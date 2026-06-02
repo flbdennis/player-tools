@@ -26,6 +26,13 @@ const jsonLd = [
     applicationCategory: 'MultimediaApplication',
     operatingSystem: 'Web',
     description: pageDescription,
+    inLanguage: site.language,
+    screenshot: `${site.domain}/imgs/mp4_1.webp`,
+    featureList: [
+      'Browser playback test for public or authorized direct MP4 URLs',
+      'Playback Log for native video events, loading failures and media errors',
+      'Troubleshooting guidance for MIME type, codecs, Range requests and access rules',
+    ],
     offers: {
       '@type': 'Offer',
       price: '0',

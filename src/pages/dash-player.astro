@@ -26,6 +26,13 @@ const jsonLd = [
     applicationCategory: 'MultimediaApplication',
     operatingSystem: 'Web',
     description: pageDescription,
+    inLanguage: site.language,
+    screenshot: `${site.domain}/imgs/dash_1.webp`,
+    featureList: [
+      'Browser playback test for public or authorized MPEG-DASH MPD manifests',
+      'Playback Log for DASH manifest, segment and media compatibility events',
+      'Troubleshooting guidance for CORS, segment access, codecs, DRM and license-flow boundaries',
+    ],
     offers: {
       '@type': 'Offer',
       price: '0',

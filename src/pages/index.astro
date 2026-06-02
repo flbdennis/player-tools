@@ -23,6 +23,7 @@ const jsonLd = [
     name: site.name,
     url: site.domain,
     description: pageDescription,
+    inLanguage: site.language,
   },
   {
     '@context': 'https://schema.org',
@@ -31,6 +32,18 @@ const jsonLd = [
     url: site.domain,
     logo: `${site.domain}/logo/logo.svg`,
     email: site.email,
+    foundingDate: site.foundingDate,
+    sameAs: [site.githubUrl],
+    founder: {
+      '@type': 'Person',
+      name: site.maintainerName,
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: site.email,
+      contactType: 'customer support',
+      availableLanguage: 'English',
+    },
   },
 ];
 ---
@@ -42,8 +55,8 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <Hero />
-  <AvailableTools />
   <QuickTest />
+  <AvailableTools />
   <HowItWorks />
   <WhyChoose />
   <FAQ />

@@ -1196,7 +1196,7 @@ const panelTitle = `${playerLabel} playback panel`;
     window.dispatchEvent(new CustomEvent('metistools:url-change', {
       detail: {
         hasUrl: Boolean(url),
-        urlType: detectUrlType(url),
+        urlType: getUrlType(url),
       },
     }));
   }

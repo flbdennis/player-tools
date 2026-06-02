@@ -59,6 +59,10 @@ function routeFromDistHtml(file) {
   return `/${relativePath.replace(/index\.html$/, '')}`;
 }
 
+function stripHashAndQuery(value) {
+  return value.split('#')[0].split('?')[0];
+}
+
 function readPngSize(relativePath) {
   const buffer = fs.readFileSync(path.join(rootDir, relativePath));
   if (buffer.length < 24 || buffer.toString('ascii', 1, 4) !== 'PNG') return null;
@@ -114,6 +118,12 @@ if (!exists('public/_headers')) {
   if (headersText.includes('/favicon.ico')) fail('public/_headers references missing /favicon.ico.');
   if (!headersText.includes('Referrer-Policy: strict-origin-when-cross-origin')) fail('Referrer-Policy header is missing.');
   if (!headersText.includes('X-Content-Type-Options: nosniff')) fail('X-Content-Type-Options header is missing.');
+  if (!headersText.includes('Strict-Transport-Security:')) fail('Strict-Transport-Security header is missing.');
+  if (!headersText.includes('Permissions-Policy:')) fail('Permissions-Policy header is missing.');
+  if (!headersText.includes('Content-Security-Policy:')) fail('Content-Security-Policy header is missing.');
+  if (!headersText.includes("object-src 'none'")) fail('CSP must include object-src none.');
+  if (!headersText.includes("base-uri 'self'")) fail('CSP must include base-uri self.');
+  if (!headersText.includes("form-action 'self'")) fail('CSP must include form-action self.');
 
   const routeLines = headersText
     .split('\n')
@@ -150,6 +160,7 @@ const htmlFiles = listFiles(distDir, (file) => file.endsWith('.html'));
 const runtimeFiles = listFiles(distDir, (file) => /\.(html|js)$/.test(file));
 const runtimeText = runtimeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
 const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google'));
+const validDistRoutes = new Set(pageHtmlFiles.map(routeFromDistHtml));
 const noAdsPages = new Set([
   '404.html',
   'about/index.html',
@@ -185,8 +196,10 @@ if (exists('public/sitemap.xml')) {
   const sitemapText = read('public/sitemap.xml');
   if (sitemapText.includes('/blog/')) fail('sitemap.xml must not include /blog/ while Blog is disabled.');
 
-  const sitemapUrls = [...sitemapText.matchAll(/<loc>https:\/\/metistools\.com(\/[^<]*)<\/loc>/g)]
-    .map((match) => match[1])
+  const sitemapEntries = [...sitemapText.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((match) => match[1]);
+  const sitemapUrls = sitemapEntries
+    .map((entry) => entry.match(/<loc>https:\/\/metistools\.com(\/[^<]*)<\/loc>/)?.[1])
+    .filter(Boolean)
     .sort();
   const indexableDistRoutes = pageHtmlFiles
     .map(routeFromDistHtml)
@@ -197,6 +210,11 @@ if (exists('public/sitemap.xml')) {
 
   if (missingRoutes.length > 0) fail(`sitemap.xml is missing routes: ${missingRoutes.join(', ')}`);
   if (staleRoutes.length > 0) fail(`sitemap.xml includes missing routes: ${staleRoutes.join(', ')}`);
+  sitemapEntries.forEach((entry) => {
+    const loc = entry.match(/<loc>([^<]+)<\/loc>/)?.[1] || 'unknown URL';
+    if (!/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(entry)) fail(`sitemap.xml entry is missing valid lastmod: ${loc}`);
+    if (!/<changefreq>[^<]+<\/changefreq>/.test(entry)) fail(`sitemap.xml entry is missing changefreq: ${loc}`);
+  });
 } else {
   fail('public/sitemap.xml is missing.');
 }
@@ -210,11 +228,20 @@ pageHtmlFiles.forEach((file) => {
   const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
   const is404 = relativePath === '404.html';
   const visibleText = stripNonVisibleHtml(html);
-  const hasAdSenseScript = html.includes('pagead2.googlesyndication.com');
+  const hasAdSenseScript = /<script\b[^>]+pagead2\.googlesyndication\.com/i.test(html);
 
   if (/[一-龥]/.test(visibleText)) {
     fail(`${relativePath} contains visible Chinese text.`);
   }
+
+  const internalLinks = [...html.matchAll(/<a\b[^>]*\bhref="([^"]+)"/gi)]
+    .map((match) => match[1])
+    .filter((href) => href.startsWith('/'))
+    .map(stripHashAndQuery)
+    .filter((href) => href && !href.startsWith('/imgs/') && !href.startsWith('/logo/') && !href.startsWith('/og/'));
+  internalLinks.forEach((href) => {
+    if (!validDistRoutes.has(href)) fail(`${relativePath} links to a missing internal page: ${href}`);
+  });
 
   if (noAdsPages.has(relativePath) && hasAdSenseScript) {
     fail(`${relativePath} must not load AdSense.`);
@@ -244,6 +271,22 @@ pageHtmlFiles.forEach((file) => {
   }
 });
 
+const aboutHtml = exists('dist/about/index.html') ? read('dist/about/index.html') : '';
+if (!aboutHtml.includes('https://github.com/flbdennis/player-tools')) fail('About page must link to the GitHub repository for transparency.');
+
+const privacyHtml = exists('dist/privacy-policy/index.html') ? read('dist/privacy-policy/index.html') : '';
+if (!privacyHtml.includes('Do Not Sell') || !privacyHtml.includes('Global Privacy Control') || !privacyHtml.includes('children under 13')) {
+  fail('Privacy Policy must include US privacy choices, Global Privacy Control and children policy language.');
+}
+
+guideArticlePages.forEach((file) => {
+  const html = fs.readFileSync(file, 'utf8');
+  const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
+  if (!/<figure\b/i.test(html) || !/src="\/imgs\/[^"]+\.webp"/i.test(html)) {
+    fail(`${relativePath} must include a guide image from public/imgs.`);
+  }
+});
+
 // Google tag 顺序检查：Consent Mode 默认状态必须早于 GA 和 AdSense 脚本
 const indexHtml = exists('dist/index.html') ? read('dist/index.html') : '';
 const consentIndex = indexHtml.indexOf("window.gtag('consent', 'default'");
@@ -258,9 +301,13 @@ if (consentIndex === -1 || gaIndex === -1 || adsenseIndex === -1) {
 }
 if (!indexHtml.includes("window.gtag('set', 'ads_data_redaction', true)")) fail('ads_data_redaction must be enabled.');
 if (!indexHtml.includes('page_location: sanitizedPageLocation')) fail('GA page_location must use sanitizedPageLocation.');
+if (!indexHtml.includes('https://fundingchoicesmessages.google.com')) fail('Funding Choices preconnect is missing.');
+if (!indexHtml.includes('sameAs') || !indexHtml.includes('https://github.com/flbdennis/player-tools')) fail('Organization JSON-LD must include GitHub sameAs.');
 if (runtimeText.includes('metistoolsCurrentUrl')) fail('runtime must not expose full video URLs on window.metistoolsCurrentUrl.');
 if (runtimeText.includes('detail:{url') || runtimeText.includes('detail: { url')) fail('runtime must not dispatch full video URLs in CustomEvent detail.');
+if (runtimeText.includes('detectUrlType(')) fail('runtime references removed detectUrlType helper.');
 if (/text-\[(?:8|8\.5|9|10|10\.5|11|11\.5)px\]/.test(runtimeText)) fail('runtime contains explicit text size below 12px.');
+if (!runtimeText.includes('featureList') || !runtimeText.includes('screenshot')) fail('Tool WebApplication JSON-LD must include featureList and screenshot.');
 
 if (failures.length > 0) {
   console.error('Production checks failed:');

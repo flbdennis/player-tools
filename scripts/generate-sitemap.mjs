@@ -1,11 +1,17 @@
 // sitemap 自动生成脚本 - 根据 src/pages 中的真实页面生成 public/sitemap.xml，避免新增或取消页面后漏同步
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { site } from '../src/config/site.js';
+import { guideArticles } from '../src/config/guideArticles.js';
 
 const rootDir = process.cwd();
 const pagesDir = path.join(rootDir, 'src/pages');
 const sitemapPath = path.join(rootDir, 'public/sitemap.xml');
-const siteDomain = 'https://metistools.com';
+const siteDomain = site.domain;
+const guideLastmodByRoute = new Map(
+  guideArticles.map((article) => [article.href, article.dateModified])
+);
 
 const excludedRoutes = new Set(['/404/']);
 
@@ -49,22 +55,77 @@ function getPriority(route) {
   return '0.6';
 }
 
+function getChangefreq(route) {
+  if (route === '/' || route.endsWith('-player/')) return 'weekly';
+  if (route.startsWith('/guides/')) return 'monthly';
+  return 'monthly';
+}
+
+function normalizeDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+function getGitLastModified(file) {
+  try {
+    const value = execFileSync('git', ['log', '-1', '--format=%cI', '--', file], {
+      cwd: rootDir,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return value || '';
+  } catch {
+    return '';
+  }
+}
+
+function getLastmod(route, file) {
+  if (guideLastmodByRoute.has(route)) return guideLastmodByRoute.get(route);
+
+  const gitLastModified = getGitLastModified(file);
+  const fileModified = fs.statSync(file).mtime.toISOString();
+  const newest = [gitLastModified, fileModified]
+    .filter(Boolean)
+    .map((value) => new Date(value))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .sort((a, b) => b.getTime() - a.getTime())[0];
+
+  return normalizeDate(newest || fileModified);
+}
+
 const routes = listPageFiles(pagesDir)
-  .map(routeFromFile)
-  .filter((route) => !excludedRoutes.has(route))
+  .map((file) => ({
+    file,
+    route: routeFromFile(file),
+  }))
+  .filter((item) => !excludedRoutes.has(item.route))
+  .map((item) => ({
+    ...item,
+    lastmod: getLastmod(item.route, item.file),
+    priority: getPriority(item.route),
+    changefreq: getChangefreq(item.route),
+  }))
   .sort((a, b) => {
-    if (a === '/') return -1;
-    if (b === '/') return 1;
-    return a.localeCompare(b);
+    if (a.route === '/') return -1;
+    if (b.route === '/') return 1;
+    return a.route.localeCompare(b.route);
   });
 
 const xml = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-  ...routes.flatMap((route) => [
+  ...routes.flatMap(({ route, lastmod, priority, changefreq }) => [
     '  <url>',
     `    <loc>${siteDomain}${route}</loc>`,
-    `    <priority>${getPriority(route)}</priority>`,
+    `    <lastmod>${lastmod}</lastmod>`,
+    `    <changefreq>${changefreq}</changefreq>`,
+    `    <priority>${priority}</priority>`,
     '  </url>',
   ]),
   '</urlset>',

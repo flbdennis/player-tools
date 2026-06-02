@@ -14,7 +14,14 @@ export const guideArticles = [
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
     datePublished: '2026-06-02',
-    dateModified: '2026-06-02',
+    dateModified: '2026-06-03',
+    image: {
+      src: '/imgs/m3u8_1.webp',
+      width: 1558,
+      height: 1086,
+      alt: 'Illustration of an M3U8 browser playback test with playback log context',
+      caption: 'Use a direct M3U8 playlist URL, then compare browser playback events with source server evidence.',
+    },
   },
   {
     slug: 'what-is-m3u8',
@@ -30,7 +37,14 @@ export const guideArticles = [
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
     datePublished: '2026-06-02',
-    dateModified: '2026-06-02',
+    dateModified: '2026-06-03',
+    image: {
+      src: '/imgs/m3u8_2.webp',
+      width: 1448,
+      height: 1086,
+      alt: 'Illustration of an HLS playlist structure for M3U8 testing',
+      caption: 'An M3U8 playlist works as a map: the browser must load playlists, variants and media segments.',
+    },
   },
   {
     slug: 'm3u8-works-in-vlc-but-not-browser',
@@ -46,7 +60,14 @@ export const guideArticles = [
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
     datePublished: '2026-06-02',
-    dateModified: '2026-06-02',
+    dateModified: '2026-06-03',
+    image: {
+      src: '/imgs/m3u8_3.webp',
+      width: 1448,
+      height: 1086,
+      alt: 'Illustration comparing browser playback checks with desktop media player checks',
+      caption: 'Browser playback is stricter than desktop playback because CORS, codecs and MediaSource rules apply.',
+    },
   },
   {
     slug: 'fix-m3u8-cors-error',
@@ -62,7 +83,14 @@ export const guideArticles = [
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
     datePublished: '2026-06-02',
-    dateModified: '2026-06-02',
+    dateModified: '2026-06-03',
+    image: {
+      src: '/imgs/m3u8_4.webp',
+      width: 1448,
+      height: 1086,
+      alt: 'Illustration of reviewing M3U8 CORS responses across playlist and segment requests',
+      caption: 'For HLS CORS troubleshooting, check the first playlist, variant playlists, segments and key files.',
+    },
   },
   {
     slug: 'mp4-url-not-playing',
@@ -78,7 +106,14 @@ export const guideArticles = [
     toolLabel: 'MP4 Player Online',
     priority: 'P1',
     datePublished: '2026-06-02',
-    dateModified: '2026-06-02',
+    dateModified: '2026-06-03',
+    image: {
+      src: '/imgs/mp4_1.webp',
+      width: 1254,
+      height: 1254,
+      alt: 'Illustration of testing a direct MP4 URL in a browser player',
+      caption: 'A direct MP4 URL needs a real video response, browser-supported codecs and useful server headers.',
+    },
   },
   {
     slug: 'mpd-test-online',
@@ -94,7 +129,14 @@ export const guideArticles = [
     toolLabel: 'MPEG-DASH Player',
     priority: 'P1',
     datePublished: '2026-06-02',
-    dateModified: '2026-06-02',
+    dateModified: '2026-06-03',
+    image: {
+      src: '/imgs/dash_1.webp',
+      width: 1448,
+      height: 1086,
+      alt: 'Illustration of testing an MPEG-DASH MPD manifest and segment requests',
+      caption: 'A DASH test checks the MPD manifest plus initialization and media segment access.',
+    },
   },
 ];
 

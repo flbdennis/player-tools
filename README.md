@@ -32,9 +32,11 @@ npm run build
 npm run preview
 npm run check
 npm run check:audit
+npm run check:prelaunch
 ```
 
 `npm run build` generates `public/sitemap.xml` before building the static site. `npm run check` builds the site and runs production checks for SEO, AdSense-sensitive output and project constraints.
+`npm run check:prelaunch` runs the production checks and the production dependency audit before launch.
 
 ## Important Paths
 
@@ -58,10 +60,26 @@ public/                   Static assets, ads.txt, robots.txt and sitemap.xml
 - Do not add public CORS proxy, downloader, converter or bypass features.
 - Keep Privacy Policy, Terms, Contact, About and Playback Policy reachable.
 - Configure Google Privacy & messaging or another Google-certified CMP for EEA, UK and Switzerland users before relying on personalized ads in those regions.
+- Keep the European Privacy Message published in AdSense Privacy & messaging.
+- Keep sitemap entries synchronized with real pages and include `lastmod`.
+- Keep guide article images sourced from authorized `public/imgs/` assets unless new images are explicitly approved and added to the project.
+- Keep security headers in `public/_headers` and test them after deployment.
 
 ## Privacy Notes
 
 Submitted video URLs should stay inside the browser for playback testing. Do not expose full video URLs in global variables, analytics events, Sentry events, copied diagnostic reports or page URLs.
+
+## Prelaunch Checklist
+
+Before submitting or resubmitting the site for AdSense review:
+
+- Deploy the current project to `https://metistools.com`.
+- Confirm the old general tools site is no longer served on the domain.
+- Confirm `https://metistools.com/ads.txt`, `robots.txt` and `sitemap.xml` are reachable.
+- Confirm the AdSense European Privacy Message is published and visible in EEA, UK and Switzerland tests.
+- Run `npm run check:prelaunch`.
+- Manually test the homepage, M3U8 Player, MP4 Player, DASH Player, FAQ, Guides, About, Contact, Privacy Policy, Terms and Playback Policy on desktop and mobile.
+- Confirm no fake ad placeholders are visible and no ad position is placed near player controls, URL inputs, Play buttons or Playback Log controls.
 
 ## Deployment
 
@@ -78,6 +96,10 @@ Recommended output directory:
 ```text
 dist
 ```
+
+## Changelog
+
+See `CHANGELOG.md` for launch-readiness changes.
 
 ## Files Not Committed
 

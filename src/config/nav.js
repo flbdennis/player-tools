@@ -66,6 +66,8 @@ export const footerNav = {
       { label: 'Contact', href: '/contact/' },
       // 隐私政策页面链接
       { label: 'Privacy Policy', href: '/privacy-policy/' },
+      // 美国州隐私选择说明入口 - 指向隐私页内真实锚点，避免创建薄页面
+      { label: 'Do Not Sell or Share', href: '/privacy-policy/#do-not-sell-or-share' },
       // 服务条款页面链接
       { label: 'Terms', href: '/terms/' },
     ],

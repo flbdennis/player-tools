@@ -26,6 +26,13 @@ const jsonLd = [
     applicationCategory: 'MultimediaApplication',
     operatingSystem: 'Web',
     description: pageDescription,
+    inLanguage: site.language,
+    screenshot: `${site.domain}/imgs/m3u8_1.webp`,
+    featureList: [
+      'Browser playback test for public or authorized M3U8/HLS playlist URLs',
+      'Playback Log for browser-side loading events and common HLS errors',
+      'Troubleshooting guidance for CORS, expired links, codecs, segments and DRM boundaries',
+    ],
     offers: {
       '@type': 'Offer',
       price: '0',

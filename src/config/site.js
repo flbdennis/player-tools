@@ -6,6 +6,14 @@ export const site = {
   domain: 'https://metistools.com',
   // 官方联系邮箱 - Footer、联系入口和审核相关页面使用
   email: 'flbdennis.fan@gmail.com',
+  // GitHub 仓库地址 - About、结构化数据和透明度说明复用
+  githubUrl: 'https://github.com/flbdennis/player-tools',
+  // 维护者英文名 - 仅用于 About 和结构化数据；如需更换，统一改这里
+  maintainerName: 'Dennis Fan',
+  // 项目公开启动日期 - 用于 Organization 结构化数据和透明度说明
+  foundingDate: '2026-06-02',
+  // 当前页面语言 - SEO 和结构化数据统一使用
+  language: 'en',
   // Google Analytics ID - BaseLayout 中加载官方统计脚本时使用
   googleAnalyticsId: 'G-87VGYW1H47',
   // Google AdSense 发布商 ID - BaseLayout 中接入官方 AdSense 脚本时使用
