@@ -1,0 +1,267 @@
+---
+// Header 组件 - 站点顶部导航，严格复用站点配置与 Icon 组件
+import { site } from '../config/site.js';
+import { headerNav } from '../config/nav.js';
+import Icon from './Icon.astro';
+import Container from './Container.astro';
+---
+
+<header class="sticky top-0 z-50 bg-white/88 backdrop-blur-xl border-b border-orange-100/60">
+  <Container variant="header">
+    <div class="flex items-center justify-between h-[58px]">
+      {/* Logo 使用 public/logo 中的既有素材，不重绘、不改色 */}
+      <a href="/" class="flex items-center shrink-0" aria-label={`${site.name} home`}>
+        <img
+          src={site.logo}
+          alt={`${site.name} logo`}
+          width="137"
+          height="30"
+          class="h-[30px] w-auto"
+        />
+      </a>
+
+      {/* 桌面导航：保持设计图中的紧凑居中布局，所有链接来自配置 */}
+      <nav class="hidden md:flex items-center gap-8" aria-label="Primary navigation">
+        {headerNav.map((item, index) => (
+          <div class="relative group" data-desktop-dropdown={item.children ? '' : undefined}>
+            {item.children ? (
+              <>
+                <button
+                  type="button"
+                  id={`desktop-nav-trigger-${index}`}
+                  class="flex items-center gap-1.5 text-[14px] font-bold text-gray-950 hover:text-violet-700 transition-colors"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-controls={`desktop-nav-menu-${index}`}
+                  data-desktop-dropdown-trigger
+                >
+                  {item.label}
+                  <Icon name="ChevronDown" size={14} strokeWidth={2.4} />
+                </button>
+                {/* 下拉菜单只使用真实工具页链接，避免死链 */}
+                <div
+                  id={`desktop-nav-menu-${index}`}
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white rounded-2xl shadow-xl shadow-violet-100/60 border border-orange-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 py-2"
+                  role="menu"
+                  aria-labelledby={`desktop-nav-trigger-${index}`}
+                  data-desktop-dropdown-menu
+                >
+                  {item.children.map((child) => (
+                    <a
+                      href={child.href}
+                      class="block px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors"
+                      role="menuitem"
+                    >
+                      {child.label}
+                    </a>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <a
+                href={item.href}
+                class="text-[14px] font-bold text-gray-950 hover:text-violet-700 transition-colors"
+              >
+                {item.label}
+              </a>
+            )}
+          </div>
+        ))}
+      </nav>
+
+      <div class="flex items-center gap-3">
+        {/* 多语言切换暂不开放，移除不可用入口，避免用户误以为当前站点已有语言切换功能 */}
+
+        {/* 移动端菜单按钮使用统一 Icon 组件，保证图标来源和可访问名称一致 */}
+        <button
+          type="button"
+          id="mobile-menu-btn"
+          class="md:hidden p-2 rounded-xl hover:bg-violet-50 transition-colors"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <Icon name="Menu" size={24} color="currentColor" strokeWidth={2.4} class="text-gray-950" />
+        </button>
+      </div>
+    </div>
+  </Container>
+
+  {/* 移动端菜单面板：使用 fixed 浮层覆盖页面，不参与文档流，避免展开后把页面内容向下挤 */}
+  <div
+    id="mobile-menu"
+    class="md:hidden hidden fixed inset-x-0 top-[58px] z-[60] bg-white/96 border-t border-orange-100 shadow-2xl shadow-violet-100/40 backdrop-blur-xl"
+  >
+    <Container variant="header" class="py-4 space-y-1 max-h-[calc(100vh-58px)] overflow-y-auto">
+      {headerNav.map((item, index) => (
+        <div class="mobile-nav-item">
+          {item.children ? (
+            <>
+              <button
+                type="button"
+                class="mobile-dropdown-btn flex items-center justify-between w-full px-4 py-3 text-sm font-bold text-gray-900 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors"
+                aria-expanded="false"
+                aria-controls={`mobile-nav-menu-${index}`}
+              >
+                {item.label}
+                <Icon name="ChevronDown" size={16} strokeWidth={2.4} />
+              </button>
+              <div id={`mobile-nav-menu-${index}`} class="mobile-dropdown hidden pl-4 space-y-1 mt-1">
+                {item.children.map((child) => (
+                  <a href={child.href} class="block px-4 py-2.5 text-sm font-semibold text-gray-600 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                    {child.label}
+                  </a>
+                ))}
+              </div>
+            </>
+          ) : (
+            <a href={item.href} class="block px-4 py-3 text-sm font-bold text-gray-900 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors">
+              {item.label}
+            </a>
+          )}
+        </div>
+      ))}
+    </Container>
+  </div>
+</header>
+
+<script>
+  // 桌面端工具下拉菜单：在 hover 之外补充 click、键盘和焦点管理，保证键盘用户可访问
+  const desktopDropdowns = document.querySelectorAll('[data-desktop-dropdown]');
+
+  function setDesktopDropdownState(dropdown, isOpen) {
+    const trigger = dropdown.querySelector('[data-desktop-dropdown-trigger]');
+    const menu = dropdown.querySelector('[data-desktop-dropdown-menu]');
+    if (!trigger || !menu) return;
+
+    trigger.setAttribute('aria-expanded', String(isOpen));
+    menu.classList.toggle('opacity-100', isOpen);
+    menu.classList.toggle('visible', isOpen);
+    menu.classList.toggle('opacity-0', !isOpen);
+    menu.classList.toggle('invisible', !isOpen);
+  }
+
+  function closeDesktopDropdowns(exceptDropdown = null) {
+    desktopDropdowns.forEach((dropdown) => {
+      if (dropdown !== exceptDropdown) {
+        setDesktopDropdownState(dropdown, false);
+      }
+    });
+  }
+
+  desktopDropdowns.forEach((dropdown) => {
+    const trigger = dropdown.querySelector('[data-desktop-dropdown-trigger]');
+    const menu = dropdown.querySelector('[data-desktop-dropdown-menu]');
+    if (!trigger || !menu) return;
+
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
+      closeDesktopDropdowns(dropdown);
+      setDesktopDropdownState(dropdown, shouldOpen);
+    });
+
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        closeDesktopDropdowns(dropdown);
+        setDesktopDropdownState(dropdown, true);
+        menu.querySelector('a')?.focus();
+      }
+
+      if (event.key === 'Escape') {
+        setDesktopDropdownState(dropdown, false);
+        trigger.focus();
+      }
+    });
+
+    menu.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        setDesktopDropdownState(dropdown, false);
+        trigger.focus();
+      }
+    });
+
+    dropdown.addEventListener('focusout', () => {
+      window.setTimeout(() => {
+        if (!dropdown.contains(document.activeElement)) {
+          setDesktopDropdownState(dropdown, false);
+        }
+      }, 0);
+    });
+  });
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    const clickedInsideDropdown = Array.from(desktopDropdowns).some((dropdown) => dropdown.contains(target));
+    if (!clickedInsideDropdown) {
+      closeDesktopDropdowns();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeDesktopDropdowns();
+    }
+  });
+
+  // 移动端菜单展开/收起逻辑，保持无框架依赖和低 JS 体积
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  function closeMobileMenu() {
+    if (!mobileMenuBtn || !mobileMenu) return;
+    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    mobileMenu.classList.add('hidden');
+    mobileMenu.querySelectorAll('.mobile-dropdown-btn').forEach((button) => {
+      button.setAttribute('aria-expanded', 'false');
+    });
+    mobileMenu.querySelectorAll('.mobile-dropdown').forEach((dropdown) => {
+      dropdown.classList.add('hidden');
+    });
+  }
+
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+      mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
+      mobileMenu.classList.toggle('hidden', isExpanded);
+    });
+
+    // 移动端导航打开后，点击导航外部区域自动关闭，避免菜单遮挡页面内容
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      const isOpen = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+      if (!isOpen || !(target instanceof Node)) return;
+
+      if (!mobileMenu.contains(target) && !mobileMenuBtn.contains(target)) {
+        closeMobileMenu();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeMobileMenu();
+      }
+    });
+
+    mobileMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', closeMobileMenu);
+    });
+  }
+
+  // 移动端工具下拉菜单，只切换当前列表，避免影响桌面导航
+  document.querySelectorAll('.mobile-dropdown-btn').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const dropdown = btn.nextElementSibling;
+      if (dropdown) {
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!isExpanded));
+        dropdown.classList.toggle('hidden', isExpanded);
+      }
+    });
+  });
+</script>

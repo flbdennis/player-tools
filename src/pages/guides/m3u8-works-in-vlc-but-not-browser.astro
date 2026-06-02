@@ -1,0 +1,84 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('m3u8-works-in-vlc-but-not-browser');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    It is common for an M3U8 stream to play in VLC but fail in a browser-based
+    player. That does not always mean the stream is broken. It usually means the
+    two players are operating under different rules. VLC is a desktop
+    application. A browser player must obey web security rules, MediaSource
+    requirements and browser codec support.
+  </p>
+
+  <p>
+    To reproduce the browser experience, test the playlist with the
+    <a href="/m3u8-player/">M3U8 Player Online</a>. The result is closer to what
+    a web visitor or embedded player may experience than a desktop media player
+    test.
+  </p>
+
+  <h2>CORS Is the Most Common Difference</h2>
+  <p>
+    Browsers enforce cross-origin rules. If your website tries to load a
+    playlist from another domain, the source server must allow that browser
+    request. VLC does not behave like a webpage running inside a browser, so it
+    may load the same URL even when the browser is blocked by CORS.
+  </p>
+
+  <p>
+    For HLS, the source must allow access to more than the first M3U8 file. The
+    browser may need CORS permission for the master playlist, variant playlists,
+    media segments and key files. One missing header can make playback fail
+    after the first request appears successful.
+  </p>
+
+  <h2>Codecs and MediaSource Support Matter</h2>
+  <p>
+    VLC supports a wide range of formats and codecs. Browsers support fewer
+    combinations, and support varies by browser and device. A stream encoded
+    with a codec that VLC can decode may still be unsupported by a browser video
+    element or MediaSource pipeline.
+  </p>
+
+  <p>
+    If the browser reports a media or decode error, check the video codec,
+    audio codec, container format and HLS packaging. The stream may need a
+    browser-compatible rendition rather than a change to the test tool.
+  </p>
+
+  <h2>Tokens, Referrers and Sessions Can Change the Result</h2>
+  <p>
+    Some streams use signed URLs, cookies, referrer checks or short-lived
+    tokens. VLC may be testing a URL at a moment when it still works, while a
+    browser test may fail after the token expires. A browser may also send a
+    different referrer or no cookie at all, depending on how the stream is
+    configured.
+  </p>
+
+  <p>
+    If you own the stream, check whether the playlist and every segment can be
+    requested from the same environment where your web player runs. Avoid using
+    test links copied from private pages unless you have permission and know how
+    the authorization flow is meant to work.
+  </p>
+
+  <h2>DRM and Protected Streams Are a Separate Case</h2>
+  <p>
+    Some HLS streams require DRM or a license flow. A simple public M3U8 test
+    page cannot replace the correct player integration, license server request
+    and user authorization. If the stream is protected, the right path is to
+    test it in the authorized player environment.
+  </p>
+
+  <p>
+    If the problem appears to be cross-origin access, continue with the
+    <a href="/guides/fix-m3u8-cors-error/">M3U8 CORS error guide</a>. If you
+    only need to confirm whether a public playlist can load in a browser, start
+    with a clean test in the M3U8 player and compare the Playback Log with your
+    server or CDN logs.
+  </p>
+</GuideArticleLayout>

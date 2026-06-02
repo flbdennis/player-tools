@@ -1,0 +1,115 @@
+---
+// EmbedCodeBox 组件 - 封装播放器嵌入代码、直链模式和复制交互
+import Icon from './Icon.astro';
+const { embed } = Astro.props;
+const pagePath = embed.pagePath || '/m3u8-player/';
+const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+---
+
+<section class="mt-card px-5 py-3 md:px-5 md:py-3" aria-labelledby="embed-title" data-page-path={pagePath} id="embed-code-panel">
+  <div class="mb-2 flex items-center justify-between gap-3">
+    <h2 id="embed-title" class="text-[16px] font-black tracking-[-0.02em] text-gray-950">{embed.title}</h2>
+  </div>
+
+  <div class="flex flex-col gap-3 md:flex-row md:items-center">
+    <div class="flex gap-2">
+      <button
+        type="button"
+        data-embed-mode="iframe"
+        class="embed-mode-btn active inline-flex h-[30px] min-w-[90px] items-center justify-center rounded-md border border-violet-200 bg-violet-50 px-3 text-[11px] font-extrabold text-violet-700 transition-colors"
+      >
+        {embed.iframeLabel}
+      </button>
+      <button
+        type="button"
+        data-embed-mode="direct"
+        class="embed-mode-btn inline-flex h-[30px] min-w-[86px] items-center justify-center rounded-md border border-orange-100 bg-white px-3 text-[11px] font-extrabold text-gray-800 transition-colors hover:text-violet-700"
+      >
+        {embed.directLabel}
+      </button>
+    </div>
+
+    <code id="embed-code" class="min-h-[30px] flex-1 overflow-hidden rounded-md border border-orange-100 bg-white/90 px-4 py-2 text-[10.5px] font-semibold leading-relaxed text-gray-600 shadow-inner shadow-orange-50/70 md:truncate">
+      {defaultEmbedCode}
+    </code>
+
+    <button
+      type="button"
+      id="copy-embed-code"
+      class="inline-flex h-[34px] min-w-[92px] items-center justify-center gap-1.5 rounded-lg bg-[linear-gradient(90deg,#5a37ff_0%,#7a2cff_55%,#9f22ff_100%)] px-4 text-[11px] font-extrabold text-white shadow-lg shadow-violet-200/70 transition-all hover:shadow-xl"
+    >
+      <Icon name="Clipboard" size={14} color="white" strokeWidth={2.3} />
+      <span>{embed.copyLabel}</span>
+    </button>
+  </div>
+</section>
+
+<script>
+  // 嵌入代码交互：切换 iframe/direct link，监听播放器 URL 变化并更新可复制内容
+  const codeEl = document.getElementById('embed-code');
+  const copyBtn = document.getElementById('copy-embed-code');
+  const modeButtons = document.querySelectorAll('[data-embed-mode]');
+  let embedMode = 'iframe';
+  const embedPanel = document.getElementById('embed-code-panel');
+  const pagePath = embedPanel?.dataset.pagePath || window.location.pathname;
+
+  updateEmbedCode();
+
+  modeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      embedMode = button.getAttribute('data-embed-mode') || 'iframe';
+      modeButtons.forEach((item) => {
+        const isActive = item === button;
+        item.classList.toggle('active', isActive);
+        item.classList.toggle('bg-violet-50', isActive);
+        item.classList.toggle('border-violet-200', isActive);
+        item.classList.toggle('text-violet-700', isActive);
+        item.classList.toggle('bg-white', !isActive);
+        item.classList.toggle('border-orange-100', !isActive);
+        item.classList.toggle('text-gray-800', !isActive);
+      });
+      updateEmbedCode();
+    });
+  });
+
+  window.addEventListener('metistools:url-change', () => {
+    // 审核前嵌入代码不拼接用户视频 URL，避免复制内容、浏览器历史或第三方 iframe 地址泄露私有流地址。
+    updateEmbedCode();
+  });
+
+  copyBtn?.addEventListener('click', async () => {
+    const text = codeEl?.textContent?.trim() || '';
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyLabel('Copied');
+    } catch {
+      const temp = document.createElement('textarea');
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      setCopyLabel('Copied');
+    }
+  });
+
+  function updateEmbedCode() {
+    if (!codeEl) return;
+    const origin = window.location.origin === 'null' ? 'https://metistools.com' : window.location.origin;
+    const normalizedPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
+    const playerUrl = `${origin}${normalizedPath}`;
+    codeEl.textContent = embedMode === 'iframe'
+      ? `<iframe src="${playerUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
+      : playerUrl;
+  }
+
+  function setCopyLabel(label) {
+    const labelEl = copyBtn?.querySelector('span');
+    if (!labelEl) return;
+    const original = labelEl.textContent;
+    labelEl.textContent = label;
+    window.setTimeout(() => {
+      labelEl.textContent = original || 'Copy Code';
+    }, 1600);
+  }
+</script>

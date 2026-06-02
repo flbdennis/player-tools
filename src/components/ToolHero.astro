@@ -1,0 +1,168 @@
+---
+// ToolHero 组件 - 工具页通用 Hero，封装标题文案与右侧 3D 插图
+// 移动端采用“文字卡片 + 右侧悬浮插图”布局，既压缩首屏高度，又避免图片遮挡标题和说明文案
+const { hero, titleId = 'tool-page-title', class: className = '' } = Astro.props;
+
+// 基础默认值：只在配置缺省时兜底，具体页面应在 config 中通过 imageLayout 单独设置
+const defaultMobile = {
+  width: '140px',
+  height: 'auto',
+  left: 'auto',
+  right: '-6px',
+  top: '42px',
+  bottom: 'auto',
+  transform: 'none',
+  zIndex: '30',
+  opacity: '0.96',
+  cardPaddingRight: '118px',
+  sectionHeight: '190px',
+  cardMinHeight: '154px',
+};
+
+const defaultDesktop = {
+  width: '300px',
+  height: 'auto',
+  left: 'auto',
+  right: '-18px',
+  top: '-24px',
+  bottom: 'auto',
+  transform: 'none',
+  zIndex: '20',
+  opacity: '1',
+};
+
+const mobile = { ...defaultMobile, ...(hero.imageLayout?.mobile || {}) };
+const desktop = { ...defaultDesktop, ...(hero.imageLayout?.desktop || {}) };
+
+// 使用 CSS 变量输出基础 CSS 控制项，保证每个工具页可以通过配置独立调节移动端和桌面端插图
+const imageStyle = [
+  `--tool-hero-img-mobile-width:${mobile.width}`,
+  `--tool-hero-img-mobile-height:${mobile.height}`,
+  `--tool-hero-img-mobile-left:${mobile.left}`,
+  `--tool-hero-img-mobile-right:${mobile.right}`,
+  `--tool-hero-img-mobile-top:${mobile.top}`,
+  `--tool-hero-img-mobile-bottom:${mobile.bottom}`,
+  `--tool-hero-img-mobile-transform:${mobile.transform}`,
+  `--tool-hero-img-mobile-z-index:${mobile.zIndex}`,
+  `--tool-hero-img-mobile-opacity:${mobile.opacity}`,
+  `--tool-hero-mobile-card-pr:${mobile.cardPaddingRight}`,
+  `--tool-hero-mobile-section-height:${mobile.sectionHeight}`,
+  `--tool-hero-mobile-card-min-height:${mobile.cardMinHeight}`,
+  `--tool-hero-img-desktop-width:${desktop.width}`,
+  `--tool-hero-img-desktop-height:${desktop.height}`,
+  `--tool-hero-img-desktop-left:${desktop.left}`,
+  `--tool-hero-img-desktop-right:${desktop.right}`,
+  `--tool-hero-img-desktop-top:${desktop.top}`,
+  `--tool-hero-img-desktop-bottom:${desktop.bottom}`,
+  `--tool-hero-img-desktop-transform:${desktop.transform}`,
+  `--tool-hero-img-desktop-z-index:${desktop.zIndex}`,
+  `--tool-hero-img-desktop-opacity:${desktop.opacity}`,
+].join(';');
+---
+
+<section class={`tool-hero relative mb-0 h-[var(--tool-hero-mobile-section-height)] overflow-visible md:h-[156px] ${className}`} style={imageStyle} aria-labelledby={titleId}>
+  <div class="tool-hero__card relative z-20 min-h-[var(--tool-hero-mobile-card-min-height)] w-full rounded-[24px] bg-white/94 p-4 pr-[var(--tool-hero-mobile-card-pr)] shadow-sm shadow-orange-100/70 backdrop-blur-[2px] md:max-w-[505px] md:min-h-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0">
+    <h1 id={titleId} class="mb-2 text-[23px] font-black leading-[1.08] tracking-[-0.045em] text-gray-950 md:mb-3 md:text-[26px]">
+      {hero.title}
+    </h1>
+    <p class="text-[11.5px] font-black leading-[1.52] text-gray-950 md:max-w-[485px] md:text-[12.5px] md:font-extrabold md:leading-[1.55]">
+      {hero.description}
+    </p>
+  </div>
+
+  {/* 插图只使用 public/imgs 中的既有素材；移动端悬浮在文案卡片右侧，桌面端按设计图压在播放器卡片上方 */}
+  <img
+    src={hero.image}
+    alt={hero.imageAlt}
+    width={hero.imageWidth || 305}
+    height={hero.imageHeight || 240}
+    loading="eager"
+    decoding="async"
+    class="tool-hero__image"
+  />
+</section>
+
+<style>
+  .tool-hero__card {
+    box-sizing: border-box;
+  }
+
+  .tool-hero__image {
+    position: absolute;
+    width: var(--tool-hero-img-mobile-width);
+    height: var(--tool-hero-img-mobile-height);
+    left: var(--tool-hero-img-mobile-left);
+    right: var(--tool-hero-img-mobile-right);
+    top: var(--tool-hero-img-mobile-top);
+    bottom: var(--tool-hero-img-mobile-bottom);
+    transform: var(--tool-hero-img-mobile-transform);
+    z-index: var(--tool-hero-img-mobile-z-index);
+    opacity: var(--tool-hero-img-mobile-opacity);
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 20px 34px rgba(119, 71, 255, 0.14));
+  }
+
+  @media (max-width: 767px) {
+    /* 移动端改为真实双列布局：文字和插图都进入文档流，不再使用绝对定位叠加，避免当前或未来更长文案被插图遮挡 */
+    .tool-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--tool-hero-img-mobile-width);
+      align-items: center;
+      column-gap: 4px;
+      height: auto !important;
+      min-height: 0;
+      overflow: visible;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      padding: 16px;
+      box-shadow: 0 10px 28px rgba(251, 146, 60, 0.12);
+      backdrop-filter: blur(2px);
+    }
+
+    /* 移动端文案卡片不再右侧留空，也不再固定最小高度；让内容自然撑开，保证以后改长文案也不会和图片重叠 */
+    .tool-hero__card {
+      grid-column: 1;
+      min-width: 0;
+      min-height: 0 !important;
+      width: 100%;
+      padding: 0 !important;
+      padding-right: 0 !important;
+      border-radius: 0;
+      background: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    /* 移动端插图改为普通网格项：保留配置中的图片宽度，不做缩小，不覆盖文字区域 */
+    .tool-hero__image {
+      grid-column: 2;
+      position: relative;
+      left: auto;
+      right: auto;
+      top: auto;
+      bottom: auto;
+      align-self: center;
+      justify-self: end;
+      width: var(--tool-hero-img-mobile-width);
+      height: var(--tool-hero-img-mobile-height);
+      max-width: none;
+      transform: none;
+      z-index: 1;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .tool-hero__image {
+      width: var(--tool-hero-img-desktop-width);
+      height: var(--tool-hero-img-desktop-height);
+      left: var(--tool-hero-img-desktop-left);
+      right: var(--tool-hero-img-desktop-right);
+      top: var(--tool-hero-img-desktop-top);
+      bottom: var(--tool-hero-img-desktop-bottom);
+      transform: var(--tool-hero-img-desktop-transform);
+      z-index: var(--tool-hero-img-desktop-z-index);
+      opacity: var(--tool-hero-img-desktop-opacity);
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+// 首页 - MetisTools 主页面，组合所有区块组件
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Hero from '../sections/Hero.astro';
+import AvailableTools from '../sections/AvailableTools.astro';
+import QuickTest from '../sections/QuickTest.astro';
+import HowItWorks from '../sections/HowItWorks.astro';
+import WhyChoose from '../sections/WhyChoose.astro';
+import FAQ from '../sections/FAQ.astro';
+
+// 首页 SEO 配置 - 使用空 title，让 SEO 组件使用 defaultTitle 避免重复站点名
+const pageTitle = '';
+const pageDescription =
+  'Use free online video player tools to test public or authorized M3U8, MP4 and DASH links in your browser. Review playback events and common loading issues.';
+const canonical = `${site.domain}/`;
+
+// JSON-LD 结构化数据 - WebSite 和 Organization
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: site.name,
+    url: site.domain,
+    description: pageDescription,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: site.name,
+    url: site.domain,
+    logo: `${site.domain}/logo/logo.svg`,
+    email: site.email,
+  },
+];
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+>
+  <Hero />
+  <AvailableTools />
+  <QuickTest />
+  <HowItWorks />
+  <WhyChoose />
+  <FAQ />
+</BaseLayout>

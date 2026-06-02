@@ -1,0 +1,75 @@
+---
+// DASH Player 页面 - 复用 M3U8/MP4 工具页结构和组件，仅替换 DASH 对应配置、素材和 SEO
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import ToolBreadcrumb from '../components/ToolBreadcrumb.astro';
+import ToolHero from '../components/ToolHero.astro';
+import PlayerShell from '../components/PlayerShell.astro';
+import EmbedCodeBox from '../components/EmbedCodeBox.astro';
+import PlayerGuideSteps from '../components/PlayerGuideSteps.astro';
+import InfoImageCard from '../components/InfoImageCard.astro';
+import PlayerFAQ from '../components/PlayerFAQ.astro';
+import { site } from '../config/site.js';
+import { dashPlayerPage } from '../config/dashPlayer.js';
+
+const pageTitle = dashPlayerPage.seo.title;
+const pageDescription = dashPlayerPage.seo.description;
+const canonical = `${site.domain}/dash-player/`;
+
+// 结构化数据 - 标记该页面为可直接在浏览器中使用的 DASH 播放测试工具
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: pageTitle,
+    url: canonical,
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    description: pageDescription,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${site.domain}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'MPEG-DASH Player',
+        item: canonical,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd}>
+  <div class="pt-2 md:pt-3">
+    <Container>
+      <ToolBreadcrumb items={dashPlayerPage.breadcrumb} />
+      <ToolHero hero={dashPlayerPage.hero} titleId="dash-page-title" />
+
+      <PlayerShell tabs={dashPlayerPage.tabs} activeId="dash" player={dashPlayerPage.player} />
+      <EmbedCodeBox embed={dashPlayerPage.embed} />
+      <PlayerGuideSteps guide={dashPlayerPage.guide} />
+
+      <div class="space-y-4">
+        {dashPlayerPage.infoCards.map((card) => (
+          <InfoImageCard card={card} />
+        ))}
+      </div>
+
+      <PlayerFAQ faq={dashPlayerPage.faq} />
+    </Container>
+  </div>
+</BaseLayout>

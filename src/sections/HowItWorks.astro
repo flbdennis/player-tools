@@ -1,0 +1,49 @@
+---
+// How It Works 区块 - 展示使用步骤，布局对齐 UI/home.png 的左图右文结构
+import { howItWorks } from '../config/home.js';
+import Icon from '../components/Icon.astro';
+import Container from '../components/Container.astro';
+---
+
+<section class="py-2 md:py-3">
+  <Container>
+    <div class="grid grid-cols-1 md:grid-cols-[0.92fr_1.08fr] items-center gap-4 md:gap-4">
+      {/* 左侧插图使用既有素材，尺寸控制接近设计图 */}
+      <div class="flex justify-center md:justify-start">
+        <img
+          src={howItWorks.image}
+          alt={howItWorks.imageAlt}
+          width="270"
+          height="270"
+          loading="lazy"
+          decoding="async"
+          class="w-full max-w-[150px] md:max-w-[218px] h-auto drop-shadow-[0_18px_26px_rgba(255,151,15,0.10)]"
+        />
+      </div>
+
+      <div>
+        <div class="mb-2 text-center md:text-left">
+          <div class="inline-flex items-center gap-2">
+            <h2 class="mt-section-title text-[19px] md:text-[21px] leading-tight">{howItWorks.title}</h2>
+            <Icon name="HelpCircle" size={18} color="#7747ff" strokeWidth={2.5} />
+          </div>
+        </div>
+
+        {/* 步骤列表全部配置驱动，序号样式按设计图圆形紫色标记 */}
+        <div class="space-y-2">
+          {howItWorks.steps.map((step, index) => (
+            <div class="flex gap-3">
+              <div class="shrink-0 w-[22px] h-[22px] rounded-full bg-[linear-gradient(135deg,#7b55ff,#6d42ff)] flex items-center justify-center shadow-md shadow-violet-200/70">
+                <span class="text-[12px] font-black text-white leading-none">{index + 1}</span>
+              </div>
+              <div class="pt-0.5">
+                <h3 class="text-[13px] font-black text-gray-950 leading-tight mb-1">{step.title}</h3>
+                <p class="text-[11px] md:text-[11.5px] font-semibold text-gray-700 leading-[1.55]">{step.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </Container>
+</section>

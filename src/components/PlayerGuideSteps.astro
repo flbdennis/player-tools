@@ -1,0 +1,24 @@
+---
+// PlayerGuideSteps 组件 - 渲染播放器使用步骤，统一序号和 Lucide 图标样式
+import Icon from './Icon.astro';
+const { guide } = Astro.props;
+---
+
+<section class="py-4" aria-labelledby="guide-title">
+  <h2 id="guide-title" class="mb-3 text-[17px] font-black tracking-[-0.03em] text-gray-950">{guide.title}</h2>
+  <div class="space-y-2">
+    {guide.steps.map((step, index) => (
+      <div class="grid grid-cols-[22px_30px_1fr] items-center gap-3">
+        <span class="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[linear-gradient(135deg,#6f42ff,#8c55ff)] text-[11px] font-black text-white shadow-md shadow-violet-200/70">
+          {index + 1}
+        </span>
+        <span class="flex h-[30px] w-[30px] items-center justify-center rounded-full bg-white text-violet-700 shadow-md shadow-orange-100/80 ring-1 ring-orange-100">
+          <Icon name={step.icon} size={17} color="currentColor" strokeWidth={2.5} />
+        </span>
+        <p class="text-[10.5px] font-semibold leading-snug text-gray-800">
+          <span class="font-black text-gray-950">{step.title}: </span>{step.description}
+        </p>
+      </div>
+    ))}
+  </div>
+</section>

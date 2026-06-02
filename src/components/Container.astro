@@ -1,0 +1,8 @@
+---
+// 容器组件 - 默认使用首页主体 800px 设计容器，可通过 variant 扩展首屏宽度
+const { class: className = '', as: Tag = 'div', variant = 'default' } = Astro.props;
+const variantClass = variant === 'hero' ? 'mt-hero-container' : variant === 'header' ? 'mt-header-container' : 'mt-container';
+---
+<Tag class={`${variantClass} ${className}`}>
+  <slot />
+</Tag>

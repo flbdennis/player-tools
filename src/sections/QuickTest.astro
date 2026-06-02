@@ -1,0 +1,113 @@
+---
+// Quick M3U8 Test 区块 - 快速测试 M3U8 链接表单
+import { quickTest } from '../config/home.js';
+import Card from '../components/Card.astro';
+import TextInput from '../components/TextInput.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+import PermissionNotice from '../components/PermissionNotice.astro';
+import Container from '../components/Container.astro';
+---
+
+<section class="py-2 md:py-3">
+  <Container>
+    <Card hover={false} class="md:h-[156px] px-7 py-3 md:px-9 md:py-4 overflow-hidden">
+      <div class="mb-2 text-center">
+        <div class="inline-flex items-center justify-center gap-2">
+          <Icon name="Link" size={22} color="#7747ff" strokeWidth={2.5} />
+          <h2 class="mt-section-title text-[19px] md:text-[21px] leading-tight">{quickTest.title}</h2>
+          <Icon name="Sparkles" size={17} color="#ffb41f" strokeWidth={2.4} />
+        </div>
+        <p class="mt-1 text-[11px] md:text-[12px] font-semibold text-gray-700">{quickTest.subtitle}</p>
+      </div>
+
+      <form id="quick-test-form" novalidate>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <TextInput id="m3u8-url" name="url" type="url" placeholder={quickTest.placeholder} class="flex-1" />
+          <Button type="submit" variant="primary" size="md" class="h-[38px] min-w-[124px] px-8 shrink-0">
+            {quickTest.buttonLabel}
+          </Button>
+        </div>
+
+        {/* 错误提示容器：默认隐藏，提交校验失败时显示 */}
+        <div id="url-error" class="hidden mt-3">
+          <p class="text-sm text-red-500 flex items-center gap-1">
+            <Icon name="AlertCircle" size={16} color="currentColor" />
+            <span id="error-message">Please enter a valid URL.</span>
+          </p>
+        </div>
+      </form>
+
+      {/* 版权和授权提示是 AdSense 审核相关内容，复用公共提示组件 */}
+      <PermissionNotice text={quickTest.hint} class="mt-2 justify-center sm:justify-start" />
+    </Card>
+  </Container>
+</section>
+
+<script>
+  // Quick M3U8 Test 表单处理逻辑：校验 URL 格式，合法后写入本会话临时存储并跳转播放器页
+  const form = document.getElementById('quick-test-form');
+  const urlInput = document.getElementById('m3u8-url');
+  const errorContainer = document.getElementById('url-error');
+  const errorMessage = document.getElementById('error-message');
+  const quickTestStorageKey = 'metistools_m3u8_player_url';
+
+  // URL 校验正则：只允许 http/https 完整链接，避免无效或危险输入
+  const urlRegex = /^https?:\/\/.+/i;
+
+  if (form && urlInput) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // @ts-ignore - Astro 项目使用 JavaScript，不新增 TypeScript 类型文件
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        showError('Please enter a video URL.');
+        return;
+      }
+
+      if (!urlRegex.test(url)) {
+        showError('Please enter a valid URL starting with http:// or https://');
+        return;
+      }
+
+      hideError();
+      storeQuickTestUrl(url);
+      window.location.href = '/m3u8-player/';
+    });
+
+    urlInput.addEventListener('input', () => {
+      if (errorContainer && !errorContainer.classList.contains('hidden')) {
+        hideError();
+      }
+    });
+  }
+
+  /** @param {string} msg */
+  function showError(msg) {
+    if (errorMessage) errorMessage.textContent = msg;
+    if (errorContainer) errorContainer.classList.remove('hidden');
+    if (urlInput) {
+      urlInput.classList.add('border-red-400');
+      urlInput.classList.remove('border-orange-100');
+    }
+  }
+
+  function hideError() {
+    if (errorContainer) errorContainer.classList.add('hidden');
+    if (urlInput) {
+      urlInput.classList.remove('border-red-400');
+      urlInput.classList.add('border-orange-100');
+    }
+  }
+
+  /** @param {string} url */
+  function storeQuickTestUrl(url) {
+    try {
+      window.sessionStorage.setItem(quickTestStorageKey, url);
+    } catch {
+      // sessionStorage 不可用时仍然跳转到播放器页，用户可以在目标页重新粘贴 URL。
+    }
+  }
+</script>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="326" height="308" viewBox="0 0 326 308" fill="none">
+  <defs>
+    <linearGradient id="iconBase" x1="0" y1="0" x2="318" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA"/>
+      <stop offset="0.36" stop-color="#6D3BFF"/>
+      <stop offset="0.68" stop-color="#F44BD8"/>
+      <stop offset="1" stop-color="#FF7A3D"/>
+    </linearGradient>
+    <linearGradient id="facetPurple" x1="14" y1="6" x2="148" y2="169" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D6C6FF"/>
+      <stop offset="0.55" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#5534E9"/>
+    </linearGradient>
+    <linearGradient id="facetBlue" x1="0" y1="126" x2="155" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#714BFF"/>
+      <stop offset="0.54" stop-color="#5042F5"/>
+      <stop offset="1" stop-color="#3A2AD6"/>
+    </linearGradient>
+    <linearGradient id="facetOrange" x1="158" y1="50" x2="318" y2="235" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF91DD"/>
+      <stop offset="0.55" stop-color="#FF5A75"/>
+      <stop offset="1" stop-color="#FF8B3D"/>
+    </linearGradient>
+    <radialGradient id="shine" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(58 30) rotate(55) scale(204 88)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.58"/>
+      <stop offset="0.52" stop-color="#FFFFFF" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="iconClip">
+      <path d="M68 0C29 0 0 28 0 67V233C0 272 30 300 69 300C92 300 109 293 129 280L299 180C324 165 324 135 299 120L129 20C109 7 92 0 68 0Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Soft 3D shadow, kept inside the tight viewBox -->
+  <path d="M68 0C29 0 0 28 0 67V233C0 272 30 300 69 300C92 300 109 293 129 280L299 180C324 165 324 135 299 120L129 20C109 7 92 0 68 0Z" fill="#24146B" opacity="0.13" transform="translate(8 8)"/>
+
+  <!-- Icon only, no text -->
+  <g>
+    <path d="M68 0C29 0 0 28 0 67V233C0 272 30 300 69 300C92 300 109 293 129 280L299 180C324 165 324 135 299 120L129 20C109 7 92 0 68 0Z" fill="url(#iconBase)"/>
+    <g clip-path="url(#iconClip)">
+      <path d="M0 0H126L163 149L0 152V0Z" fill="url(#facetPurple)" opacity="0.96"/>
+      <path d="M0 150L163 149L126 300H0V150Z" fill="url(#facetBlue)" opacity="0.96"/>
+      <path d="M126 0L299 120C324 135 324 165 299 180L126 300L163 149L126 0Z" fill="url(#facetOrange)" opacity="0.92"/>
+      <path d="M0 48L163 149L0 252V48Z" fill="#4E33E9" opacity="0.50"/>
+      <path d="M126 0L163 149L126 300L54 150L126 0Z" fill="#C857FF" opacity="0.54"/>
+      <path d="M163 149L318 100V205L163 149Z" fill="#FF6449" opacity="0.40"/>
+      <path d="M0 0H318V300H0V0Z" fill="url(#shine)"/>
+      <path d="M12 14C22 5 42 0 66 0H126L156 70C121 54 81 36 39 24C28 21 18 18 12 14Z" fill="#FFFFFF" opacity="0.32"/>
+      <path d="M0 237V300H70C92 300 108 293 129 280L233 219C144 258 68 263 0 237Z" fill="#2511B8" opacity="0.20"/>
+    </g>
+    <path d="M68 2C30 2 2 29 2 67V233C2 270 31 298 69 298C91 298 108 291 128 278L298 178C321 164 321 136 298 122L128 22C108 9 91 2 68 2Z" stroke="#FFFFFF" stroke-opacity="0.38" stroke-width="3"/>
+    <path d="M69 299C92 299 109 292 129 279L300 179C313 171 320 160 320 150" stroke="#3A1EDB" stroke-opacity="0.30" stroke-width="3"/>
+  </g>
+</svg>

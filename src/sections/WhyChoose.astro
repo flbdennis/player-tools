@@ -1,0 +1,29 @@
+---
+// Why Choose MetisTools 区块 - 展示平台优势，五列布局贴合设计图
+import { whyChoose } from '../config/home.js';
+import SectionHeader from '../components/SectionHeader.astro';
+import Card from '../components/Card.astro';
+import Icon from '../components/Icon.astro';
+import Container from '../components/Container.astro';
+---
+
+<section class="py-2 md:py-3">
+  <Container>
+    <Card hover={false} class="h-auto px-4 py-4 md:min-h-[160px] md:px-6 md:py-5 overflow-visible">
+      <SectionHeader title={whyChoose.title} class="mb-2" />
+
+      <div class="mt-soft-divider grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5">
+        {whyChoose.features.map((feature) => (
+          <div class="px-3 py-1 text-center md:py-1.5">
+            {/* 优势图标保持 Lucide 统一线性风格，颜色使用设计图紫色 */}
+            <div class="mb-2 flex justify-center text-violet-500">
+              <Icon name={feature.icon} size={20} color="#8b5cf6" strokeWidth={2.7} class="md:hidden" /><Icon name={feature.icon} size={25} color="#8b5cf6" strokeWidth={2.7} class="hidden md:block" />
+            </div>
+            <h3 class="mb-0.5 text-[11px] md:mb-1 md:text-[12px] font-black text-gray-950 leading-tight">{feature.title}</h3>
+            <p class="mx-auto max-w-[118px] text-[9px] font-semibold leading-[1.35] text-gray-600 md:max-w-[104px] md:text-[10px] md:leading-[1.55]">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  </Container>
+</section>

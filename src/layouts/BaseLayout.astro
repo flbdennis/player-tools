@@ -1,0 +1,85 @@
+---
+// 基础布局组件 - 所有页面的统一布局，包含 HTML 骨架、全局样式、Header、Footer
+import { site } from '../config/site.js';
+import SEO from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import MonitoringConsent from '../components/MonitoringConsent.astro';
+import '../styles/global.css';
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage,
+  jsonLd,
+  noindex = false,
+  robots,
+  disableCanonical = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <SEO
+      title={title}
+      description={description}
+      canonical={canonical}
+      ogImage={ogImage}
+      noindex={noindex}
+      robots={robots}
+      disableCanonical={disableCanonical}
+      jsonLd={jsonLd}
+    />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    {/* Google Consent Mode 默认状态 - 必须在 GA / AdSense 脚本前执行，避免广告和统计标签在未知同意状态下直接读写存储 */}
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function() {
+        window.dataLayer.push(arguments);
+      };
+      window.gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        wait_for_update: 500,
+      });
+      window.gtag('set', 'ads_data_redaction', true);
+      window.gtag('set', 'url_passthrough', false);
+    </script>
+    {/* Google Analytics - 只保留官方统计脚本，满足 SEO 与运营统计要求 */}
+    <script
+      async
+      src={`https://www.googletagmanager.com/gtag/js?id=${site.googleAnalyticsId}`}
+    ></script>
+    {/* GA 初始化时只上报干净路径，不携带 query/hash，避免旧 ?url= 链接里的视频地址进入统计系统 */}
+    <script define:vars={{ gaId: site.googleAnalyticsId }}>
+      const sanitizedPageLocation = `${window.location.origin}${window.location.pathname}`;
+      window.gtag('js', new Date());
+      window.gtag('config', gaId, {
+        page_location: sanitizedPageLocation,
+        page_path: window.location.pathname,
+        page_title: document.title,
+      });
+    </script>
+    {/* Google AdSense - 审核前只接入官方脚本，不展示假广告位 */}
+    <script
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.googleAdsenseId}`}
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body class="min-h-screen antialiased">
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    {/* 可选错误监控授权提示：默认关闭，用户同意后才加载 Sentry */}
+    <MonitoringConsent />
+  </body>
+</html>

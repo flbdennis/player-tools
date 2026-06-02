@@ -1,0 +1,85 @@
+---
+// About 页面 - 关于 MetisTools，说明工具定位、授权边界和隐私处理方式
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Container from '../components/Container.astro';
+
+const pageTitle = 'About Our Video Player Tools';
+const pageDescription = `${site.name} provides free browser-based tools for testing public or authorized M3U8, MP4 and MPEG-DASH video links, with playback logs and clear access boundaries.`;
+const canonical = `${site.domain}/about/`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        About {site.name}
+      </h1>
+
+      <div class="prose prose-lg text-gray-600 space-y-6">
+        <p>
+          {site.name} provides free online video player tools for people who
+          need to test public or authorized video links in a browser. The first
+          tools support M3U8/HLS playlists, direct MP4 video URLs and
+          MPEG-DASH MPD manifests.
+        </p>
+
+        <p>
+          The site is designed for practical playback checks: paste a link,
+          preview playback, review browser-side events in the Playback Log and
+          read notes about common loading issues such as CORS restrictions,
+          unsupported codecs, expired links, missing segments, MIME type
+          problems or DRM requirements.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-4">
+          What We Provide
+        </h2>
+        <p>
+          MetisTools focuses on browser-based playback testing, not downloading
+          or converting video. The tools help you check whether a video link can
+          be loaded by a modern browser and whether common browser-side issues
+          are visible during playback.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-4">
+          Responsible Testing Boundary
+        </h2>
+        <p>
+          Only test video links you own, manage or are authorized to access.
+          MetisTools does not bypass CORS, DRM, login walls, signed token rules,
+          geo restrictions, copyright restrictions or source website
+          permissions.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-4">
+          Privacy and Diagnostics
+        </h2>
+        <p>
+          The tools do not require accounts. Video URLs are used inside your
+          browser session for playback testing. Do not paste confidential,
+          private or unauthorized links. For details about analytics,
+          advertising cookies and optional error monitoring, review our Privacy
+          Policy.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-10 mb-4">
+          Contact
+        </h2>
+        <p>
+          For questions, feedback or policy concerns, contact us at
+          <a
+            href={`mailto:${site.email}`}
+            class="text-violet-600 hover:text-violet-700"
+          >
+            {site.email}
+          </a>.
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

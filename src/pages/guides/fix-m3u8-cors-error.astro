@@ -1,0 +1,79 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('fix-m3u8-cors-error');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    An M3U8 CORS error happens when the browser is not allowed to fetch a
+    playlist, media segment or related resource from the video source. CORS is a
+    browser security rule. It is not a video format problem by itself, and it is
+    not something a responsible test tool should bypass.
+  </p>
+
+  <p>
+    If you own or manage the stream, use the
+    <a href="/m3u8-player/">M3U8 Player Online</a> to reproduce the browser
+    behavior, then check the responses from your origin server or CDN. The goal
+    is to configure authorized browser playback correctly, not to work around
+    someone else’s access controls.
+  </p>
+
+  <h2>Check the First Playlist Response</h2>
+  <p>
+    Start with the first M3U8 URL you paste into the player. The response should
+    be a real playlist, not an HTML page, login screen, expired token error or
+    redirect loop. It should also be served over HTTPS when the page using the
+    player is HTTPS.
+  </p>
+
+  <p>
+    If your browser console or Playback Log indicates a CORS problem, inspect
+    the response headers on that playlist. The source server must allow browser
+    requests from the site where the player runs. For public streams, that may
+    mean allowing the expected origin. For private streams, it may require a
+    controlled and authenticated player environment.
+  </p>
+
+  <h2>Do Not Forget Variant Playlists and Segments</h2>
+  <p>
+    HLS often loads several files after the first playlist. A master playlist
+    can point to variant playlists. Variant playlists point to segment files.
+    Some streams also use encryption key URLs. A CORS fix on only the first
+    file may not be enough.
+  </p>
+
+  <p>
+    Check the failing request, not just the original URL. If the first playlist
+    loads but playback stops later, the blocked resource may be a segment, key
+    file or variant playlist. Your CDN logs and browser network panel can help
+    identify which response is missing the required access behavior.
+  </p>
+
+  <h2>Confirm MIME Types and Redirects</h2>
+  <p>
+    CORS issues sometimes appear together with other response problems. The
+    server may return the wrong content type, redirect to another host or serve
+    an error page with a successful-looking status code. These details can make
+    a stream behave differently across players.
+  </p>
+
+  <p>
+    A clean test should show that the playlist is reachable, segment URLs are
+    reachable, HTTPS is consistent and the browser receives media responses
+    rather than HTML or JSON error bodies. If you are also seeing codec or media
+    errors, read
+    <a href="/guides/m3u8-works-in-vlc-but-not-browser/">why M3U8 can work in VLC but fail in the browser</a>.
+  </p>
+
+  <h2>Fix CORS at the Source You Control</h2>
+  <p>
+    The long-term fix belongs on the origin server, CDN or storage service that
+    serves the playlist and segments. If the stream is yours, configure browser
+    access for the origins that should be allowed to play it. If the stream is
+    not yours, do not try to bypass the restriction. Ask the content owner for
+    an authorized test URL or integration instructions.
+  </p>
+</GuideArticleLayout>

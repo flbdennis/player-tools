@@ -1,0 +1,85 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('mpd-test-online');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    An MPD manifest is the playlist-like document used by MPEG-DASH streaming.
+    It describes periods, adaptations, representations, codecs and segment
+    information. To test it in a browser, you need the MPD and its referenced
+    segments to be reachable, compatible and authorized for browser playback.
+  </p>
+
+  <p>
+    Use the <a href="/dash-player/">MPEG-DASH Player</a> when you want to test a
+    public or authorized MPD URL. A browser test is useful because it reflects
+    the environment where a web player actually runs, including CORS,
+    MediaSource support and browser codec limits.
+  </p>
+
+  <h2>Start With the Correct MPD URL</h2>
+  <p>
+    Paste the direct MPD manifest URL, not a webpage that contains a video
+    player. The URL often ends in <code>.mpd</code>, but the extension alone is
+    not enough. The response should be a valid MPEG-DASH manifest rather than
+    HTML, JSON, a login page or an expired token error.
+  </p>
+
+  <p>
+    If you operate the stream, check that the manifest is reachable from the
+    browser and that any relative segment URLs resolve correctly. If the source
+    uses redirects, make sure the final destination is also accessible from the
+    browser player.
+  </p>
+
+  <h2>Review Manifest and Segment Access</h2>
+  <p>
+    DASH playback does not stop at the MPD file. The player must also request
+    initialization segments and media segments. If the manifest loads but
+    playback never starts, inspect the segment requests. A missing segment,
+    blocked response or invalid URL can prevent playback even when the MPD
+    itself appears fine.
+  </p>
+
+  <p>
+    CORS matters here too. The browser may need cross-origin permission for the
+    MPD and all referenced segment files. If the stream is private, the correct
+    fix is to use the authorized player flow or configure your own source
+    server, not to bypass access controls.
+  </p>
+
+  <h2>Check Codec and DRM Requirements</h2>
+  <p>
+    MPEG-DASH is often used for adaptive streaming and can be paired with DRM.
+    A plain MPD test page can test ordinary browser playback, but it cannot
+    replace a protected license flow. If the stream requires DRM, the browser
+    needs the right player integration, license server request and user
+    authorization.
+  </p>
+
+  <p>
+    If the stream is not DRM-protected but still fails, check codec support,
+    manifest validity, segment paths, HTTPS consistency and server response
+    behavior. Browser support may vary across devices, especially for less
+    common codec combinations.
+  </p>
+
+  <h2>Use the Playback Log With Server Evidence</h2>
+  <p>
+    The Playback Log can help identify whether the browser failed while loading
+    the manifest, requesting segments or starting media playback. Treat those
+    events as clues. For deeper diagnosis, compare them with your CDN, storage
+    or origin server logs.
+  </p>
+
+  <p>
+    If your content uses HLS instead of DASH, use the
+    <a href="/m3u8-player/">M3U8 Player Online</a> and read
+    <a href="/guides/how-to-test-m3u8-stream-online/">how to test an M3U8 stream online</a>.
+    If you are testing a single MP4 file, use the
+    <a href="/mp4-player/">MP4 Player Online</a> instead.
+  </p>
+</GuideArticleLayout>

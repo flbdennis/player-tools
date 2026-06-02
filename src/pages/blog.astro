@@ -1,0 +1,83 @@
+---
+// Blog 页面 - 播放排障短文索引，避免占位页影响审核质量
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Container from '../components/Container.astro';
+
+const pageTitle = 'Video Playback Notes';
+const pageDescription = `${site.name} playback notes about M3U8, MP4 and MPEG-DASH browser testing, common loading errors, CORS limits and authorized video links.`;
+const canonical = `${site.domain}/blog/`;
+
+// 首批说明内容 - 当前不创建薄文章详情页，先在索引页提供真实可见内容和工具内链
+const notes = [
+  {
+    title: 'How to Test an HLS or M3U8 Stream Online',
+    summary:
+      'Use a direct M3U8 playlist URL, confirm that the link is public or authorized, then review browser playback and HLS loading events in the Playback Log.',
+    href: '/m3u8-player/',
+    linkLabel: 'Open M3U8 Player',
+  },
+  {
+    title: 'Why an MP4 Link May Fail in a Browser',
+    summary:
+      'An MP4 URL can fail when the server returns HTML instead of video, uses an unsupported codec, sends the wrong MIME type, blocks Range requests or restricts browser access.',
+    href: '/mp4-player/',
+    linkLabel: 'Open MP4 Player',
+  },
+  {
+    title: 'What to Check Before Testing an MPD Manifest',
+    summary:
+      'For MPEG-DASH playback, check the MPD manifest, segment URLs, codec declarations, CORS headers, token expiry and whether the stream requires a DRM license flow.',
+    href: '/dash-player/',
+    linkLabel: 'Open DASH Player',
+  },
+];
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Video Playback Notes
+        </h1>
+        <p class="text-lg text-gray-500 mb-10 leading-relaxed">
+          Practical notes for testing public or authorized video links in a
+          browser. These notes summarize common issues users see when checking
+          M3U8, MP4 and MPEG-DASH playback.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+        {notes.map((note) => (
+          <article class="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 shadow-sm shadow-orange-100/60 p-5">
+            <h2 class="text-lg font-bold text-gray-900 mb-3">{note.title}</h2>
+            <p class="text-sm text-gray-600 leading-relaxed mb-4">{note.summary}</p>
+            <a
+              href={note.href}
+              class="text-sm font-bold text-violet-600 hover:text-violet-700 transition-colors"
+            >
+              {note.linkLabel}
+            </a>
+          </article>
+        ))}
+      </div>
+
+      <section class="mt-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+          Responsible Testing Reminder
+        </h2>
+        <p class="text-gray-600 leading-relaxed">
+          MetisTools is for playback testing and troubleshooting. It does not
+          download, convert, capture or redistribute video content, and it does
+          not bypass CORS, DRM, login requirements, token rules, geo
+          restrictions or source website permissions.
+        </p>
+      </section>
+    </div>
+  </Container>
+</BaseLayout>

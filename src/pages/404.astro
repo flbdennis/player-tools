@@ -1,0 +1,31 @@
+---
+// 404 页面 - 为不存在的路径提供清晰返回入口，避免用户遇到空白错误页
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import Button from '../components/Button.astro';
+import Icon from '../components/Icon.astro';
+
+const pageTitle = 'Page Not Found';
+const pageDescription = 'The page you are looking for could not be found. Return to MetisTools or open one of the online video player tools.';
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} robots="noindex, follow" disableCanonical={true}>
+  <section class="py-16 md:py-24">
+    <Container>
+      <div class="mt-card px-6 py-10 text-center md:px-10 md:py-14">
+        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(90deg,#5a37ff_0%,#7a2cff_55%,#9f22ff_100%)] text-white shadow-lg shadow-violet-200/80">
+          <Icon name="HelpCircle" size={34} color="white" strokeWidth={2.5} />
+        </div>
+        <p class="mb-2 text-sm font-black uppercase tracking-[0.2em] text-violet-700">404 Error</p>
+        <h1 class="mb-4 text-3xl font-black tracking-[-0.04em] text-gray-950 md:text-4xl">Page Not Found</h1>
+        <p class="mx-auto mb-7 max-w-xl text-sm font-semibold leading-relaxed text-gray-700 md:text-base">
+          The page may have moved, or the link may be incorrect. Use the links below to continue testing video streams.
+        </p>
+        <div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button href="/" variant="primary" size="lg" class="min-w-[160px]">Back Home</Button>
+          <Button href="/m3u8-player/" variant="secondary" size="lg" class="min-w-[180px]">Open M3U8 Player</Button>
+        </div>
+      </div>
+    </Container>
+  </section>
+</BaseLayout>

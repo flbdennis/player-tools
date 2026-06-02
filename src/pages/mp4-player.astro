@@ -1,0 +1,75 @@
+---
+// MP4 Player 页面 - 复用 M3U8 工具页结构和组件，仅替换 MP4 对应配置、素材和 SEO
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import ToolBreadcrumb from '../components/ToolBreadcrumb.astro';
+import ToolHero from '../components/ToolHero.astro';
+import PlayerShell from '../components/PlayerShell.astro';
+import EmbedCodeBox from '../components/EmbedCodeBox.astro';
+import PlayerGuideSteps from '../components/PlayerGuideSteps.astro';
+import InfoImageCard from '../components/InfoImageCard.astro';
+import PlayerFAQ from '../components/PlayerFAQ.astro';
+import { site } from '../config/site.js';
+import { mp4PlayerPage } from '../config/mp4Player.js';
+
+const pageTitle = mp4PlayerPage.seo.title;
+const pageDescription = mp4PlayerPage.seo.description;
+const canonical = `${site.domain}/mp4-player/`;
+
+// 结构化数据 - 标记该页面为可直接在浏览器中使用的 MP4 播放测试工具
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: pageTitle,
+    url: canonical,
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    description: pageDescription,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${site.domain}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'MP4 Player Online',
+        item: canonical,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd}>
+  <div class="pt-2 md:pt-3">
+    <Container>
+      <ToolBreadcrumb items={mp4PlayerPage.breadcrumb} />
+      <ToolHero hero={mp4PlayerPage.hero} titleId="mp4-page-title" />
+
+      <PlayerShell tabs={mp4PlayerPage.tabs} activeId="mp4" player={mp4PlayerPage.player} />
+      <EmbedCodeBox embed={mp4PlayerPage.embed} />
+      <PlayerGuideSteps guide={mp4PlayerPage.guide} />
+
+      <div class="space-y-4">
+        {mp4PlayerPage.infoCards.map((card) => (
+          <InfoImageCard card={card} />
+        ))}
+      </div>
+
+      <PlayerFAQ faq={mp4PlayerPage.faq} />
+    </Container>
+  </div>
+</BaseLayout>

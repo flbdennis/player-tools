@@ -1,0 +1,44 @@
+---
+// 按钮组件 - 封装所有按钮样式变体，禁止页面直接写原生按钮样式
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  class: className = '',
+  type = 'button',
+  id,
+} = Astro.props;
+
+// 变体样式映射 - 与 UI/home.png 的紫色主按钮和白色次按钮保持一致
+const variantStyles = {
+  primary:
+    'bg-[linear-gradient(90deg,#5a37ff_0%,#7a2cff_55%,#9f22ff_100%)] text-white hover:shadow-xl hover:shadow-violet-200/80 shadow-lg shadow-violet-200/80',
+  secondary:
+    'bg-white text-gray-900 border border-orange-100 hover:border-violet-200 hover:text-violet-700 shadow-sm shadow-orange-100/60',
+  outline:
+    'bg-transparent text-violet-700 border border-violet-400 hover:bg-violet-50',
+  ghost: 'bg-transparent text-gray-600 hover:text-violet-700 hover:bg-violet-50',
+};
+
+// 尺寸样式映射 - 首页首屏大按钮接近设计图 146x45
+const sizeStyles = {
+  sm: 'px-4 py-2 text-sm rounded-xl',
+  md: 'px-5 py-3 text-sm rounded-xl',
+  lg: 'px-7 py-3.5 text-base rounded-xl',
+};
+
+const baseStyles =
+  'inline-flex items-center justify-center gap-2 font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-2 focus:ring-offset-white';
+
+const styles = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;
+---
+
+{href ? (
+  <a href={href} class={styles} id={id}>
+    <slot />
+  </a>
+) : (
+  <button type={type} class={styles} id={id}>
+    <slot />
+  </button>
+)}

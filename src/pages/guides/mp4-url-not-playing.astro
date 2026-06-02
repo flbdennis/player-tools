@@ -1,0 +1,82 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('mp4-url-not-playing');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    A direct MP4 URL can fail in the browser even when the file exists. The
+    browser needs more than a reachable link. It needs a playable media
+    response, compatible codecs, useful headers and permission to access the
+    file from the page where the player runs.
+  </p>
+
+  <p>
+    Start with the <a href="/mp4-player/">MP4 Player Online</a> when you want
+    to test a public or authorized MP4 file URL. This page is for playback
+    testing only. It is not a downloader, converter or tool for copying video
+    from websites.
+  </p>
+
+  <h2>Make Sure the URL Points to an MP4 File</h2>
+  <p>
+    Many links that look like video links are actually webpages, redirect URLs
+    or API endpoints. A browser video element expects a real media response. If
+    the URL returns HTML, a login page, a JSON error or a blocked redirect, the
+    player cannot treat it as a normal MP4 file.
+  </p>
+
+  <p>
+    If you manage the file, open the network response and confirm that the
+    content is the video file itself. If the link requires cookies, signed
+    tokens or a user session, it may fail outside the original website or
+    authorized player flow.
+  </p>
+
+  <h2>Check MIME Type and Codec Support</h2>
+  <p>
+    A common browser error is “No video with supported format and MIME type
+    found.” This can happen when the server sends an unexpected content type,
+    the file is not actually MP4, or the video/audio codecs are not supported by
+    the browser.
+  </p>
+
+  <p>
+    MP4 is a container, not a guarantee that every browser can decode the
+    content inside it. For broad web playback, the file usually needs common
+    browser-supported video and audio codecs. If only one browser fails, compare
+    codec support across devices before changing the player.
+  </p>
+
+  <h2>Verify Range Request Support</h2>
+  <p>
+    Browsers often use byte Range requests to seek, buffer and read metadata
+    efficiently. If the server does not support Range requests correctly,
+    playback may start slowly, seeking may break or metadata may not load as
+    expected.
+  </p>
+
+  <p>
+    This is especially important for larger MP4 files. If you own the hosting
+    setup, check whether the server or CDN returns partial content responses
+    when the browser asks for a byte range. A simple file download test is not
+    always enough to prove browser playback is healthy.
+  </p>
+
+  <h2>Look for Expired Links and Access Rules</h2>
+  <p>
+    Some MP4 URLs are temporary. They may expire, require a specific referrer or
+    only work for a signed user session. A test page cannot supply private
+    access it does not have. If a private URL fails, test it in the authorized
+    environment or generate a fresh link you are allowed to use.
+  </p>
+
+  <p>
+    If your project also uses streaming playlists, compare the MP4 test with
+    <a href="/guides/how-to-test-m3u8-stream-online/">how to test an M3U8 stream online</a>
+    or <a href="/guides/mpd-test-online/">how to test an MPD manifest online</a>.
+    Each format has different browser requirements.
+  </p>
+</GuideArticleLayout>

@@ -1,0 +1,9 @@
+---
+// PlayerFAQ 组件 - 工具页 FAQ，直接复用首页同款公共 FAQ Accordion
+import FaqAccordion from './FaqAccordion.astro';
+const { faq } = Astro.props;
+---
+
+<section class="pt-4 pb-10" aria-labelledby="player-faq-title">
+  <FaqAccordion title={faq.title} items={faq.items} idPrefix={faq.idPrefix || 'player-faq'} />
+</section>

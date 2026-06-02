@@ -1,0 +1,84 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('how-to-test-m3u8-stream-online');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    An M3U8 stream is usually tested for a simple reason: you want to know
+    whether an HLS playlist can load and play in a normal web browser. The
+    answer is not always the same as “the URL exists.” A playlist may open in a
+    desktop media player but fail in a browser because the browser has stricter
+    rules for CORS, codecs, mixed content, signed URLs and MediaSource playback.
+  </p>
+
+  <p>
+    The safest first step is to use a browser-based player such as the
+    <a href="/m3u8-player/">M3U8 Player Online</a>. Paste only a public stream
+    or a stream you are authorized to test. Do not paste private customer links,
+    paid video URLs, DRM-protected streams or links copied from sites where you
+    do not have permission to test the source.
+  </p>
+
+  <h2>Start With the Direct Playlist URL</h2>
+  <p>
+    A useful HLS test starts with the actual playlist URL, normally ending in
+    <code>.m3u8</code>. A regular webpage URL is not enough, because many video
+    pages load the playlist later through JavaScript, player configuration or
+    an authenticated API call. If you paste a webpage instead of the playlist,
+    the browser player cannot guess which stream you intended to test.
+  </p>
+
+  <p>
+    If you manage the video source, confirm that the URL returns playlist text
+    rather than an HTML page, an error page or a redirect to a login screen. A
+    master playlist may point to several variant playlists for different
+    bitrates, and those variant playlists point to media segments. The browser
+    needs access to the playlist and to the segment files.
+  </p>
+
+  <h2>Run the Browser Playback Test</h2>
+  <p>
+    Paste the playlist into the player and click Play. If playback starts, the
+    browser can load enough of the playlist and segments to begin. If playback
+    fails, read the message and the Playback Log before changing the URL. The
+    log can show whether the failure happened early, during playlist loading,
+    while fetching segments or after metadata was available.
+  </p>
+
+  <p>
+    A browser-side test is especially useful when you are comparing web
+    playback with VLC or another desktop player. Desktop players are often more
+    tolerant of server headers and may not enforce the same cross-origin rules.
+    A successful VLC test does not guarantee that an embedded web player will
+    work for visitors.
+  </p>
+
+  <h2>Check Common HLS Failure Points</h2>
+  <p>
+    If the stream does not play, check whether the playlist and segment URLs are
+    still valid. Signed links can expire quickly. Token rules may require a
+    specific referrer, IP address, cookie or user session. A public browser test
+    cannot supply those private credentials unless the source was designed to
+    allow standalone web playback.
+  </p>
+
+  <p>
+    Also check CORS headers on every relevant response. For HLS, the first
+    playlist is not the only file that matters. Variant playlists, media
+    segments and encryption key URLs can each fail separately. If one segment is
+    blocked or missing, playback may start and then stop.
+  </p>
+
+  <h2>Use the Result as a Clue, Not a Full Diagnosis</h2>
+  <p>
+    An online player can tell you what the browser experienced, but it cannot
+    see everything happening on your origin server, CDN, firewall or license
+    system. If the Playback Log points to a network, CORS or media error, use
+    that clue with your server logs and CDN configuration. For a broader
+    explanation of browser-specific failures, read
+    <a href="/guides/m3u8-works-in-vlc-but-not-browser/">why an M3U8 stream can work in VLC but not in the browser</a>.
+  </p>
+</GuideArticleLayout>

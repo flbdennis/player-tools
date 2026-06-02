@@ -1,0 +1,81 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('what-is-m3u8');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    An M3U8 file is a text playlist used by HLS, the streaming technology
+    commonly used for live streams and adaptive video playback. The playlist
+    does not usually contain the whole video. Instead, it tells the player where
+    to find media segments, what bitrate options are available and how the
+    stream should be assembled during playback.
+  </p>
+
+  <p>
+    In everyday terms, the M3U8 file is a map. The media segments are the pieces
+    of video. A browser player reads the map, requests the pieces and switches
+    between quality levels when the stream provides variants. You can test a
+    public or authorized playlist with the
+    <a href="/m3u8-player/">M3U8 Player Online</a>.
+  </p>
+
+  <h2>How M3U8 Works With HLS</h2>
+  <p>
+    HLS stands for HTTP Live Streaming. It breaks video into many smaller files
+    and serves them over normal HTTP or HTTPS. The M3U8 playlist lists those
+    files and includes metadata such as target duration, sequence numbers,
+    stream variants and sometimes encryption information.
+  </p>
+
+  <p>
+    Some M3U8 files are master playlists. A master playlist points to one or
+    more variant playlists, often with different resolutions or bitrates. Other
+    M3U8 files are media playlists. A media playlist points directly to the
+    segment files that the player downloads during playback.
+  </p>
+
+  <h2>Why M3U8 Is Different From a Normal Video File</h2>
+  <p>
+    A direct MP4 link usually points to one file. An M3U8 link points to a
+    playlist that may reference many additional files. That is why testing an
+    M3U8 stream is different from testing a single video URL. The first request
+    can succeed while a later variant playlist, segment or key request fails.
+  </p>
+
+  <p>
+    This also explains why HLS playback can be sensitive to CORS and access
+    rules. The browser may need permission to fetch the master playlist, the
+    media playlist, every segment and sometimes an encryption key URL. If one of
+    those responses blocks the browser, playback can fail even when the first
+    playlist URL appears valid.
+  </p>
+
+  <h2>What an M3U8 Player Can Check</h2>
+  <p>
+    A browser-based M3U8 player can check whether the playlist can be loaded in
+    a web environment, whether the browser can begin playback and what events
+    or errors happen along the way. The Playback Log can help you separate a
+    simple bad URL from a CORS problem, codec issue, missing segment or access
+    restriction.
+  </p>
+
+  <p>
+    It cannot turn a private stream into a public one, and it cannot bypass DRM,
+    login requirements, copyright restrictions or token rules. If the stream is
+    protected, the correct fix is usually in your own player integration,
+    authorization flow, CDN settings or license system, not in an external test
+    page.
+  </p>
+
+  <h2>When to Use M3U8, MP4 or MPD</h2>
+  <p>
+    Use M3U8 for HLS playlists. Use the
+    <a href="/mp4-player/">MP4 Player Online</a> for direct MP4 file URLs. Use
+    the <a href="/dash-player/">MPEG-DASH Player</a> for MPD manifests. Choosing
+    the right test page matters because each format has different loading
+    behavior and different failure points.
+  </p>
+</GuideArticleLayout>

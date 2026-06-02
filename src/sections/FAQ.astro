@@ -1,0 +1,12 @@
+---
+// FAQ 区块 - 首页常见问题，复用全站公共 FAQ Accordion 组件
+import { faq } from '../config/home.js';
+import Container from '../components/Container.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+---
+
+<section class="pt-1 pb-9 md:pt-2 md:pb-10">
+  <Container>
+    <FaqAccordion title={faq.title} items={faq.items} idPrefix="home-faq" />
+  </Container>
+</section>

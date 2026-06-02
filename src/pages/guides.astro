@@ -1,0 +1,163 @@
+---
+// Guides 页面 - 真实的视频链接测试指南，替代占位内容以提升审核质量
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Container from '../components/Container.astro';
+import Button from '../components/Button.astro';
+import { guideArticles } from '../config/guideArticles.js';
+
+const pageTitle = 'Video Link Testing Guide';
+const pageDescription = `Learn how to test public or authorized M3U8, MP4 and MPEG-DASH video links with ${site.name}, read playback logs and understand common browser playback limits.`;
+const canonical = `${site.domain}/guides/`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Video Link Testing Guide
+        </h1>
+        <p class="text-lg text-gray-500 mb-10">
+          Use this guide to choose the right player, run a basic browser
+          playback test and understand what the Playback Log can and cannot
+          tell you.
+        </p>
+      </div>
+
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">
+          Featured Guides
+        </h2>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {guideArticles.map((article) => (
+            <article class="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 shadow-sm shadow-orange-100/60 p-5">
+              <p class="mb-2 text-xs font-extrabold uppercase tracking-wide text-violet-700">
+                {article.category}
+              </p>
+              <h3 class="font-bold text-gray-900 mb-2">
+                <a class="hover:text-violet-700" href={article.href}>{article.h1}</a>
+              </h3>
+              <p class="text-sm text-gray-600 leading-relaxed">
+                {article.summary}
+              </p>
+              <a
+                class="mt-3 inline-flex text-sm font-bold text-violet-700 hover:text-violet-900"
+                href={article.href}
+              >
+                Read guide
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">
+          Choose the Right Player
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <article class="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 shadow-sm shadow-orange-100/60 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">
+              <a class="hover:text-violet-700" href="/m3u8-player/">M3U8 Player</a>
+            </h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Use this for HLS playlists that end in .m3u8. It helps test
+              playlist loading, HLS segment access, CORS behavior and browser
+              playback support.
+            </p>
+          </article>
+          <article class="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 shadow-sm shadow-orange-100/60 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">
+              <a class="hover:text-violet-700" href="/mp4-player/">MP4 Player Online</a>
+            </h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Use this for direct MP4 video URLs. It helps check whether the
+              browser can load the file, read metadata and play the codec
+              served by the source server.
+            </p>
+          </article>
+          <article class="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 shadow-sm shadow-orange-100/60 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">
+              <a class="hover:text-violet-700" href="/dash-player/">MPEG-DASH Player</a>
+            </h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+              Use this for MPD manifest URLs. It helps test DASH manifest
+              loading, segment requests, browser support and common DRM or
+              access limits.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">
+          Basic Testing Steps
+        </h2>
+        <ol class="space-y-4 text-gray-600">
+          <li>
+            <strong class="text-gray-900">1. Confirm permission.</strong>
+            Only test links you own, manage or are authorized to access.
+          </li>
+          <li>
+            <strong class="text-gray-900">2. Paste the direct media link.</strong>
+            Use the M3U8 playlist, MP4 file URL or MPD manifest URL, not a
+            normal webpage URL that only embeds a video player.
+          </li>
+          <li>
+            <strong class="text-gray-900">3. Start playback.</strong>
+            If the browser can load the source, the video should begin or show
+            enough metadata to help you continue testing.
+          </li>
+          <li>
+            <strong class="text-gray-900">4. Review the Playback Log.</strong>
+            Check browser-side events, warnings and errors. Use them as clues,
+            not as a full replacement for server logs or CDN diagnostics.
+          </li>
+        </ol>
+      </section>
+
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">
+          Common Checks Before Testing
+        </h2>
+        <div class="space-y-4 text-gray-600">
+          <p>
+            Make sure the link starts with http:// or https:// and is reachable
+            from your browser. Some private links require cookies, login
+            sessions, referrer rules, signed tokens or IP restrictions and may
+            fail in a standalone browser test.
+          </p>
+          <p>
+            For M3U8 and DASH streams, check whether playlists, manifests and
+            segments allow browser access through CORS. For MP4 links, verify
+            the server returns a real MP4 response with a suitable MIME type,
+            supported codecs and byte Range support when needed.
+          </p>
+        </div>
+      </section>
+
+      <section class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-5">
+          What the Tools Cannot Do
+        </h2>
+        <p class="text-gray-600 leading-relaxed">
+          MetisTools does not download, convert, capture or redistribute video
+          content. It also does not bypass CORS, DRM, license servers, login
+          walls, token rules, geo restrictions, copyright restrictions or source
+          website permissions.
+        </p>
+      </section>
+
+      <div class="flex flex-col gap-3 text-center sm:flex-row sm:justify-center">
+        <Button href="/m3u8-player/" variant="primary">Try M3U8 Player</Button>
+        <Button href="/mp4-player/" variant="secondary">Try MP4 Player</Button>
+        <Button href="/dash-player/" variant="secondary">Try DASH Player</Button>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

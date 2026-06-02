@@ -1,0 +1,109 @@
+---
+// FaqAccordion 组件 - 全站 FAQ 公共折叠面板，首页和工具页共用同一套样式与交互
+import Icon from './Icon.astro';
+
+const {
+  title = 'FAQ',
+  items = [],
+  idPrefix = 'faq',
+  class: className = '',
+} = Astro.props;
+
+// 桌面端拆成左右两列独立纵向栈，避免 CSS Grid 同行等高导致相邻未展开项被撑高
+const leftItems = items.filter((_, index) => index % 2 === 0);
+const rightItems = items.filter((_, index) => index % 2 === 1);
+---
+
+<div class={`mt-card px-4 py-4 md:px-5 md:py-5 ${className}`} data-faq-accordion>
+  <div class="mb-3 flex items-center gap-2">
+    <span class="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-violet-600 text-white">
+      <Icon name="HelpCircle" size={14} color="white" strokeWidth={2.5} />
+    </span>
+    <h2 class="mt-section-title text-[16px] md:text-[17px] leading-tight">{title}</h2>
+  </div>
+
+  {/* 移动端保持原始顺序纵向排列，避免奇偶拆列造成阅读顺序错乱 */}
+  <div class="flex flex-col gap-2 md:hidden">
+    {items.map((item, index) => (
+      <div class="faq-item overflow-hidden rounded-lg border border-orange-100/90 bg-white/82 shadow-sm shadow-orange-100/40">
+        <button
+          type="button"
+          class="faq-trigger flex min-h-[32px] w-full items-center justify-between gap-3 px-3 py-1.5 text-left"
+          aria-expanded="false"
+          aria-controls={`${idPrefix}-mobile-content-${index}`}
+          data-faq-trigger
+        >
+          <span class="min-w-0 flex-1 text-[12px] font-extrabold leading-snug text-gray-900">{item.question}</span>
+          <span class="faq-icon shrink-0 text-violet-700 transition-transform duration-200">
+            <Icon name="ChevronRight" size={15} color="#6f42ff" strokeWidth={2.6} />
+          </span>
+        </button>
+        <div id={`${idPrefix}-mobile-content-${index}`} class="faq-content hidden px-4 pb-3 pt-1">
+          <p class="text-[12px] font-semibold leading-relaxed text-gray-600">{item.answer}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {/* 桌面端使用两个独立纵向栈，展开左列不会把右列同一行撑高 */}
+  <div class="hidden gap-2 md:grid md:grid-cols-2 md:gap-x-5">
+    {[leftItems, rightItems].map((columnItems, columnIndex) => (
+      <div class="flex flex-col gap-2">
+        {columnItems.map((item, itemIndex) => {
+          const originalIndex = itemIndex * 2 + columnIndex;
+          return (
+            <div class="faq-item overflow-hidden rounded-lg border border-orange-100/90 bg-white/82 shadow-sm shadow-orange-100/40">
+              <button
+                type="button"
+                class="faq-trigger flex min-h-[32px] w-full items-center justify-between gap-3 px-3 py-1.5 text-left"
+                aria-expanded="false"
+                aria-controls={`${idPrefix}-desktop-content-${originalIndex}`}
+                data-faq-trigger
+              >
+                <span class="min-w-0 flex-1 text-[12px] font-extrabold leading-snug text-gray-900">{item.question}</span>
+                <span class="faq-icon shrink-0 text-violet-700 transition-transform duration-200">
+                  <Icon name="ChevronRight" size={15} color="#6f42ff" strokeWidth={2.6} />
+                </span>
+              </button>
+              <div id={`${idPrefix}-desktop-content-${originalIndex}`} class="faq-content hidden px-4 pb-3 pt-1">
+                <p class="text-[12px] font-semibold leading-relaxed text-gray-600">{item.answer}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  // FAQ Accordion 交互逻辑：同一组件内只展开一个答案，避免多个 FAQ 互相干扰
+  document.querySelectorAll('[data-faq-accordion]').forEach((accordion) => {
+    const triggers = accordion.querySelectorAll('[data-faq-trigger]');
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        const currentItem = trigger.closest('.faq-item');
+        const currentContent = currentItem?.querySelector('.faq-content');
+        const currentIcon = trigger.querySelector('.faq-icon');
+        const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
+
+        triggers.forEach((otherTrigger) => {
+          const otherItem = otherTrigger.closest('.faq-item');
+          const otherContent = otherItem?.querySelector('.faq-content');
+          const otherIcon = otherTrigger.querySelector('.faq-icon');
+
+          otherTrigger.setAttribute('aria-expanded', 'false');
+          otherContent?.classList.add('hidden');
+          otherIcon?.classList.remove('rotate-90');
+        });
+
+        if (shouldOpen) {
+          trigger.setAttribute('aria-expanded', 'true');
+          currentContent?.classList.remove('hidden');
+          currentIcon?.classList.add('rotate-90');
+        }
+      });
+    });
+  });
+</script>

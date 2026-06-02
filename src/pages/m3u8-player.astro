@@ -1,0 +1,75 @@
+---
+// M3U8 Player 页面 - 根据 UI/m3u8_player.png 还原主体，Header/Footer 继续复用现有组件
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import ToolBreadcrumb from '../components/ToolBreadcrumb.astro';
+import ToolHero from '../components/ToolHero.astro';
+import PlayerShell from '../components/PlayerShell.astro';
+import EmbedCodeBox from '../components/EmbedCodeBox.astro';
+import PlayerGuideSteps from '../components/PlayerGuideSteps.astro';
+import InfoImageCard from '../components/InfoImageCard.astro';
+import PlayerFAQ from '../components/PlayerFAQ.astro';
+import { site } from '../config/site.js';
+import { m3u8PlayerPage } from '../config/m3u8Player.js';
+
+const pageTitle = m3u8PlayerPage.seo.title;
+const pageDescription = m3u8PlayerPage.seo.description;
+const canonical = `${site.domain}/m3u8-player/`;
+
+// 结构化数据 - 让搜索引擎理解该页面是一个在线视频播放/测试工具
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: pageTitle,
+    url: canonical,
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    description: pageDescription,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${site.domain}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'M3U8 Player Online',
+        item: canonical,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} jsonLd={jsonLd}>
+  <div class="pt-2 md:pt-3">
+    <Container>
+      <ToolBreadcrumb items={m3u8PlayerPage.breadcrumb} />
+      <ToolHero hero={m3u8PlayerPage.hero} titleId="m3u8-page-title" />
+
+      <PlayerShell tabs={m3u8PlayerPage.tabs} activeId="m3u8" player={m3u8PlayerPage.player} />
+      <EmbedCodeBox embed={m3u8PlayerPage.embed} />
+      <PlayerGuideSteps guide={m3u8PlayerPage.guide} />
+
+      <div class="space-y-4">
+        {m3u8PlayerPage.infoCards.map((card) => (
+          <InfoImageCard card={card} />
+        ))}
+      </div>
+
+      <PlayerFAQ faq={m3u8PlayerPage.faq} />
+    </Container>
+  </div>
+</BaseLayout>

@@ -1,0 +1,23 @@
+---
+// ToolBreadcrumb 组件 - 工具页通用面包屑，后续 MP4/DASH 页面可直接复用
+import Icon from './Icon.astro';
+
+const { items = [], class: className = '' } = Astro.props;
+---
+
+<nav class={`mb-2 flex items-center gap-2 text-[12px] font-black text-slate-800 ${className}`} aria-label="Breadcrumb">
+  {items.map((item, index) => (
+    <>
+      <a
+        href={item.href}
+        aria-current={index === items.length - 1 ? 'page' : undefined}
+        class={index === items.length - 1 ? 'text-slate-950' : 'hover:text-violet-700'}
+      >
+        {item.label}
+      </a>
+      {index < items.length - 1 && (
+        <Icon name="ChevronRight" size={13} color="#111827" strokeWidth={2.6} />
+      )}
+    </>
+  ))}
+</nav>

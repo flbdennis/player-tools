@@ -1,0 +1,168 @@
+---
+// Privacy Policy 页面 - 隐私政策，覆盖 AdSense 审核需要的第三方 Cookie、广告服务、可选错误监控和联系方式说明
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Container from '../components/Container.astro';
+import Button from '../components/Button.astro';
+
+const pageTitle = 'Privacy Policy';
+const pageDescription = `${site.name} privacy policy - learn how we handle data, cookies, Google advertising services, video URLs, and optional error monitoring when using our video player tools.`;
+const canonical = `${site.domain}/privacy-policy/`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        Privacy Policy
+      </h1>
+
+      <div class="text-gray-600 space-y-6">
+        <p class="text-sm text-gray-400">Last updated: May 31, 2026</p>
+
+        <p>
+          This Privacy Policy explains how {site.name} handles technical data,
+          video links, cookies, advertising services and optional error
+          monitoring when you use our online video player tools.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          1. Information We Collect
+        </h2>
+        <p>
+          {site.name} does not require user accounts. We do not ask for names,
+          postal addresses, phone numbers or payment details to use the player
+          tools. We may process limited technical and usage information through
+          third-party services to understand website traffic, maintain site
+          reliability, prevent abuse and improve our tools.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          2. Video URLs
+        </h2>
+        <p>
+          Video URLs entered into our M3U8, MP4 and DASH player tools are used
+          in your browser for playback testing. We do not require you to upload
+          video files or create an account. You should only test public or
+          authorized video links and respect copyright, privacy and the source
+          website’s terms of service.
+        </p>
+        <p>
+          Playback diagnostics and optional error monitoring are configured to
+          filter video URLs before diagnostic data is sent. Do not paste private,
+          confidential or unauthorized video links into the tools.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          3. Cookies, Local Storage and Advertising
+        </h2>
+        <p>
+          We may use essential local storage to remember your optional error
+          monitoring choice. We also use Google services, including Google
+          Analytics and Google AdSense, for traffic measurement and advertising.
+        </p>
+        <p>
+          Third-party vendors, including Google, may use cookies to serve ads
+          based on your prior visits to this website or other websites. Google’s
+          use of advertising cookies enables Google and its partners to serve ads
+          based on visits to this site and other sites on the Internet.
+        </p>
+        <p>
+          You can control cookies through your browser settings and manage
+          personalized advertising through Google’s ad settings. Where required
+          by applicable law, users in regions such as the European Economic Area,
+          the United Kingdom and Switzerland may be shown Google-certified
+          consent messages before personalized advertising is served.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          4. Third-Party Services
+        </h2>
+        <p>
+          We use Google Analytics to measure traffic and Google AdSense to serve
+          advertisements. These third-party services may collect technical
+          information such as browser type, device information, page paths,
+          approximate location derived from network data and cookie or advertising
+          identifiers according to their own policies and controls.
+        </p>
+        <p>
+          We do not control the cookies or identifiers used by third-party ad
+          providers. You may review Google’s advertising and privacy controls in
+          your Google account and browser settings.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          5. Optional Error Monitoring
+        </h2>
+        <p>
+          We offer optional error monitoring through Sentry to help detect
+          JavaScript errors, browser compatibility issues and player failures.
+          This feature is disabled by default and only loads after you choose to
+          allow it. If enabled, it may collect technical information such as
+          browser type, device type, page path, error stack traces and limited
+          interaction context for debugging.
+        </p>
+        <p>
+          Video URLs entered into the player tools are filtered before error
+          data is sent. Session replay is disabled. You can keep optional error
+          monitoring disabled and continue using all tools normally.
+        </p>
+
+        <div class="rounded-2xl border border-orange-100 bg-white/80 p-5 shadow-sm shadow-orange-100/60">
+          <h3 class="text-base font-black text-gray-950">
+            Manage Optional Error Monitoring
+          </h3>
+          <p class="mt-2 text-sm font-semibold leading-relaxed text-gray-600">
+            You can reopen the optional monitoring choice at any time. This
+            setting only controls Sentry error monitoring and does not replace
+            any Google-certified advertising consent message required in certain
+            regions.
+          </p>
+          <div class="mt-4">
+            <Button id="metis-open-privacy-choices" variant="secondary" size="sm">
+              Open Privacy Choices
+            </Button>
+          </div>
+        </div>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          6. European Advertising Consent
+        </h2>
+        <p>
+          If advertising consent is required for users in the European Economic
+          Area, the United Kingdom or Switzerland, advertising consent should be
+          handled through Google’s Privacy &amp; messaging tools or another
+          Google-certified consent management platform. The optional error
+          monitoring choice on this website does not manage Google advertising
+          consent.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          7. Contact
+        </h2>
+        <p>
+          If you have any questions about this privacy policy, please contact
+          us at{' '}
+          <a
+            href={`mailto:${site.email}`}
+            class="text-violet-600 hover:text-violet-700"
+          >
+            {site.email}
+          </a>.
+        </p>
+      </div>
+    </div>
+  </Container>
+
+  {/* Privacy Policy 页面专用：用户点击按钮后重新打开全站统一的 optional monitoring 选择弹窗 */}
+  <script>
+    const openPrivacyChoicesButton = document.getElementById('metis-open-privacy-choices');
+    openPrivacyChoicesButton?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('metistools:open-privacy-choices'));
+    });
+  </script>
+</BaseLayout>

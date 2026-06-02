@@ -1,0 +1,126 @@
+---
+// Guide 文章布局 - 为所有指南统一 SEO、结构化数据、内链区和合规提醒
+import BaseLayout from './BaseLayout.astro';
+import Container from '../components/Container.astro';
+import Button from '../components/Button.astro';
+import { site, defaultSeo } from '../config/site.js';
+import { getRelatedGuides } from '../config/guideArticles.js';
+
+const { article } = Astro.props;
+const canonical = `${site.domain}${article.href}`;
+const relatedGuides = getRelatedGuides(article.slug);
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.h1,
+    description: article.description,
+    author: {
+      '@type': 'Organization',
+      name: site.name,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: site.name,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${site.domain}/logo/logo.svg`,
+      },
+    },
+    mainEntityOfPage: canonical,
+    image: `${site.domain}${defaultSeo.ogImage}`,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${site.domain}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Guides',
+        item: `${site.domain}/guides/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: article.h1,
+        item: canonical,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title={article.title}
+  description={article.description}
+  canonical={canonical}
+  ogType="article"
+  jsonLd={jsonLd}
+>
+  <Container class="py-12 md:py-16">
+    <article class="mx-auto max-w-3xl">
+      <nav class="mb-6 text-sm font-semibold text-gray-500" aria-label="Breadcrumb">
+        <a class="hover:text-violet-700" href="/">Home</a>
+        <span class="mx-2 text-gray-300">/</span>
+        <a class="hover:text-violet-700" href="/guides/">Guides</a>
+      </nav>
+
+      <header class="mb-9">
+        <p class="mb-3 text-sm font-extrabold uppercase tracking-wide text-violet-700">
+          {article.category}
+        </p>
+        <h1 class="text-3xl font-black leading-tight text-gray-950 md:text-4xl">
+          {article.h1}
+        </h1>
+        <p class="mt-4 text-lg font-medium leading-relaxed text-gray-600">
+          {article.summary}
+        </p>
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button href={article.toolHref} variant="primary">{article.toolLabel}</Button>
+          <Button href="/guides/" variant="secondary">All Guides</Button>
+        </div>
+      </header>
+
+      <div class="guide-prose">
+        <slot />
+      </div>
+
+      <aside class="mt-10 rounded-xl border border-orange-100 bg-white/82 p-5 shadow-sm shadow-orange-100/50">
+        <h2 class="text-lg font-black text-gray-950">Responsible Testing Reminder</h2>
+        <p class="mt-2 text-sm font-medium leading-relaxed text-gray-600">
+          MetisTools is for testing public or authorized video links. It does not
+          download, convert, capture, redistribute or bypass CORS, DRM, login
+          walls, token rules, geo restrictions, copyright restrictions or source
+          website permissions.
+        </p>
+      </aside>
+
+      <section class="mt-10" aria-labelledby="related-guides-title">
+        <h2 id="related-guides-title" class="text-xl font-black text-gray-950">
+          Related Guides
+        </h2>
+        <div class="mt-4 grid gap-3">
+          {relatedGuides.map((guide) => (
+            <a
+              class="rounded-xl border border-orange-100 bg-white/78 p-4 shadow-sm shadow-orange-100/50 transition-colors hover:border-violet-200 hover:text-violet-700"
+              href={guide.href}
+            >
+              <p class="text-sm font-black text-gray-950">{guide.h1}</p>
+              <p class="mt-1 text-sm font-medium leading-relaxed text-gray-600">
+                {guide.summary}
+              </p>
+            </a>
+          ))}
+        </div>
+      </section>
+    </article>
+  </Container>
+</BaseLayout>

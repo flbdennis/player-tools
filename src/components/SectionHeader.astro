@@ -1,0 +1,19 @@
+---
+// 区块标题组件 - 统一标题、星光装饰和副标题样式
+import Icon from './Icon.astro';
+const { title, subtitle, class: className = '', decorated = true } = Astro.props;
+---
+<div class={`text-center mb-4 md:mb-5 ${className}`}>
+  <div class="inline-flex items-center justify-center gap-4">
+    {decorated && <Icon name="Sparkles" size={18} color="#ffb41f" strokeWidth={2.4} />}
+    <h2 class="mt-section-title text-[21px] md:text-[23px] leading-tight">
+      {title}
+    </h2>
+    {decorated && <Icon name="Sparkles" size={18} color="#ffb41f" strokeWidth={2.4} />}
+  </div>
+  {subtitle && (
+    <p class="mt-2 text-[12px] md:text-sm font-semibold text-gray-700 max-w-2xl mx-auto leading-relaxed">
+      {subtitle}
+    </p>
+  )}
+</div>

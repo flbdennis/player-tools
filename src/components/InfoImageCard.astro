@@ -1,0 +1,36 @@
+---
+// InfoImageCard 组件 - 信息说明卡片，左侧可爬取文本、右侧复用现有 3D 插图素材
+const { card } = Astro.props;
+---
+
+<article class="mt-card grid grid-cols-1 items-center gap-4 overflow-visible px-5 py-6 md:min-h-[184px] md:grid-cols-[minmax(0,1fr)_290px] md:gap-5 md:px-7 md:py-7">
+  <div class="relative z-10 min-w-0 self-center">
+    <h2 class="mb-3 text-[17px] font-black tracking-[-0.03em] text-gray-950 md:text-[18px]">{card.title}</h2>
+    {card.paragraphs && (
+      <div class="space-y-2.5 text-[12px] font-semibold leading-[1.62] text-gray-800">
+        {card.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+    )}
+    {card.bullets && (
+      <ul class="space-y-2 text-[12px] font-semibold leading-[1.55] text-gray-800">
+        {card.bullets.map((bullet) => (
+          <li class="flex items-start gap-2.5">
+            <span class="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-gray-950"></span>
+            <span class="min-w-0 flex-1">{bullet}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+  <div class="flex min-h-[118px] items-center justify-center self-center md:min-h-[170px] md:justify-end">
+    <img
+      src={card.image}
+      alt={card.imageAlt}
+      width="390"
+      height="292"
+      loading="lazy"
+      decoding="async"
+      class="h-auto w-full max-w-[210px] object-contain drop-shadow-[0_18px_26px_rgba(119,71,255,0.12)] md:max-h-[232px] md:max-w-[375px]"
+    />
+  </div>
+</article>

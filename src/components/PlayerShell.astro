@@ -1,0 +1,1220 @@
+---
+// PlayerShell 组件 - 封装播放器 Tab、URL 表单、授权提示、视频预览和 Playback Log
+import PlayerTabs from './PlayerTabs.astro';
+import TextInput from './TextInput.astro';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import PermissionNotice from './PermissionNotice.astro';
+import { playerShared } from '../config/player.js';
+
+const { tabs, activeId = 'm3u8', player } = Astro.props;
+const defaultUrl = player.defaultUrl || '';
+const playbackLog = player.playbackLog || {};
+// Playback Log 默认提示统一从播放器公共配置读取，避免三个工具页重复维护同一句提示
+const playbackLogNotice = playerShared.playbackLogNotice;
+// Playback Log 说明优先读取页面配置，缺省时使用公共合规说明，保证三类播放器话术一致
+const playbackLogDescription = playbackLog.description || playerShared.playbackLogDescription;
+// CORS/访问限制相关诊断文案统一读取公共配置，避免三个播放器页提示不一致
+const corsFixSuggestion = playerShared.corsFixSuggestion;
+const accessBoundaryNotice = playerShared.accessBoundaryNotice;
+// 授权与版权提示统一从公共配置兜底，避免不同页面出现相互矛盾的话术
+const policyNotice = player.policyHint || playerShared.policyNotice;
+const playerId = player.id || activeId || 'video';
+const pagePath = player.pagePath || `/${activeId}-player/`;
+const playerLabel = player.playerLabel || `${playerId.toUpperCase()} video`;
+const panelTitle = `${playerLabel} playback panel`;
+---
+
+<section
+  id="player-shell"
+  data-default-url={defaultUrl}
+  data-page-path={pagePath}
+  data-player-label={playerLabel}
+  data-player-type={playerId}
+  data-cors-fix-suggestion={corsFixSuggestion}
+  data-access-boundary-notice={accessBoundaryNotice}
+  class="relative z-10 mt-card px-4 py-4 md:px-5 md:py-4"
+  aria-labelledby="player-panel-title"
+>
+  <h2 id="player-panel-title" class="sr-only">{panelTitle}</h2>
+  <PlayerTabs tabs={tabs} activeId={activeId} />
+
+  <form id="metis-player-form" class="mt-3 flex flex-col gap-3 md:flex-row" novalidate>
+    <div class="relative flex-1">
+      <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-violet-700">
+        <Icon name="Link" size={16} color="currentColor" strokeWidth={2.4} />
+      </span>
+      <TextInput
+        id="metis-url-input"
+        name="url"
+        type="url"
+        value={defaultUrl}
+        placeholder={player.inputPlaceholder}
+        class="[&_input]:pl-10 [&_input]:h-[36px] [&_input]:text-[12px]"
+      />
+    </div>
+    <Button type="submit" variant="primary" size="md" class="h-[36px] min-w-[108px] rounded-lg px-8 text-[12px]">
+      {player.buttonLabel}
+    </Button>
+  </form>
+
+  <p id="metis-player-error" class="mt-2 hidden items-center gap-1 text-[12px] font-semibold text-red-500">
+    <Icon name="AlertCircle" size={14} color="currentColor" strokeWidth={2.3} />
+    <span>Please enter a valid URL starting with http:// or https://.</span>
+  </p>
+
+  {/* 授权与版权提示复用首页同款组件，保证全站审核提示一致 */}
+  <PermissionNotice text={policyNotice} class="mt-3 text-gray-700" iconColor="#7747ff" />
+
+  <div class="mt-4 overflow-hidden rounded-xl border border-orange-100 bg-black shadow-inner shadow-black/20">
+    <div id="metis-player-stage" class="relative aspect-video min-h-0 bg-black md:aspect-[16/6.05]">
+      <video
+        id="metis-video"
+        class="absolute inset-0 hidden h-full w-full bg-black object-contain"
+        controls
+        playsinline
+        preload="metadata"
+      ></video>
+
+      {/* 默认预览区使用 CSS 构造，避免把设计图截图或第三方视频画面当作资源 */}
+      <div id="metis-placeholder" class="absolute inset-0 overflow-hidden bg-[linear-gradient(180deg,#68c8ff_0%,#7fd6ff_45%,#70c96e_46%,#50a94f_100%)]">
+        <div class="absolute left-[8%] top-[17%] h-11 w-11 rounded-full md:h-16 md:w-16 bg-lime-300 shadow-[20px_7px_0_3px_rgba(163,230,53,0.92),46px_0_0_1px_rgba(132,204,22,0.9)] md:shadow-[30px_10px_0_4px_rgba(163,230,53,0.92),70px_0_0_1px_rgba(132,204,22,0.9)]"></div>
+        <div class="absolute right-[11%] top-[20%] h-9 w-14 rounded-full md:h-14 md:w-20 bg-white/80 shadow-[38px_10px_0_0_rgba(255,255,255,0.65),-46px_6px_0_-4px_rgba(255,255,255,0.6)]"></div>
+        <div class="absolute bottom-0 left-0 h-[40%] w-full bg-[radial-gradient(circle_at_22%_35%,rgba(255,255,255,0.9)_0_2%,transparent_2.5%),radial-gradient(circle_at_74%_30%,rgba(255,255,255,0.9)_0_2%,transparent_2.5%),linear-gradient(180deg,#6ec65b,#308e3b)]"></div>
+        <div class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.35)]">
+          <button
+            type="button"
+            id="metis-placeholder-main-play"
+            class="mb-2 flex h-12 w-12 md:mb-3 md:h-16 md:w-16 items-center justify-center rounded-full bg-white/90 text-violet-700 shadow-2xl shadow-violet-500/20 transition-all duration-200 hover:scale-105 hover:bg-white active:scale-95"
+            aria-label={`Play ${playerLabel}`}
+          >
+            <Icon name="Play" size={24} color="currentColor" fill="currentColor" strokeWidth={1.8} class="md:hidden" /><Icon name="Play" size={30} color="currentColor" fill="currentColor" strokeWidth={1.8} class="hidden md:block" />
+          </button>
+          <strong class="text-[11px] font-black md:text-sm">{player.emptyTitle}</strong>
+          <span class="mt-0.5 max-w-[230px] text-[9px] font-semibold leading-snug text-white/90 md:mt-1 md:max-w-[320px] md:text-[11px] md:leading-relaxed">{player.emptyDescription}</span>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 flex h-[40px] items-center gap-2 md:h-[54px] md:gap-3 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.7))] px-5 text-white">
+          <button
+            type="button"
+            id="metis-placeholder-control-play"
+            class="flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full text-white transition-all duration-200 hover:scale-110 hover:bg-white/15 active:scale-95"
+            aria-label={`Play ${playerLabel}`}
+          >
+            <Icon name="Play" size={19} color="white" fill="white" strokeWidth={1.6} />
+          </button>
+          <span class="text-[10px] font-bold md:text-[12px]">0:00 / 0:00</span>
+          <span class="h-1 flex-1 rounded-full bg-white/70"></span>
+          <Icon name="Volume2" size={15} color="white" strokeWidth={2.2} class="md:hidden" />
+          <Icon name="Maximize" size={15} color="white" strokeWidth={2.2} class="md:hidden" />
+          <Icon name="Volume2" size={18} color="white" strokeWidth={2.2} class="hidden md:block" />
+          <Icon name="Maximize" size={18} color="white" strokeWidth={2.2} class="hidden md:block" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Playback Log 放在播放器组件内部，记录原生 video、hls.js、dash.js 的关键事件 */}
+  <div class="mt-4 rounded-xl border border-orange-100 bg-white/78 p-5 shadow-sm shadow-orange-100/50" aria-labelledby="playback-log-title">
+    <h3 id="playback-log-title" class="mb-2 text-[18px] font-black tracking-[-0.03em] text-gray-950">{playbackLog.title}</h3>
+    <p class="mb-3 rounded-lg border border-amber-100 bg-amber-50/80 px-4 py-2 text-[11.5px] font-bold leading-relaxed text-amber-950">
+      {playbackLogDescription}
+    </p>
+    <div id="playback-status-summary" class="mb-3 rounded-lg border border-violet-100 bg-violet-50/70 px-4 py-3 text-[12px] font-bold leading-relaxed text-gray-700">
+      <span class="text-violet-700">Status: Ready.</span> Paste a public or authorized link, then click Play to start a diagnostic session.
+    </div>
+    <div id="playback-log-resize-shell" class="playback-log-resize-shell rounded-lg border border-orange-200 bg-[#f4ecdf] px-4 py-3 shadow-inner shadow-orange-100/80" aria-label="Resizable playback log output">
+      <pre id="playback-log-output" class="min-h-full whitespace-pre-wrap font-mono text-[12px] font-bold leading-[1.6] text-[#27303f]">{(playbackLog.lines && playbackLog.lines.length ? playbackLog.lines.join('\n') : playbackLogNotice)}</pre>
+    </div>
+    <p class="mt-2 text-[10.5px] font-semibold leading-relaxed text-gray-500">
+      Drag the lower-left corner to expand the log area and review more diagnostic lines.
+    </p>
+    <div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <Button type="button" id="playback-log-start" variant="primary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+        {playbackLog.actions?.start || 'Start Log'}
+      </Button>
+      <Button type="button" id="playback-log-pause" variant="secondary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+        {playbackLog.actions?.pause || 'Pause Log'}
+      </Button>
+      <Button type="button" id="playback-log-clear" variant="secondary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+        {playbackLog.actions?.clear || 'Clear Log'}
+      </Button>
+      <Button type="button" id="playback-log-copy" variant="secondary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+        {playbackLog.actions?.copy || 'Copy Log'}
+      </Button>
+    </div>
+  </div>
+
+  <p id="metis-player-status" class="mt-3 hidden text-[12px] font-semibold text-gray-600"></p>
+</section>
+
+
+<style>
+  /* Playback Log 输出框：使用基础 CSS 实现可拉伸区域，不依赖复杂 Tailwind 插件。
+     direction: rtl 让支持 RTL 的浏览器把原生 resize 手柄放在左下角；内部 pre 再恢复 LTR，保证英文日志正常显示。 */
+  .playback-log-resize-shell {
+    position: relative;
+    height: 142px;
+    min-height: 132px;
+    max-height: 460px;
+    overflow: auto;
+    resize: vertical;
+    direction: rtl;
+  }
+
+  .playback-log-resize-shell pre {
+    direction: ltr;
+    text-align: left;
+  }
+
+  .playback-log-resize-shell::after {
+    content: '';
+    position: sticky;
+    left: 0;
+    bottom: 0;
+    display: block;
+    width: 14px;
+    height: 14px;
+    margin-top: -14px;
+    background: linear-gradient(135deg, transparent 0 45%, rgba(119, 71, 255, 0.42) 46% 54%, transparent 55% 100%);
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  // hls.js 和 dash.js 按需动态加载：MP4 页面不加载流媒体库，降低首屏 JS 体积
+
+  // 播放器交互：读取 URL 参数、校验输入、用户点击后才加载视频，避免未经用户操作自动播放
+  const playerForm = document.getElementById('metis-player-form');
+  const urlInput = document.getElementById('metis-url-input');
+  const playerError = document.getElementById('metis-player-error');
+  const playerStatus = document.getElementById('metis-player-status');
+  const video = document.getElementById('metis-video');
+  const placeholder = document.getElementById('metis-placeholder');
+  const logOutput = document.getElementById('playback-log-output');
+  const logScrollBox = document.getElementById('playback-log-resize-shell');
+  const statusSummary = document.getElementById('playback-status-summary');
+  const placeholderMainPlay = document.getElementById('metis-placeholder-main-play');
+  const placeholderControlPlay = document.getElementById('metis-placeholder-control-play');
+  const logStartBtn = document.getElementById('playback-log-start');
+  const logPauseBtn = document.getElementById('playback-log-pause');
+  const logClearBtn = document.getElementById('playback-log-clear');
+  const logCopyBtn = document.getElementById('playback-log-copy');
+  const validUrlPattern = /^https?:\/\/.+/i;
+  const shell = document.getElementById('player-shell');
+  const defaultPlayerUrl = shell?.dataset.defaultUrl || '';
+  const pagePath = shell?.dataset.pagePath || window.location.pathname;
+  const playerLabel = shell?.dataset.playerLabel || 'video';
+  const playerType = (shell?.dataset.playerType || 'mp4').toLowerCase();
+  const corsFixSuggestion = shell?.dataset.corsFixSuggestion || 'If you own the source server, enable CORS for playlists, manifests, media files, and media segments. Allow this site origin for GET, HEAD, and OPTIONS requests.';
+  const accessBoundaryNotice = shell?.dataset.accessBoundaryNotice || 'This tool does not bypass CORS, DRM, private access controls, copyright restrictions, token rules, or source website permissions.';
+  const playerUrlStorageKey = `metistools_${playerType}_player_url`;
+
+  // 播放诊断状态：只在本地浏览器中维护，不主动上传完整视频地址，避免用户复制报告时泄露私有流地址
+  const diagnostic = {
+    sessionId: '',
+    startedAt: null,
+    urlType: 'unknown',
+    engine: 'native video',
+    status: 'Ready',
+    mainError: '',
+    warnings: [],
+    fatalReported: false,
+    metadataLoaded: false,
+    canPlay: false,
+    playbackStarted: false,
+    firstSegmentLogged: false,
+    fragmentLogCount: 0,
+    lastCurrentTime: 0,
+    lastProgressAt: 0,
+    waitingSince: 0,
+    lastWaitingWarningAt: 0,
+    lastStallWarningAt: 0,
+    stallConfirmCount: 0,
+    stalledWarningShown: false,
+    timers: [],
+    stallInterval: null,
+  };
+
+  let logPaused = false;
+  let hlsInstance = null;
+  let dashPlayer = null;
+  let dashInitialized = false;
+  let HlsLibrary = null;
+  let dashjsLibrary = null;
+  let suppressNativeEvents = false;
+  let activeSession = false;
+
+  const legacyUrl = new URLSearchParams(window.location.search).get('url') || '';
+  if (legacyUrl) {
+    // 兼容旧版 ?url= 分享链接：读取一次后立即清理地址栏，避免视频地址进入历史记录、截图或后续统计。
+    setStoredPlayerUrl(legacyUrl);
+    clearUrlFromAddressBar();
+  }
+
+  const initialUrl = legacyUrl || getStoredPlayerUrl() || defaultPlayerUrl;
+  if (initialUrl && urlInput) {
+    // 默认填入公开测试链接或本会话临时值，但不自动播放，避免未经用户操作启动视频。
+    urlInput.value = initialUrl;
+    updateEmbedData(initialUrl);
+  }
+
+  // 原生 video 事件日志：MP4、Safari 原生 HLS、hls.js 和 dash.js 最终都会触发这些事件
+  const nativeVideoEvents = [
+    'loadstart',
+    'loadedmetadata',
+    'loadeddata',
+    'canplay',
+    'playing',
+    'timeupdate',
+    'progress',
+    'pause',
+    'waiting',
+    'stalled',
+    'seeking',
+    'seeked',
+    'ended',
+    'error',
+  ];
+
+  nativeVideoEvents.forEach((eventName) => {
+    video?.addEventListener(eventName, () => handleNativeVideoEvent(eventName));
+  });
+
+  if (playerForm && urlInput) {
+    playerForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const value = urlInput.value.trim();
+
+      if (!validUrlPattern.test(value)) {
+        showPlayerError();
+        return;
+      }
+
+      hidePlayerError();
+      loadAndPlay(value, 'main Play button');
+    });
+
+    urlInput.addEventListener('input', () => {
+      hidePlayerError();
+      const currentValue = urlInput.value.trim();
+      setStoredPlayerUrl(currentValue);
+      updateEmbedData(currentValue);
+    });
+  }
+
+  // 占位播放器中的两个假播放按钮和表单 Play 按钮共用同一播放逻辑，避免交互行为不一致。
+  // 注意：这里不能回退到 defaultPlayerUrl；如果用户已经清空输入框，播放器上的假播放按钮也必须阻止播放。
+  [placeholderMainPlay, placeholderControlPlay].forEach((button) => {
+    button?.addEventListener('click', () => {
+      const value = (urlInput?.value || '').trim();
+      if (!validUrlPattern.test(value)) {
+        showPlayerError();
+        return;
+      }
+
+      hidePlayerError();
+      loadAndPlay(value, 'placeholder Play button');
+    });
+  });
+
+  logStartBtn?.addEventListener('click', () => {
+    logPaused = false;
+    appendDiagnosticLog('INFO', 'Logging resumed.', 'New playback events will be appended to this diagnostic session.', '', true);
+  });
+
+  logPauseBtn?.addEventListener('click', () => {
+    appendDiagnosticLog('INFO', 'Logging paused.', 'Playback continues, but new diagnostic lines are temporarily hidden.', '', true);
+    logPaused = true;
+  });
+
+  logClearBtn?.addEventListener('click', () => {
+    clearPlaybackLog();
+    setDiagnosticStatus('Ready', 'Log cleared. Paste a public or authorized link, then click Play to start a new diagnostic session.', 'info');
+  });
+
+  logCopyBtn?.addEventListener('click', async () => {
+    const reportText = buildDiagnosticReport();
+    try {
+      await navigator.clipboard.writeText(reportText);
+      setLogCopyLabel('Copied');
+    } catch {
+      const temp = document.createElement('textarea');
+      temp.value = reportText;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+      setLogCopyLabel('Copied');
+    }
+  });
+
+  async function loadAndPlay(value, sourceLabel) {
+    // 用户开始播放时清空默认诊断提示和上一次播放日志，只保留本次播放过程
+    resetDiagnosticSession(value);
+    setStoredPlayerUrl(value);
+    updateEmbedData(value);
+
+    if (!video || !placeholder) return;
+
+    resetPlaybackEngines();
+    activeSession = true;
+    video.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+
+    const engineLabel = getEngineLabel(value);
+    diagnostic.engine = engineLabel;
+    setPlayerStatus(`${playerLabel} diagnostic started. Playback depends on browser support, codec support, CORS and server access settings.`);
+    setDiagnosticStatus('Loading', `Checking ${diagnostic.urlType.toUpperCase()} playback with ${engineLabel}.`, 'info');
+    appendDiagnosticLog('INFO', 'Diagnostic session started.', `Triggered by ${sourceLabel}. URL is hidden from the report for privacy.`);
+    appendDiagnosticLog('INFO', `Selected playback engine: ${engineLabel}.`, `Detected URL type: ${diagnostic.urlType.toUpperCase()}.`);
+    appendDiagnosticLog('INFO', 'Access boundary notice.', accessBoundaryNotice);
+    startPlaybackWatchdog();
+
+    if (shouldUseHls(value)) {
+      setupHlsPlayback(value).catch((error) => {
+        reportFatalPlaybackError('HLS playback engine failed to initialize.', `Technical details: ${error?.message || 'unknown error'}`, 'Refresh the page or try a browser with MediaSource Extensions support.');
+      });
+      return;
+    }
+
+    if (shouldUseDash(value)) {
+      setupDashPlayback(value).catch((error) => {
+        reportFatalPlaybackError('DASH playback engine failed to initialize.', `Technical details: ${error?.message || 'unknown error'}`, 'Try Chrome, Edge or Firefox, and make sure the MPD manifest is public and valid.');
+      });
+      return;
+    }
+
+    setupNativePlayback(value, 'native MP4/video');
+  }
+
+  function setupNativePlayback(value, engineLabel) {
+    if (!video) return;
+    appendDiagnosticLog('INFO', 'Setting native video source.', `${engineLabel} will use the browser built-in media pipeline.`);
+    video.src = value;
+    video.load();
+    requestPlayback(engineLabel);
+  }
+
+  async function setupHlsPlayback(value) {
+    if (!video) return;
+
+    // Safari 可以原生播放 HLS；Chrome/Firefox/Edge 通常需要 hls.js + MSE
+    if (video.canPlayType('application/vnd.apple.mpegurl') || video.canPlayType('application/x-mpegURL')) {
+      appendDiagnosticLog('INFO', 'Native HLS support detected.', 'The browser can play HLS without hls.js. This is common in Safari.');
+      setupNativePlayback(value, 'native HLS');
+      return;
+    }
+
+    const Hls = await loadHlsLibrary();
+
+    if (!Hls.isSupported()) {
+      reportFatalPlaybackError(
+        'HLS playback is not supported in this browser.',
+        'hls.js reported that MediaSource Extensions are unavailable.',
+        'Try Safari for native HLS, or use Chrome, Edge, or Firefox with MediaSource Extensions support.'
+      );
+      return;
+    }
+
+    hlsInstance = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 30,
+    });
+
+    hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
+      appendDiagnosticLog('INFO', 'HLS engine attached to the video element.', 'The browser is ready to receive the HLS media source.');
+    });
+
+    hlsInstance.on(Hls.Events.MANIFEST_LOADING, () => {
+      appendDiagnosticLog('INFO', 'Loading HLS manifest.', 'The player is requesting the M3U8 playlist.');
+    });
+
+    hlsInstance.on(Hls.Events.MANIFEST_LOADED, (_, data) => {
+      const levelCount = data?.levels?.length || 0;
+      appendDiagnosticLog('SUCCESS', 'HLS manifest loaded.', `${levelCount || 'Unknown number of'} variant stream${levelCount === 1 ? '' : 's'} found.`);
+    });
+
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+      const levels = data?.levels?.length || 0;
+      diagnostic.metadataLoaded = true;
+      appendDiagnosticLog('SUCCESS', 'HLS manifest parsed.', `${levels || 'No'} quality level${levels === 1 ? '' : 's'} available for adaptive playback.`);
+      requestPlayback('hls.js');
+    });
+
+    hlsInstance.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
+      const level = hlsInstance?.levels?.[data?.level];
+      const quality = level?.height ? `${level.height}p` : `level ${data?.level}`;
+      appendDiagnosticLog('INFO', `HLS quality switched to ${quality}.`, 'Adaptive bitrate selection is working.');
+    });
+
+    hlsInstance.on(Hls.Events.FRAG_LOADED, (_, data) => {
+      const frag = data?.frag;
+      if (frag?.sn === 'initSegment') return;
+
+      diagnostic.fragmentLogCount += 1;
+      if (!diagnostic.firstSegmentLogged) {
+        diagnostic.firstSegmentLogged = true;
+        appendDiagnosticLog('SUCCESS', 'First HLS media segment loaded.', 'Segment requests are reachable from this browser.');
+        return;
+      }
+
+      // 片段加载频率很高，生产日志只保留少量样例，避免把日志刷屏
+      if (diagnostic.fragmentLogCount <= 3) {
+        appendDiagnosticLog('DEBUG', `HLS media segment loaded${frag?.sn !== undefined ? ` #${frag.sn}` : ''}.`, 'Additional segment logs are hidden to keep the report readable.');
+      }
+    });
+
+    hlsInstance.on(Hls.Events.ERROR, (_, data) => {
+      const normalized = normalizeHlsError(data, Hls);
+      appendDiagnosticLog(normalized.level, normalized.message, normalized.details, normalized.suggestion);
+
+      if (!data?.fatal || !hlsInstance) return;
+
+      if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+        appendDiagnosticLog('WARNING', 'Trying to recover from a fatal HLS network error.', 'hls.js will retry loading the stream.');
+        hlsInstance.startLoad();
+        return;
+      }
+
+      if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+        appendDiagnosticLog('WARNING', 'Trying to recover from a fatal HLS media error.', 'hls.js will attempt media recovery once.');
+        hlsInstance.recoverMediaError();
+        return;
+      }
+
+      reportFatalPlaybackError('HLS playback stopped after an unrecoverable error.', normalized.details, normalized.suggestion);
+      hlsInstance.destroy();
+      hlsInstance = null;
+    });
+
+    hlsInstance.attachMedia(video);
+    hlsInstance.loadSource(value);
+  }
+
+  async function setupDashPlayback(value) {
+    if (!video) return;
+
+    if (!window.MediaSource && !window.ManagedMediaSource) {
+      reportFatalPlaybackError(
+        'DASH playback is not supported in this browser.',
+        'dash.js requires MediaSource Extensions, but this browser does not expose a compatible API.',
+        'Try Chrome, Edge, or Firefox for MPEG-DASH playback.'
+      );
+      return;
+    }
+
+    const dashjs = await loadDashLibrary();
+
+    dashInitialized = false;
+    dashPlayer = dashjs.MediaPlayer().create();
+    dashPlayer.updateSettings({
+      streaming: {
+        abr: {
+          autoSwitchBitrate: {
+            audio: true,
+            video: true,
+          },
+        },
+      },
+    });
+
+    const dashEvents = dashjs.MediaPlayer.events || {};
+    bindDashEvent(dashEvents.MANIFEST_LOADED, () => appendDiagnosticLog('SUCCESS', 'DASH manifest loaded.', 'The MPD file was downloaded and accepted by dash.js.'));
+    bindDashEvent(dashEvents.STREAM_INITIALIZED, () => {
+      dashInitialized = true;
+      diagnostic.metadataLoaded = true;
+      appendDiagnosticLog('SUCCESS', 'DASH stream initialized.', 'The MPD manifest contains playable stream information.');
+      requestPlayback('dash.js');
+    });
+    bindDashEvent(dashEvents.PLAYBACK_STARTED, () => appendDiagnosticLog('SUCCESS', 'DASH playback started.', 'The browser started rendering the stream.'));
+    bindDashEvent(dashEvents.PLAYBACK_PAUSED, () => appendDiagnosticLog('INFO', 'DASH playback paused.', 'Playback was paused by the user, browser, or player state.'));
+    bindDashEvent(dashEvents.BUFFER_EMPTY, () => appendDiagnosticLog('WARNING', 'DASH buffer is empty.', 'The player is waiting for more media data. This can be caused by slow network, missing segments, or high bitrate.'));
+    bindDashEvent(dashEvents.BUFFER_LOADED, () => appendDiagnosticLog('INFO', 'DASH buffer loaded.', 'Enough media data is available to continue playback.'));
+    bindDashEvent(dashEvents.QUALITY_CHANGE_RENDERED, (event) => {
+      const quality = getDashQualityLabel(event);
+      appendDiagnosticLog('INFO', quality ? `DASH quality rendered: ${quality}.` : 'DASH quality rendered.', quality ? 'Adaptive bitrate rendering is working.' : 'Quality metadata was not provided by dash.js, but this is not a playback error.');
+    });
+    bindDashEvent(dashEvents.ERROR, (event) => {
+      const normalized = normalizeDashError(event);
+      appendDiagnosticLog(normalized.level, normalized.message, normalized.details, normalized.suggestion);
+      if (normalized.level === 'ERROR') {
+        setDiagnosticStatus('Failed', normalized.message, 'error');
+      }
+    });
+    bindDashEvent(dashEvents.PLAYBACK_ERROR, (event) => {
+      const normalized = normalizeDashError(event);
+      reportFatalPlaybackError(normalized.message, normalized.details, normalized.suggestion);
+    });
+
+    appendDiagnosticLog('INFO', 'Initializing DASH engine.', 'dash.js will parse the MPD manifest and attach it to the video element.');
+    dashPlayer.initialize(video, value, false);
+
+    // 某些浏览器事件返回较慢，初始化后给一次兜底播放请求，但仍受用户点击触发约束
+    window.setTimeout(() => {
+      if (!dashInitialized) requestPlayback('dash.js fallback');
+    }, 1200);
+  }
+
+  async function loadHlsLibrary() {
+    if (HlsLibrary) return HlsLibrary;
+    appendDiagnosticLog('INFO', 'Loading HLS playback engine.', 'hls.js is loaded only when this browser needs it.');
+    const module = await import('hls.js/light');
+    HlsLibrary = module.default;
+    return HlsLibrary;
+  }
+
+  async function loadDashLibrary() {
+    if (dashjsLibrary) return dashjsLibrary;
+    appendDiagnosticLog('INFO', 'Loading DASH playback engine.', 'dash.js is loaded only on the DASH player page.');
+    dashjsLibrary = await import('dashjs/playback');
+    return dashjsLibrary;
+  }
+
+  function bindDashEvent(eventName, handler) {
+    if (!dashPlayer || !eventName) return;
+    dashPlayer.on(eventName, handler);
+  }
+
+  function requestPlayback(engineLabel) {
+    if (!video) return;
+    appendDiagnosticLog('INFO', 'Playback requested.', `${engineLabel} asked the browser to start playback.`);
+    video
+      .play()
+      .then(() => {
+        const details = diagnostic.playbackStarted
+          ? 'Playback is already active. Media events confirm the current playing state.'
+          : 'The browser accepted the user click. Playback state will be confirmed by media events.';
+        appendDiagnosticLog('SUCCESS', 'Playback request accepted by the browser.', details);
+      })
+      .catch((error) => {
+        reportFatalPlaybackError(
+          'The browser rejected the playback request.',
+          `Technical details: ${error?.message || 'browser blocked playback or unsupported media'}`,
+          'Click Play again, check browser autoplay rules, or verify that the media format is supported.'
+        );
+      });
+  }
+
+  function resetPlaybackEngines() {
+    if (!video) return;
+
+    clearWatchdogs();
+
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
+
+    if (dashPlayer) {
+      dashPlayer.reset();
+      dashPlayer = null;
+    }
+
+    dashInitialized = false;
+    suppressNativeEvents = true;
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    window.setTimeout(() => {
+      suppressNativeEvents = false;
+    }, 0);
+  }
+
+  function handleNativeVideoEvent(eventName) {
+    if (!activeSession || suppressNativeEvents) return;
+
+    if (eventName === 'error') {
+      reportFatalPlaybackError('The browser could not play this media source.', getVideoErrorMessage(), getNativeErrorSuggestion());
+      return;
+    }
+
+    if (eventName === 'loadstart') {
+      appendDiagnosticLog('INFO', 'Browser started loading media metadata.', 'The media element accepted the source and began loading.');
+      return;
+    }
+
+    if (eventName === 'loadedmetadata') {
+      diagnostic.metadataLoaded = true;
+      appendDiagnosticLog('SUCCESS', 'Media metadata loaded.', getVideoMetadataDetails());
+      return;
+    }
+
+    if (eventName === 'loadeddata') {
+      clearBufferingState();
+      appendDiagnosticLog('SUCCESS', 'First media frame is available.', 'The browser decoded enough data to render the first frame.');
+      return;
+    }
+
+    if (eventName === 'canplay') {
+      diagnostic.canPlay = true;
+      clearBufferingState();
+      appendDiagnosticLog('SUCCESS', 'Browser can start playback.', 'The media source passed the browser compatibility check.');
+      return;
+    }
+
+    if (eventName === 'playing') {
+      diagnostic.playbackStarted = true;
+      updatePlaybackProgress(true);
+      clearBufferingState();
+      setDiagnosticStatus('Playing', 'Playback started successfully.', 'success');
+      appendDiagnosticLog('SUCCESS', 'Playback started.', 'The media is actively playing in the browser.');
+      return;
+    }
+
+    if (eventName === 'timeupdate' || eventName === 'progress') {
+      updatePlaybackProgress(false);
+      return;
+    }
+
+    if (eventName === 'waiting' || eventName === 'stalled') {
+      handlePotentialBufferingEvent(eventName);
+      return;
+    }
+
+    if (eventName === 'pause') {
+      appendDiagnosticLog('INFO', 'Playback paused.', 'This may be caused by the user, browser, or player state.');
+      return;
+    }
+
+    if (eventName === 'seeking') {
+      appendDiagnosticLog('INFO', 'Seeking started.', 'The browser is moving to another playback position.');
+      return;
+    }
+
+    if (eventName === 'seeked') {
+      appendDiagnosticLog('INFO', 'Seeking finished.', 'The browser reached the requested playback position.');
+      return;
+    }
+
+    if (eventName === 'ended') {
+      setDiagnosticStatus('Completed', 'Playback reached the end of the media.', 'success');
+      appendDiagnosticLog('SUCCESS', 'Playback ended.', 'The media played to completion.');
+    }
+  }
+
+  function updatePlaybackProgress(force = false) {
+    if (!video) return;
+    const current = Number(video.currentTime || 0);
+    if (force || current > diagnostic.lastCurrentTime + 0.05) {
+      diagnostic.lastCurrentTime = current;
+      diagnostic.lastProgressAt = Date.now();
+      diagnostic.stallConfirmCount = 0;
+      diagnostic.stalledWarningShown = false;
+      clearBufferingState();
+    }
+  }
+
+  function clearBufferingState(restorePlayingStatus = true) {
+    diagnostic.waitingSince = 0;
+    diagnostic.stallConfirmCount = 0;
+
+    // waiting/stalled 事件在 HLS 和部分浏览器中可能是短暂瞬时状态。
+    // 一旦 timeupdate/progress/canplay/playing 证明播放仍在推进，就把顶部状态恢复为 Playing，避免视频正常播放时一直显示 Buffering。
+    if (restorePlayingStatus && diagnostic.playbackStarted && video && !video.paused && !video.ended && !video.seeking) {
+      if (['Buffering', 'Stalled', 'Loading slowly'].includes(diagnostic.status)) {
+        setDiagnosticStatus('Playing', 'Playback is continuing normally.', 'success');
+      }
+    }
+  }
+
+  function getBufferedAheadSeconds() {
+    if (!video || !video.buffered || !video.buffered.length) return 0;
+    const current = Number(video.currentTime || 0);
+    for (let index = 0; index < video.buffered.length; index += 1) {
+      const start = video.buffered.start(index);
+      const end = video.buffered.end(index);
+      if (current >= start && current <= end) return Math.max(0, end - current);
+    }
+    return 0;
+  }
+
+  function shouldSkipStallDetection() {
+    if (!video || !activeSession || !diagnostic.playbackStarted) return true;
+    if (document.hidden || video.paused || video.ended || video.seeking) return true;
+    if (video.playbackRate === 0) return true;
+    if (Number.isFinite(video.duration) && video.duration > 0 && video.duration - video.currentTime < 0.5) return true;
+    return false;
+  }
+
+  function isLikelyBufferStarved() {
+    if (!video) return false;
+    const bufferedAhead = getBufferedAheadSeconds();
+    const waitingLongEnough = diagnostic.waitingSince && Date.now() - diagnostic.waitingSince > 3500;
+    return (video.readyState <= HTMLMediaElement.HAVE_CURRENT_DATA || waitingLongEnough) && bufferedAhead < 0.25;
+  }
+
+  function handlePotentialBufferingEvent(eventName) {
+    if (shouldSkipStallDetection()) return;
+    if (!diagnostic.waitingSince) diagnostic.waitingSince = Date.now();
+
+    // 不在 waiting/stalled 事件触发瞬间修改顶部状态。
+    // Safari/Chrome 原生 HLS 在正常低缓冲播放时也会短暂触发 waiting；如果立即显示 Buffering，会出现“视频正常播放但状态一直缓冲”的误导。
+    // 只有延迟确认后仍然缺数据，才把状态改为 Buffering 并写入 WARNING。
+    window.setTimeout(() => {
+      if (shouldSkipStallDetection() || !diagnostic.waitingSince) return;
+      if (!isLikelyBufferStarved()) {
+        clearBufferingState();
+        return;
+      }
+      if (Date.now() - diagnostic.lastWaitingWarningAt < 30000) return;
+      diagnostic.lastWaitingWarningAt = Date.now();
+      setDiagnosticStatus('Buffering', 'Playback is waiting for more media data.', 'warning');
+      appendDiagnosticLog(
+        'WARNING',
+        eventName === 'waiting' ? 'Playback is waiting for more data.' : 'Playback appears stalled.',
+        'The browser reported a sustained buffering state. This can be caused by network delay, server delay, CORS restrictions, missing media segments, expired signed segment URLs, or bitrate higher than the current connection can sustain.'
+      );
+    }, 4000);
+  }
+
+  function startPlaybackWatchdog() {
+    clearWatchdogs();
+    diagnostic.lastProgressAt = Date.now();
+    diagnostic.lastCurrentTime = Number(video?.currentTime || 0);
+
+    // 10 秒没有元数据时提示用户，避免一直空等但也不立即判定失败
+    diagnostic.timers.push(window.setTimeout(() => {
+      if (!diagnostic.metadataLoaded && activeSession) {
+        appendDiagnosticLog('WARNING', 'Media metadata is taking longer than expected.', 'The browser has not received playable metadata yet. Common causes include CORS, private or expired URLs, missing MIME type, slow CDN response, unsupported redirects, or server availability.', 'If you own the source, verify CORS, Content-Type, Range support for MP4, and that the manifest or media file is publicly reachable.');
+        setDiagnosticStatus('Loading slowly', 'Metadata has not loaded yet. Check CORS, network, MIME type, permissions, and server availability.', 'warning');
+      }
+    }, 10000));
+
+    // 20 秒没有达到可播放状态时给出明确错误，但仍保留播放器继续尝试的空间
+    diagnostic.timers.push(window.setTimeout(() => {
+      if (!diagnostic.canPlay && !diagnostic.playbackStarted && activeSession) {
+        reportFatalPlaybackError('Playback did not become ready in time.', 'The browser did not receive enough compatible media data within 20 seconds. This can happen when CORS blocks browser requests, the source is private or expired, the server returns HTML instead of media, MIME type is wrong, codecs are unsupported, or Range requests fail.', 'Check whether the link is public, CORS allows browser access, codecs are supported, MP4 Range requests work, and the source server is responding with the expected media content.');
+      }
+    }, 20000));
+
+    // 播放中 currentTime 长时间不增长时再做二次确认，避免 HLS 正常低缓冲播放时误报。
+    // 必须同时满足：正在播放、页面可见、currentTime 持续不增长、浏览器处于缺数据状态、短缓冲区，并连续确认 2 次。
+    diagnostic.stallInterval = window.setInterval(() => {
+      if (shouldSkipStallDetection()) return;
+
+      const current = Number(video.currentTime || 0);
+      if (current > diagnostic.lastCurrentTime + 0.05) {
+        diagnostic.lastCurrentTime = current;
+        diagnostic.lastProgressAt = Date.now();
+        diagnostic.stallConfirmCount = 0;
+        diagnostic.stalledWarningShown = false;
+        clearBufferingState();
+        return;
+      }
+
+      if (Date.now() - diagnostic.lastProgressAt <= 20000 || !isLikelyBufferStarved()) {
+        diagnostic.stallConfirmCount = 0;
+        return;
+      }
+
+      diagnostic.stallConfirmCount += 1;
+      if (diagnostic.stallConfirmCount < 2 || Date.now() - diagnostic.lastStallWarningAt < 45000) return;
+
+      diagnostic.lastStallWarningAt = Date.now();
+      diagnostic.stalledWarningShown = true;
+      appendDiagnosticLog('WARNING', 'Playback appears stalled.', 'The browser has not advanced playback for more than 20 seconds and appears to be waiting for media data.', 'Check for missing segments, CORS-blocked segment requests, token expiry, CDN latency, or an overloaded source server.');
+      setDiagnosticStatus('Stalled', 'Playback started but appears stalled after repeated checks.', 'warning');
+    }, 5000);
+  }
+
+  function clearWatchdogs() {
+    diagnostic.timers.forEach((timer) => window.clearTimeout(timer));
+    diagnostic.timers = [];
+    if (diagnostic.stallInterval) {
+      window.clearInterval(diagnostic.stallInterval);
+      diagnostic.stallInterval = null;
+    }
+  }
+
+  function resetDiagnosticSession(value) {
+    clearPlaybackLog();
+    clearWatchdogs();
+    diagnostic.sessionId = `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+    diagnostic.startedAt = new Date();
+    diagnostic.urlType = getUrlType(value);
+    diagnostic.engine = getEngineLabel(value);
+    diagnostic.status = 'Loading';
+    diagnostic.mainError = '';
+    diagnostic.warnings = [];
+    diagnostic.fatalReported = false;
+    diagnostic.metadataLoaded = false;
+    diagnostic.canPlay = false;
+    diagnostic.playbackStarted = false;
+    diagnostic.firstSegmentLogged = false;
+    diagnostic.fragmentLogCount = 0;
+    diagnostic.lastCurrentTime = 0;
+    diagnostic.lastProgressAt = Date.now();
+    diagnostic.waitingSince = 0;
+    diagnostic.lastWaitingWarningAt = 0;
+    diagnostic.lastStallWarningAt = 0;
+    diagnostic.stallConfirmCount = 0;
+    diagnostic.stalledWarningShown = false;
+    activeSession = false;
+  }
+
+  function reportFatalPlaybackError(message, details = '', suggestion = '') {
+    if (!diagnostic.mainError) diagnostic.mainError = message;
+    diagnostic.fatalReported = true;
+    appendDiagnosticLog('ERROR', message, details, suggestion, true);
+    setDiagnosticStatus('Failed', message, 'error');
+  }
+
+  function appendDiagnosticLog(level, message, details = '', suggestion = '', force = false) {
+    if (!logOutput || (logPaused && !force)) return;
+    const now = new Date();
+    const time = now.toTimeString().slice(0, 8);
+    const normalizedLevel = normalizeLogLevel(level);
+    const safeMessage = sanitizeLogText(message);
+    const safeDetails = sanitizeLogText(details);
+    const safeSuggestion = sanitizeLogText(suggestion);
+    const parts = [`[${time}] [${normalizedLevel}] ${safeMessage}`];
+
+    if (safeDetails) parts.push(`  Details: ${safeDetails}`);
+    if (safeSuggestion) parts.push(`  Suggestion: ${safeSuggestion}`);
+
+    if (normalizedLevel === 'WARNING' && safeMessage && !diagnostic.warnings.includes(safeMessage)) {
+      diagnostic.warnings.push(safeMessage);
+    }
+
+    const current = logOutput.textContent?.trim();
+    logOutput.textContent = `${current ? `${current}\n` : ''}${parts.join('\n')}`;
+    if (logScrollBox) logScrollBox.scrollTop = logScrollBox.scrollHeight;
+    logOutput.scrollTop = logOutput.scrollHeight;
+  }
+
+  function normalizeHlsError(data, Hls) {
+    const statusCode = getHlsStatusCode(data);
+    const status = statusCode ? `HTTP ${statusCode}` : 'no HTTP response status';
+    const technicalDetails = [
+      `type=${data?.type || 'unknown'}`,
+      `details=${data?.details || 'unknown'}`,
+      `fatal=${Boolean(data?.fatal)}`,
+      status,
+      data?.error?.message ? `message=${data.error.message}` : '',
+    ].filter(Boolean).join(', ');
+
+    const details = String(data?.details || '').toLowerCase();
+    const type = data?.type;
+    const errorText = [
+      data?.type,
+      data?.details,
+      data?.error?.message,
+      data?.reason,
+      data?.response?.text,
+    ].filter(Boolean).join(' ').toLowerCase();
+    const resourceLabel = getHlsResourceLabel(details);
+    const corsSuspected = isCorsLikeFailure(errorText, statusCode, type === Hls?.ErrorTypes?.NETWORK_ERROR);
+    let message = data?.fatal ? 'HLS playback failed.' : 'HLS playback warning.';
+    let suggestion = 'Check whether the stream is public, authorized, and accessible from the browser.';
+
+    if (corsSuspected) {
+      message = `HLS ${resourceLabel} request may be blocked by browser CORS or access policy.`;
+      suggestion = corsFixSuggestion;
+    } else if (statusCode === 401 || statusCode === 403) {
+      message = `HLS ${resourceLabel} request was denied by the source server.`;
+      suggestion = 'Check whether the link is public or authorized, whether signed tokens have expired, and whether the source allows browser playback from this site.';
+    } else if (statusCode === 404 || statusCode === 410) {
+      message = `HLS ${resourceLabel} was not found.`;
+      suggestion = 'Check whether the playlist or segment URL is correct, still available, and not generated by an expired temporary link.';
+    } else if (statusCode >= 500) {
+      message = `HLS ${resourceLabel} server error detected.`;
+      suggestion = 'The origin server or CDN returned a server error. Retry later or check the source server logs if you own the stream.';
+    } else if (details.includes('manifest') && details.includes('load')) {
+      message = 'HLS manifest could not be loaded.';
+      suggestion = 'Verify that the M3U8 URL is public, not expired, and returns a valid playlist with CORS enabled.';
+    } else if (details.includes('manifest') && details.includes('parsing')) {
+      message = 'HLS manifest could not be parsed.';
+      suggestion = 'Check whether the playlist format is valid M3U8 and not an HTML error page, login page, redirect page, or CDN error page.';
+    } else if (details.includes('frag') || details.includes('level')) {
+      message = 'HLS media segment could not be loaded.';
+      suggestion = 'Check segment URLs, CDN availability, CORS headers, token expiry, geo restrictions, and whether relative segment paths resolve correctly.';
+    } else if (details.includes('buffer')) {
+      message = 'HLS buffering issue detected.';
+      suggestion = 'Try another network or stream variant. The server may be slow, missing segments, using too high a bitrate, or delaying live segments.';
+    } else if (details.includes('key') || details.includes('eme') || type === Hls?.ErrorTypes?.KEY_SYSTEM_ERROR) {
+      message = 'HLS DRM or key-system issue detected.';
+      suggestion = 'This browser player cannot play protected streams without the required DRM license flow.';
+    } else if (type === Hls?.ErrorTypes?.MEDIA_ERROR) {
+      message = 'HLS media decode issue detected.';
+      suggestion = 'Check codecs, container compatibility, browser support, and whether the stream uses unsupported audio/video tracks.';
+    } else if (type === Hls?.ErrorTypes?.NETWORK_ERROR) {
+      message = 'HLS network issue detected.';
+      suggestion = 'Check server availability, CORS headers, redirects, signed URL expiry, mixed content, and ad-blocking or corporate network filters.';
+    }
+
+    return {
+      level: data?.fatal ? 'ERROR' : 'WARNING',
+      message,
+      details: `Technical details: ${technicalDetails}.`,
+      suggestion,
+    };
+  }
+
+  function normalizeDashError(event) {
+    const rawMessage = event?.error?.message || event?.event?.message || event?.message || event?.error || 'unknown error';
+    const code = event?.error?.code || event?.code || '';
+    const rawText = getDashErrorText(event);
+    const messageText = rawText.toLowerCase();
+    const statusCode = extractHttpStatusCode(rawText);
+    const corsSuspected = isCorsLikeFailure(messageText, statusCode, true);
+    let message = 'DASH playback error detected.';
+    let suggestion = 'Check whether the MPD manifest and media segments are public and compatible with this browser.';
+
+    if (corsSuspected) {
+      message = 'DASH request may be blocked by browser CORS or access policy.';
+      suggestion = corsFixSuggestion;
+    } else if (statusCode === 401 || statusCode === 403) {
+      message = 'DASH request was denied by the source server.';
+      suggestion = 'Check permissions, signed URL expiry, geo restrictions, DRM/license requirements, and whether the source allows browser playback from this site.';
+    } else if (statusCode === 404 || statusCode === 410) {
+      message = 'DASH manifest or media segment was not found.';
+      suggestion = 'Check whether the MPD or segment URL is correct, still available, and not generated by an expired temporary link.';
+    } else if (statusCode >= 500) {
+      message = 'DASH source server or CDN error detected.';
+      suggestion = 'The origin server or CDN returned a server error. Retry later or check the source server logs if you own the stream.';
+    } else if (messageText.includes('manifest') || messageText.includes('mpd')) {
+      message = 'DASH manifest could not be loaded or parsed.';
+      suggestion = 'Verify that the MPD URL is public, valid XML, not an HTML error page, and served with browser-accessible CORS headers.';
+    } else if (messageText.includes('segment') || messageText.includes('fragment') || messageText.includes('chunk')) {
+      message = 'DASH media segment could not be loaded.';
+      suggestion = 'Check segment URLs, CDN availability, CORS headers, token expiry, geo restrictions, and relative segment paths.';
+    } else if (messageText.includes('codec') || messageText.includes('decode') || messageText.includes('media')) {
+      message = 'DASH media compatibility issue detected.';
+      suggestion = 'Check video/audio codecs, MIME types, and browser MediaSource support.';
+    } else if (messageText.includes('drm') || messageText.includes('eme') || messageText.includes('license') || messageText.includes('key')) {
+      message = 'DASH DRM or license issue detected.';
+      suggestion = 'Protected streams require a supported DRM license flow and cannot be tested as a plain public stream.';
+    } else if (messageText.includes('network') || messageText.includes('timeout')) {
+      message = 'DASH network issue detected.';
+      suggestion = 'Check server availability, CORS headers, redirects, signed URL expiry, and network or CDN latency.';
+    }
+
+    return {
+      level: 'ERROR',
+      message,
+      details: `Technical details: ${code ? `code=${code}, ` : ''}${rawMessage}${statusCode ? `, HTTP ${statusCode}` : ''}.`,
+      suggestion,
+    };
+  }
+
+  function getDashQualityLabel(event) {
+    if (event?.mediaType && event.mediaType !== 'video') return '';
+    if (event?.newQuality !== undefined && event?.newQuality !== null) return `level ${event.newQuality}`;
+    if (event?.quality !== undefined && event?.quality !== null) return `level ${event.quality}`;
+    return '';
+  }
+
+  function getHlsStatusCode(data) {
+    const code = data?.response?.code ?? data?.response?.status ?? data?.context?.response?.code;
+    const numberCode = Number(code);
+    return Number.isFinite(numberCode) && numberCode > 0 ? numberCode : 0;
+  }
+
+  function getHlsResourceLabel(details) {
+    if (details.includes('manifest') || details.includes('level')) return 'playlist';
+    if (details.includes('frag') || details.includes('segment')) return 'media segment';
+    if (details.includes('key')) return 'key';
+    return 'resource';
+  }
+
+  function getDashErrorText(event) {
+    const parts = [
+      event?.error?.message,
+      event?.event?.message,
+      event?.message,
+      event?.error?.data?.message,
+      event?.error?.data?.url,
+      event?.event?.url,
+      event?.event?.request?.url,
+      event?.event?.request?.responseURL,
+      event?.event?.response?.status,
+      event?.event?.status,
+      event?.code,
+    ].filter(Boolean);
+    return parts.join(' ');
+  }
+
+  function extractHttpStatusCode(value) {
+    const text = String(value || '');
+    const match = text.match(/\b(?:http\s*)?(status|code)?\s*[:=]?\s*(40[0-9]|41[0-9]|42[0-9]|43[0-9]|50[0-9]|51[0-9]|52[0-9]|53[0-9])\b/i);
+    return match ? Number(match[2]) : 0;
+  }
+
+  function isCorsLikeFailure(errorText, statusCode = 0, isNetworkContext = false) {
+    const text = String(errorText || '').toLowerCase();
+    if (text.includes('cors') || text.includes('cross-origin') || text.includes('access-control-allow-origin')) return true;
+    if (text.includes('blocked by client') || text.includes('blocked by cors policy')) return true;
+    if (text.includes('failed to fetch') || text.includes('networkerror') || text.includes('load failed')) return true;
+    // XHR/fetch 在 CORS 阻止、混合内容、DNS/网络失败、插件拦截时经常没有可读 HTTP 状态；这里用“可能”而不是绝对判断。
+    return isNetworkContext && !statusCode;
+  }
+
+  function shouldUseHls(value) {
+    return playerType === 'm3u8' || /\.m3u8($|[?#])/i.test(value);
+  }
+
+  function shouldUseDash(value) {
+    return playerType === 'dash' || /\.mpd($|[?#])/i.test(value);
+  }
+
+  function getEngineLabel(value) {
+    if (shouldUseHls(value)) return 'HLS';
+    if (shouldUseDash(value)) return 'DASH';
+    return 'native video';
+  }
+
+  function getUrlType(value) {
+    if (/\.m3u8($|[?#])/i.test(value) || playerType === 'm3u8') return 'm3u8';
+    if (/\.mpd($|[?#])/i.test(value) || playerType === 'dash') return 'mpd';
+    if (/\.mp4($|[?#])/i.test(value) || playerType === 'mp4') return 'mp4';
+    return 'video';
+  }
+
+  function getVideoMetadataDetails() {
+    const duration = Number.isFinite(video?.duration) ? `${Math.round(video.duration * 10) / 10}s` : 'unknown duration';
+    const width = video?.videoWidth || 0;
+    const height = video?.videoHeight || 0;
+    const size = width && height ? `${width}x${height}` : 'unknown resolution';
+    return `Duration: ${duration}. Resolution: ${size}.`;
+  }
+
+  function getVideoErrorMessage() {
+    const errorCode = video?.error?.code;
+    const errorMap = {
+      1: 'MEDIA_ERR_ABORTED: playback was aborted by the user or browser.',
+      2: 'MEDIA_ERR_NETWORK: a network error interrupted media loading.',
+      3: 'MEDIA_ERR_DECODE: the browser could not decode the media. Codec or file corruption is likely.',
+      4: 'MEDIA_ERR_SRC_NOT_SUPPORTED: the source or MIME type is not supported by this browser.',
+    };
+    return errorMap[errorCode] || 'Unknown native video error.';
+  }
+
+  function getNativeErrorSuggestion() {
+    const errorCode = video?.error?.code;
+    if (errorCode === 2) return 'Check server availability, CORS headers, signed URL expiry, redirects, mixed content, and network connectivity.';
+    if (errorCode === 3) return 'Check whether the file uses browser-supported video and audio codecs and is not corrupted or partially uploaded.';
+    if (errorCode === 4) return 'Try a public MP4 file or verify that this browser supports the media format, MIME type, codec, and Range request behavior.';
+    return 'Check whether the URL is public, authorized, served with correct CORS and MIME headers, and compatible with this browser.';
+  }
+
+  function showPlayerError() {
+    playerError?.classList.remove('hidden');
+    playerError?.classList.add('flex');
+  }
+
+  function hidePlayerError() {
+    playerError?.classList.add('hidden');
+    playerError?.classList.remove('flex');
+  }
+
+  function setPlayerStatus(message) {
+    if (!playerStatus) return;
+    playerStatus.textContent = message;
+    playerStatus.classList.remove('hidden');
+  }
+
+  function setDiagnosticStatus(status, message, tone = 'info') {
+    diagnostic.status = status;
+    if (!statusSummary) return;
+
+    const toneClass = {
+      info: 'border-violet-100 bg-violet-50/70 text-gray-700',
+      success: 'border-green-100 bg-green-50/80 text-green-900',
+      warning: 'border-amber-100 bg-amber-50/80 text-amber-900',
+      error: 'border-red-100 bg-red-50/80 text-red-900',
+    }[tone] || 'border-violet-100 bg-violet-50/70 text-gray-700';
+
+    statusSummary.className = `mb-3 rounded-lg border px-4 py-3 text-[12px] font-bold leading-relaxed ${toneClass}`;
+    statusSummary.innerHTML = `<span class="font-black">Status: ${escapeHtml(status)}.</span> ${escapeHtml(message)}`;
+  }
+
+  function getStoredPlayerUrl() {
+    try {
+      return window.sessionStorage.getItem(playerUrlStorageKey) || '';
+    } catch {
+      return '';
+    }
+  }
+
+  function setStoredPlayerUrl(value) {
+    try {
+      if (value) {
+        window.sessionStorage.setItem(playerUrlStorageKey, value);
+      } else {
+        window.sessionStorage.removeItem(playerUrlStorageKey);
+      }
+    } catch {
+      // sessionStorage 可能在隐私模式下不可用；失败时保持内存输入值即可。
+    }
+  }
+
+  function clearUrlFromAddressBar() {
+    try {
+      window.history.replaceState({}, '', pagePath);
+    } catch {
+      // 浏览器不允许修改历史记录时静默降级，不影响播放器主功能。
+    }
+  }
+
+  function updateEmbedData(url) {
+    window.metistoolsCurrentUrl = url;
+    window.dispatchEvent(new CustomEvent('metistools:url-change', { detail: { url } }));
+  }
+
+  function clearPlaybackLog() {
+    if (logOutput) logOutput.textContent = '';
+  }
+
+  function buildDiagnosticReport() {
+    const logText = logOutput?.textContent?.trim() || 'No diagnostic log lines recorded.';
+    const warnings = diagnostic.warnings.length ? diagnostic.warnings.join('; ') : 'None';
+    const browser = `${navigator.userAgent}`;
+
+    return [
+      'MetisTools Playback Diagnostic Report',
+      `Tool: ${playerLabel}`,
+      `URL Type: ${diagnostic.urlType.toUpperCase()}`,
+      `Engine: ${diagnostic.engine}`,
+      `Status: ${diagnostic.status}`,
+      `Main Error: ${diagnostic.mainError || 'None'}`,
+      `Warnings: ${warnings}`,
+      `Started At: ${diagnostic.startedAt ? diagnostic.startedAt.toISOString() : 'Not started'}`,
+      'Source URL: [filtered-url]',
+      `Browser: ${browser}`,
+      '',
+      'Log:',
+      logText,
+    ].join('\n');
+  }
+
+  function sanitizeLogText(value) {
+    if (!value) return '';
+    return String(value)
+      .replace(/https?:\/\/[^\s"'<>]+/gi, '[filtered-url]')
+      .replace(/([?&](?:url|u|token|signature|expires|auth|key|access_token|secret)=)[^\s&]+/gi, '$1[filtered]');
+  }
+
+  function normalizeLogLevel(level) {
+    const normalized = String(level || 'INFO').toUpperCase();
+    return ['INFO', 'SUCCESS', 'WARNING', 'ERROR', 'DEBUG'].includes(normalized) ? normalized : 'INFO';
+  }
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function setLogCopyLabel(label) {
+    if (!logCopyBtn) return;
+    const original = logCopyBtn.textContent;
+    logCopyBtn.textContent = label;
+    window.setTimeout(() => {
+      logCopyBtn.textContent = original || 'Copy Log';
+    }, 1600);
+  }
+</script>

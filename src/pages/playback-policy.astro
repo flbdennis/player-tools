@@ -1,0 +1,93 @@
+---
+// Playback Policy 页面 - 播放政策，集中说明授权测试和工具能力边界
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Container from '../components/Container.astro';
+
+const pageTitle = 'Playback Policy';
+const pageDescription = `${site.name} playback policy - guidelines for testing public or authorized M3U8, MP4 and MPEG-DASH video links responsibly without downloading, bypassing or redistributing content.`;
+const canonical = `${site.domain}/playback-policy/`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        Playback Policy
+      </h1>
+
+      <div class="text-gray-600 space-y-6">
+        <p>
+          {site.name} provides browser-based video playback testing tools for
+          public or authorized links. Please review these guidelines before
+          testing M3U8, MP4 or MPEG-DASH content.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          1. Test Only Authorized Content
+        </h2>
+        <p>
+          Only test video links that you own, manage or have permission to
+          access. Do not use our tools to test copyrighted, private,
+          confidential or restricted content without authorization.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          2. Respect Terms of Service
+        </h2>
+        <p>
+          Ensure your use of video content complies with the terms of service
+          of the content provider and any applicable laws in your
+          jurisdiction.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          3. No Redistribution
+        </h2>
+        <p>
+          Our tools are for browser playback testing only. Do not use them to
+          download, convert, capture, redistribute or obtain video content
+          without permission.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          4. No Bypass or Circumvention
+        </h2>
+        <p>
+          MetisTools does not bypass CORS, DRM, license servers, login
+          requirements, token rules, geo restrictions, private access controls,
+          copyright restrictions or source website permissions. If a stream is
+          protected or restricted, use the proper authorized playback workflow
+          provided by the content owner.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          5. Playback Results Are Browser-Side Signals
+        </h2>
+        <p>
+          Playback Log entries and error messages are browser-side diagnostic
+          signals. They can help identify likely issues, but they do not replace
+          source server logs, CDN diagnostics, DRM license checks or full
+          streaming infrastructure monitoring.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          6. Report Abuse
+        </h2>
+        <p>
+          If you encounter misuse of our tools, please contact us at{' '}
+          <a
+            href={`mailto:${site.email}`}
+            class="text-violet-600 hover:text-violet-700"
+          >
+            {site.email}
+          </a>.
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

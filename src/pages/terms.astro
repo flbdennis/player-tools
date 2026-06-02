@@ -1,0 +1,96 @@
+---
+// Terms 页面 - 服务条款，覆盖授权测试、禁止下载/绕过和责任边界
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import Container from '../components/Container.astro';
+
+const pageTitle = 'Terms of Service';
+const pageDescription = `${site.name} terms of service - rules for using our M3U8, MP4 and MPEG-DASH video player tools responsibly and only with public or authorized links.`;
+const canonical = `${site.domain}/terms/`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        Terms of Service
+      </h1>
+
+      <div class="text-gray-600 space-y-6">
+        <p class="text-sm text-gray-400">Last updated: June 2, 2026</p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          1. Acceptance of Terms
+        </h2>
+        <p>
+          By accessing and using {site.name}, you accept and agree to be bound
+          by these terms of service. If you do not agree to these terms,
+          please do not use our services.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          2. Use of Tools
+        </h2>
+        <p>
+          Our video player tools are provided for browser playback testing and
+          basic troubleshooting only. You agree to test only video links that
+          you own, manage or have permission to access. You are solely
+          responsible for ensuring your use complies with applicable laws and
+          the terms of service of any third-party content providers.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          3. Prohibited Activities
+        </h2>
+        <p>
+          You may not use our tools to test, distribute or access copyrighted
+          content without authorization, engage in illegal activities, attempt
+          to disrupt our services, or use the tools to download, convert,
+          capture, redistribute or obtain video content without permission.
+        </p>
+        <p>
+          You may not use MetisTools to bypass CORS, DRM, license servers,
+          login requirements, token rules, geo restrictions, private access
+          controls, copyright restrictions or source website permissions.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          4. Disclaimer
+        </h2>
+        <p>
+          Our tools are provided as-is without warranties of any kind. We do
+          not guarantee that all video formats will play correctly in all
+          browsers or devices. Playback results depend on browser support,
+          codecs, CORS rules, source server behavior, network conditions and
+          access permissions.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          5. Changes to Terms
+        </h2>
+        <p>
+          We reserve the right to modify these terms at any time. Continued
+          use of our services after changes constitutes acceptance of the
+          updated terms.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          6. Contact
+        </h2>
+        <p>
+          For questions about these terms, please contact us at{' '}
+          <a
+            href={`mailto:${site.email}`}
+            class="text-violet-600 hover:text-violet-700"
+          >
+            {site.email}
+          </a>.
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

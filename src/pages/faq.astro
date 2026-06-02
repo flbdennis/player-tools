@@ -1,0 +1,28 @@
+---
+// FAQ 页面 - 独立 FAQ 页面，复用首页 FAQ 数据并覆盖全站核心合规问题
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../config/site.js';
+import { faq } from '../config/home.js';
+import Container from '../components/Container.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+
+const pageTitle = 'Video Player Tools FAQ';
+const pageDescription = `Frequently asked questions about ${site.name} M3U8, MP4 and MPEG-DASH player tools, Playback Log, browser limits and authorized video link testing.`;
+const canonical = `${site.domain}/faq/`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+>
+  <Container class="py-16 md:py-24">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-10 text-center">
+        Video Player Tools FAQ
+      </h1>
+
+      <FaqAccordion title={faq.title} items={faq.items} idPrefix="faq-page" class="mx-auto" />
+    </div>
+  </Container>
+</BaseLayout>

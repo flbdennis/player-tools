@@ -1,0 +1,21 @@
+# 依赖包
+node_modules/
+dist/
+.output/
+docs/
+.claude/
+tmp/
+output/
+.playwright-cli/
+
+# 环境配置文件
+.env
+.env.*
+!.env.example
+
+# 系统自动生成
+.DS_Store
+.vscode/
+.idea/
+.astro/
+*.log

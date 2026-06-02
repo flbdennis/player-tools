@@ -1,0 +1,167 @@
+---
+// MonitoringConsent 组件 - 可选错误监控授权提示
+// 重要边界：这个组件只控制 Sentry Error Monitoring，不是 Google Ads 的 TCF/CMP 广告同意弹窗。
+// 这样写可以避免误导用户，也避免把“广告 Cookie 同意”和“可选错误监控”混为一谈。
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+---
+
+<div
+  id="metis-monitoring-consent"
+  class="fixed inset-x-3 bottom-3 z-[80] hidden rounded-xl border border-orange-100 bg-white/97 p-3 shadow-2xl shadow-violet-100/50 backdrop-blur-xl md:left-auto md:right-5 md:w-[460px] md:p-4"
+  role="dialog"
+  aria-live="polite"
+  aria-labelledby="metis-monitoring-consent-title"
+>
+  <div class="flex items-start gap-2.5 md:gap-3">
+    <div class="mt-0.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 sm:flex">
+      <Icon name="AlertCircle" size={17} color="currentColor" strokeWidth={2.3} />
+    </div>
+    <div class="min-w-0 flex-1">
+      <p id="metis-monitoring-consent-title" class="text-[14px] font-black leading-snug text-gray-950">
+        Optional Error Monitoring
+      </p>
+      <p class="mt-1 text-[11.5px] font-semibold leading-relaxed text-gray-600 md:text-[12px]">
+        Off by default. If allowed, it helps diagnose JavaScript and player errors. Video URLs are filtered and replay is disabled.
+      </p>
+      <details class="mt-1 text-[11px] font-semibold leading-relaxed text-gray-500">
+        <summary class="cursor-pointer font-bold text-violet-700 outline-none focus-visible:ring-2 focus-visible:ring-violet-300 focus-visible:ring-offset-2">
+          Learn more
+        </summary>
+        <p class="mt-1">
+          Essential local storage remembers this choice. Google ads and analytics consent is handled separately through Google-certified consent messages where required.
+        </p>
+      </details>
+      <p id="metis-monitoring-status" class="mt-2 rounded-md bg-violet-50 px-2.5 py-1.5 text-[11px] font-bold text-violet-800">
+        Current optional monitoring status: Not selected.
+      </p>
+      <div class="mt-2 grid grid-cols-2 gap-2">
+        <Button
+          id="metis-monitoring-allow"
+          type="button"
+          size="sm"
+          class="h-8 rounded-lg px-3 text-[11px] md:h-9 md:text-[12px]"
+        >
+          <span class="hidden sm:inline">Allow Optional Monitoring</span>
+          <span class="sm:hidden">Allow</span>
+        </Button>
+        <Button
+          id="metis-monitoring-deny"
+          type="button"
+          variant="secondary"
+          size="sm"
+          class="h-8 rounded-lg px-3 text-[11px] md:h-9 md:text-[12px]"
+        >
+          Keep Off
+        </Button>
+      </div>
+      <a href="/privacy-policy/" class="mt-2 inline-flex text-[11px] font-bold text-violet-700 hover:text-violet-800">
+        Read Privacy Policy
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 错误监控授权逻辑：默认关闭，用户同意后才加载 @sentry/browser。
+  // 注意：这里不控制 Google Analytics / AdSense。若向 EEA、UK、Switzerland 用户投放 Google 广告，仍应在 AdSense 后台配置 Google 认证 CMP 或 European regulations message。
+  const consentPanel = document.getElementById('metis-monitoring-consent');
+  const allowButton = document.getElementById('metis-monitoring-allow');
+  const denyButton = document.getElementById('metis-monitoring-deny');
+  const statusText = document.getElementById('metis-monitoring-status');
+  const storageKey = 'metistools_error_monitoring_consent';
+  const grantedValue = 'granted';
+  const deniedValue = 'denied';
+
+  // 安全读取 localStorage - 某些浏览器隐私模式可能禁用存储，必须兜底
+  function getStoredConsent() {
+    try {
+      return window.localStorage.getItem(storageKey);
+    } catch {
+      return null;
+    }
+  }
+
+  // 安全写入 localStorage - 写入失败时仍然保持默认关闭
+  function setStoredConsent(value) {
+    try {
+      window.localStorage.setItem(storageKey, value);
+    } catch {
+      // localStorage 不可用时不抛错，避免影响页面主功能
+    }
+  }
+
+  // 更新当前状态文案 - Privacy Policy 页面手动打开设置时用户能看懂当前选择
+  function updateStatusText() {
+    if (!statusText) return;
+
+    const currentConsent = getStoredConsent();
+    if (currentConsent === grantedValue) {
+      statusText.textContent = 'Current optional monitoring status: On.';
+    } else if (currentConsent === deniedValue) {
+      statusText.textContent = 'Current optional monitoring status: Off.';
+    } else {
+      statusText.textContent = 'Current optional monitoring status: Not selected.';
+    }
+  }
+
+  // 显示授权提示 - 首次访问自动显示，也允许 Privacy Policy 页面手动重新打开
+  function showConsentPanel() {
+    updateStatusText();
+    consentPanel?.classList.remove('hidden');
+  }
+
+  // 隐藏授权提示 - 用户允许或拒绝后隐藏
+  function hideConsentPanel() {
+    consentPanel?.classList.add('hidden');
+  }
+
+  // 动态加载 Sentry - 只有同意后才下载 sentry-client chunk，默认不增加首屏负担
+  async function enableErrorMonitoring() {
+    setStoredConsent(grantedValue);
+    updateStatusText();
+    hideConsentPanel();
+
+    try {
+      const { initSentry } = await import('../scripts/sentry-client.js');
+      initSentry();
+    } catch (error) {
+      console.warn('Sentry failed to initialize:', error);
+    }
+  }
+
+  // 拒绝错误监控 - 保存拒绝状态，后续页面不再弹出提示
+  function disableErrorMonitoring() {
+    setStoredConsent(deniedValue);
+    updateStatusText();
+    hideConsentPanel();
+  }
+
+  // 暴露最小隐私设置 API - Privacy Policy 页面可复用同一个弹窗，不需要在 Footer 或工具页放额外开关
+  window.MetisPrivacy = {
+    enableErrorMonitoring,
+    disableErrorMonitoring,
+    openPrivacyChoices: showConsentPanel,
+    resetErrorMonitoringConsent() {
+      try {
+        window.localStorage.removeItem(storageKey);
+      } catch {
+        // localStorage 不可用时不抛错，避免影响页面主功能
+      }
+      showConsentPanel();
+    },
+  };
+
+  allowButton?.addEventListener('click', enableErrorMonitoring);
+  denyButton?.addEventListener('click', disableErrorMonitoring);
+
+  // 允许 Privacy Policy 页面通过自定义事件重新打开设置，不在每个页面额外放按钮
+  window.addEventListener('metistools:open-privacy-choices', showConsentPanel);
+
+  const currentConsent = getStoredConsent();
+  if (currentConsent === grantedValue) {
+    enableErrorMonitoring();
+  } else if (currentConsent !== deniedValue) {
+    showConsentPanel();
+  }
+</script>
