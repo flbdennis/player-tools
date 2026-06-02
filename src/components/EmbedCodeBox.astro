@@ -1,35 +1,67 @@
 ---
 // EmbedCodeBox 组件 - 封装播放器嵌入代码、直链模式和复制交互
 import Icon from './Icon.astro';
+import { site } from '../config/site.js';
 const { embed } = Astro.props;
-const pagePath = embed.pagePath || '/m3u8-player/';
-const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+const embedPath = embed.embedPath || embed.pagePath || '/embed/m3u8/';
+const normalizedEmbedPath = embedPath.endsWith('/') ? embedPath : `${embedPath}/`;
+const defaultEmbedCode = `<iframe title="${embed.title || 'MetisTools embedded player'}" src="${site.domain}${normalizedEmbedPath}" width="100%" height="360" style="border:0;aspect-ratio:16/9" allow="autoplay; fullscreen; encrypted-media" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
 ---
 
-<section class="mt-card px-4 py-3 md:px-5 md:py-3" aria-labelledby="embed-title" data-page-path={pagePath} id="embed-code-panel">
-  <div class="mb-2 flex items-center justify-between gap-3">
-    <h2 id="embed-title" class="text-[16px] font-black tracking-[-0.02em] text-gray-950">{embed.title}</h2>
+<section
+  class="mt-card px-4 py-3 md:px-5 md:py-3"
+  aria-labelledby="embed-title"
+  data-embed-path={normalizedEmbedPath}
+  data-embed-title={embed.title || 'MetisTools embedded player'}
+  data-sensitive-notice={embed.sensitiveNotice || ''}
+  data-missing-url-notice={embed.missingUrlNotice || ''}
+  id="embed-code-panel"
+>
+  <div class="mb-2 flex flex-col gap-1.5">
+    <div>
+      <h2 id="embed-title" class="relative inline-block pr-3 text-[16px] font-black tracking-[-0.02em] text-gray-950">
+        {embed.title}
+        <span class="group absolute -right-1 -top-1 inline-flex">
+        <button
+          type="button"
+          class="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-transparent text-violet-700/85 transition-colors hover:text-violet-900"
+          aria-label="Embed sharing note"
+          aria-describedby="embed-detail-tooltip"
+        >
+          <Icon name="HelpCircle" size={14} color="currentColor" strokeWidth={2.3} />
+        </button>
+        <span
+          id="embed-detail-tooltip"
+          role="tooltip"
+          class="pointer-events-none absolute left-0 top-7 z-20 w-[260px] rounded-lg border border-violet-100 bg-white px-3 py-2 text-[12px] font-semibold leading-snug text-gray-700 opacity-0 shadow-xl shadow-violet-100/70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 md:w-[340px]"
+        >
+          {embed.detailNotice}
+        </span>
+      </span>
+      </h2>
+    </div>
+    <p class="text-[12.5px] font-semibold leading-snug text-gray-600">{embed.shortNotice}</p>
   </div>
 
   <div class="flex flex-col gap-2.5 md:flex-row md:items-center">
     <div class="flex gap-1.5">
       <button
         type="button"
-        data-embed-mode="iframe"
+        data-embed-mode="empty"
         class="embed-mode-btn active inline-flex h-[30px] min-w-[90px] items-center justify-center rounded-md border border-violet-200 bg-violet-50 px-3 text-[13px] font-extrabold text-violet-700 transition-colors"
       >
-        {embed.iframeLabel}
+        {embed.emptyLabel || 'Empty Player'}
       </button>
       <button
         type="button"
-        data-embed-mode="direct"
-        class="embed-mode-btn inline-flex h-[30px] min-w-[86px] items-center justify-center rounded-md border border-orange-100 bg-white px-3 text-[13px] font-extrabold text-gray-800 transition-colors hover:text-violet-700"
+        data-embed-mode="current"
+        class="embed-mode-btn inline-flex h-[30px] min-w-[118px] items-center justify-center rounded-md border border-orange-100 bg-white px-3 text-[13px] font-extrabold text-gray-800 transition-colors hover:text-violet-700"
       >
-        {embed.directLabel}
+        {embed.currentUrlLabel || 'With Current URL'}
       </button>
     </div>
 
-    <code id="embed-code" class="min-h-[30px] flex-1 overflow-hidden rounded-md border border-orange-100 bg-white/90 px-3 py-1.5 text-[12px] font-semibold leading-snug text-gray-600 shadow-inner shadow-orange-50/70 md:truncate">
+    <code id="embed-code" class="min-h-[30px] flex-1 overflow-x-auto rounded-md border border-orange-100 bg-white/90 px-3 py-1.5 text-[12px] font-semibold leading-snug text-gray-600 shadow-inner shadow-orange-50/70">
       {defaultEmbedCode}
     </code>
 
@@ -42,16 +74,23 @@ const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow=
       <span>{embed.copyLabel}</span>
     </button>
   </div>
+  <p id="embed-code-note" class="mt-2 hidden text-[12.5px] font-semibold leading-snug text-amber-800"></p>
 </section>
 
 <script>
-  // 嵌入代码交互：切换 iframe/direct link，监听播放器 URL 变化并更新可复制内容
+  // 嵌入代码交互：切换空播放器/带当前 URL 的 iframe，避免默认把用户私有 URL 写入分享代码
   const codeEl = document.getElementById('embed-code');
   const copyBtn = document.getElementById('copy-embed-code');
   const modeButtons = document.querySelectorAll('[data-embed-mode]');
-  let embedMode = 'iframe';
+  const urlInput = document.getElementById('metis-url-input');
+  const codeNote = document.getElementById('embed-code-note');
+  let embedMode = 'empty';
   const embedPanel = document.getElementById('embed-code-panel');
-  const pagePath = embedPanel?.dataset.pagePath || window.location.pathname;
+  const embedPath = embedPanel?.dataset.embedPath || '/embed/m3u8/';
+  const embedTitle = embedPanel?.dataset.embedTitle || 'MetisTools embedded player';
+  const sensitiveNotice = embedPanel?.dataset.sensitiveNotice || '';
+  const missingUrlNotice = embedPanel?.dataset.missingUrlNotice || '';
+  const sensitiveParamPattern = /(?:^|[?&#;])(token|signature|sig|expires|expiry|auth|key|jwt|access_token|x-amz-signature|x-amz-security-token|policy)=/i;
 
   updateEmbedCode();
 
@@ -73,9 +112,10 @@ const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow=
   });
 
   window.addEventListener('metistools:url-change', () => {
-    // 审核前嵌入代码不拼接用户视频 URL，避免复制内容、浏览器历史或第三方 iframe 地址泄露私有流地址。
+    // URL 变化事件不携带完整地址；这里直接读取同页输入框，避免把用户 URL 放进全局事件 detail。
     updateEmbedCode();
   });
+  urlInput?.addEventListener('input', updateEmbedCode);
 
   copyBtn?.addEventListener('click', async () => {
     const text = codeEl?.textContent?.trim() || '';
@@ -96,11 +136,13 @@ const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow=
   function updateEmbedCode() {
     if (!codeEl) return;
     const origin = window.location.origin === 'null' ? 'https://metistools.com' : window.location.origin;
-    const normalizedPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
-    const playerUrl = `${origin}${normalizedPath}`;
-    codeEl.textContent = embedMode === 'iframe'
-      ? `<iframe src="${playerUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
-      : playerUrl;
+    const normalizedPath = embedPath.endsWith('/') ? embedPath : `${embedPath}/`;
+    const currentUrl = getCurrentPlayerUrl();
+    const shouldIncludeUrl = embedMode === 'current' && Boolean(currentUrl);
+    const playerUrl = `${origin}${normalizedPath}${shouldIncludeUrl ? `#src=${encodeURIComponent(currentUrl)}` : ''}`;
+
+    codeEl.textContent = `<iframe title="${embedTitle}" src="${playerUrl}" width="100%" height="360" style="border:0;aspect-ratio:16/9" allow="autoplay; fullscreen; encrypted-media" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+    updateCodeNote(currentUrl);
   }
 
   function setCopyLabel(label) {
@@ -111,5 +153,30 @@ const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow=
     window.setTimeout(() => {
       labelEl.textContent = original || 'Copy Code';
     }, 1600);
+  }
+
+  function getCurrentPlayerUrl() {
+    const value = urlInput?.value?.trim() || '';
+    if (!value) return '';
+
+    try {
+      const parsed = new URL(value);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? value : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function updateCodeNote(currentUrl) {
+    if (!codeNote) return;
+    const hasSensitiveParams = currentUrl && sensitiveParamPattern.test(currentUrl);
+    const message = hasSensitiveParams
+      ? sensitiveNotice
+      : embedMode === 'current' && !currentUrl
+        ? missingUrlNotice
+        : '';
+
+    codeNote.textContent = message;
+    codeNote.classList.toggle('hidden', !message);
   }
 </script>

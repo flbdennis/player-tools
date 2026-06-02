@@ -1,0 +1,17 @@
+---
+// DASH embed 页面 - 专用于 iframe 分享，不进入 sitemap，不加载广告
+import EmbedLayout from '../../../layouts/EmbedLayout.astro';
+import EmbedPlayer from '../../../components/EmbedPlayer.astro';
+import { dashPlayerPage } from '../../../config/dashPlayer.js';
+
+const pageTitle = 'DASH Embed Player';
+const pageDescription = 'A lightweight noindex iframe player for public or authorized MPEG-DASH MPD streams.';
+const embedPlayer = {
+  ...dashPlayerPage.player,
+  defaultUrl: '',
+};
+---
+
+<EmbedLayout title={pageTitle} description={pageDescription}>
+  <EmbedPlayer player={embedPlayer} embed={dashPlayerPage.embed} />
+</EmbedLayout>

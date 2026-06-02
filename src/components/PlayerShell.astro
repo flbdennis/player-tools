@@ -14,6 +14,8 @@ const playbackLog = player.playbackLog || {};
 const playbackLogNotice = playerShared.playbackLogNotice;
 // Playback Log 说明优先读取页面配置，缺省时使用公共合规说明，保证三类播放器话术一致
 const playbackLogDescription = playbackLog.description || playerShared.playbackLogDescription;
+// Playback Log 可见短提示 - 详细边界放入问号提示，降低日志区高度
+const playbackLogShortDescription = playbackLog.shortDescription || playerShared.playbackLogShortDescription;
 // CORS/访问限制相关诊断文案统一读取公共配置，避免三个播放器页提示不一致
 const corsFixSuggestion = playerShared.corsFixSuggestion;
 const accessBoundaryNotice = playerShared.accessBoundaryNotice;
@@ -115,10 +117,29 @@ const panelTitle = `${playerLabel} playback panel`;
 
   {/* Playback Log 放在播放器组件内部，记录原生 video、hls.js、dash.js 的关键事件 */}
   <div class="mt-3 rounded-xl border border-orange-100 bg-white/78 p-4 shadow-sm shadow-orange-100/50" aria-labelledby="playback-log-title">
-    <h3 id="playback-log-title" class="mb-1.5 text-[18px] font-black tracking-[-0.03em] text-gray-950">{playbackLog.title}</h3>
-    <p class="mb-2 rounded-lg border border-amber-100 bg-amber-50/80 px-3 py-1.5 text-[13px] font-bold leading-snug text-amber-950">
-      {playbackLogDescription}
-    </p>
+    <div class="mb-1.5">
+      <h3 id="playback-log-title" class="relative inline-block pr-3 text-[18px] font-black tracking-[-0.03em] text-gray-950">
+        {playbackLog.title}
+        <span class="group absolute -right-1 -top-1 inline-flex">
+        <button
+          type="button"
+          class="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-transparent text-amber-700/85 transition-colors hover:text-amber-900"
+          aria-label="Playback Log note"
+          aria-describedby="playback-log-detail-tooltip"
+        >
+          <Icon name="HelpCircle" size={14} color="currentColor" strokeWidth={2.3} />
+        </button>
+        <span
+          id="playback-log-detail-tooltip"
+          role="tooltip"
+          class="pointer-events-none absolute left-0 top-7 z-20 w-[270px] rounded-lg border border-amber-100 bg-white px-3 py-2 text-[12px] font-semibold leading-snug text-gray-700 opacity-0 shadow-xl shadow-orange-100/70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 md:w-[360px]"
+        >
+          {playbackLogDescription}
+        </span>
+      </span>
+      </h3>
+    </div>
+    <p class="mb-1.5 text-[12.5px] font-semibold leading-snug text-gray-600">{playbackLogShortDescription}</p>
     <div id="playback-status-summary" class="mb-2 rounded-lg border border-violet-100 bg-violet-50/70 px-3 py-2 text-[13px] font-bold leading-snug text-gray-700">
       <span class="text-violet-700">Status: Ready.</span> Paste a public or authorized link, then click Play to start a diagnostic session.
     </div>

@@ -1,0 +1,17 @@
+---
+// MP4 embed 页面 - 专用于 iframe 分享，不进入 sitemap，不加载广告
+import EmbedLayout from '../../../layouts/EmbedLayout.astro';
+import EmbedPlayer from '../../../components/EmbedPlayer.astro';
+import { mp4PlayerPage } from '../../../config/mp4Player.js';
+
+const pageTitle = 'MP4 Embed Player';
+const pageDescription = 'A lightweight noindex iframe player for public or authorized MP4 video URLs.';
+const embedPlayer = {
+  ...mp4PlayerPage.player,
+  defaultUrl: '',
+};
+---
+
+<EmbedLayout title={pageTitle} description={pageDescription}>
+  <EmbedPlayer player={embedPlayer} embed={mp4PlayerPage.embed} />
+</EmbedLayout>

@@ -114,6 +114,11 @@ export const faqPageGroups = [
           'MetisTools does not intentionally store submitted video URLs on its server. Video URLs are used inside your browser for playback testing, and diagnostic reports filter the source URL.',
       },
       {
+        question: 'Can I embed a private video?',
+        answer:
+          'Yes, if you own it or have permission to share it. The embed player does not hide or proxy the video URL, so use short-lived links and source-side access rules for private or internal content.',
+      },
+      {
         question: 'Can I test copyrighted or restricted content?',
         answer:
           'Only test content you own, manage or are authorized to access. Do not use MetisTools to access, copy, redistribute or test restricted content without permission.',

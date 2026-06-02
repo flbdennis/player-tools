@@ -1,0 +1,17 @@
+---
+// M3U8 embed 页面 - 专用于 iframe 分享，不进入 sitemap，不加载广告
+import EmbedLayout from '../../../layouts/EmbedLayout.astro';
+import EmbedPlayer from '../../../components/EmbedPlayer.astro';
+import { m3u8PlayerPage } from '../../../config/m3u8Player.js';
+
+const pageTitle = 'M3U8 Embed Player';
+const pageDescription = 'A lightweight noindex iframe player for public or authorized M3U8 and HLS streams.';
+const embedPlayer = {
+  ...m3u8PlayerPage.player,
+  defaultUrl: '',
+};
+---
+
+<EmbedLayout title={pageTitle} description={pageDescription}>
+  <EmbedPlayer player={embedPlayer} embed={m3u8PlayerPage.embed} />
+</EmbedLayout>

@@ -165,9 +165,18 @@ const noAdsPages = new Set([
   '404.html',
   'about/index.html',
   'contact/index.html',
+  'embed/dash/index.html',
+  'embed/m3u8/index.html',
+  'embed/mp4/index.html',
   'privacy-policy/index.html',
   'terms/index.html',
   'playback-policy/index.html',
+]);
+const noindexRoutes = new Set([
+  '/404/',
+  '/embed/dash/',
+  '/embed/m3u8/',
+  '/embed/mp4/',
 ]);
 
 const guideArticlePages = pageHtmlFiles.filter((file) => {
@@ -203,7 +212,7 @@ if (exists('public/sitemap.xml')) {
     .sort();
   const indexableDistRoutes = pageHtmlFiles
     .map(routeFromDistHtml)
-    .filter((route) => route !== '/404/')
+    .filter((route) => !noindexRoutes.has(route))
     .sort();
   const missingRoutes = indexableDistRoutes.filter((route) => !sitemapUrls.includes(route));
   const staleRoutes = sitemapUrls.filter((route) => !indexableDistRoutes.includes(route));
@@ -227,6 +236,8 @@ pageHtmlFiles.forEach((file) => {
   const html = fs.readFileSync(file, 'utf8');
   const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
   const is404 = relativePath === '404.html';
+  const route = routeFromDistHtml(file);
+  const isNoindexPage = noindexRoutes.has(route);
   const visibleText = stripNonVisibleHtml(html);
   const hasAdSenseScript = /<script\b[^>]+pagead2\.googlesyndication\.com/i.test(html);
 
@@ -262,9 +273,12 @@ pageHtmlFiles.forEach((file) => {
   if (!/<meta property="og:image:height" content="630"/i.test(html)) fail(`${relativePath} is missing og:image:height.`);
   if (!/<meta name="twitter:image" content="https:\/\/metistools\.com\/og\/default-og\.png"/i.test(html)) fail(`${relativePath} is missing Twitter image.`);
 
-  if (is404) {
-    if (!/<meta name="robots" content="noindex, follow"/i.test(html)) fail('404.html must use noindex, follow.');
-    if (/<link rel="canonical"/i.test(html)) fail('404.html must not output canonical.');
+  if (isNoindexPage) {
+    const expectedRobots = is404 ? 'noindex, follow' : 'noindex, nofollow';
+    if (!new RegExp(`<meta name="robots" content="${expectedRobots}"`, 'i').test(html)) {
+      fail(`${relativePath} must use ${expectedRobots}.`);
+    }
+    if (/<link rel="canonical"/i.test(html)) fail(`${relativePath} must not output canonical.`);
   } else {
     if (!/<link rel="canonical" href="https:\/\/metistools\.com\//i.test(html)) fail(`${relativePath} is missing canonical.`);
     if (!/<meta name="robots" content="index, follow"/i.test(html)) fail(`${relativePath} must be index, follow.`);

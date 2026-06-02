@@ -104,7 +104,7 @@ const routes = listPageFiles(pagesDir)
     file,
     route: routeFromFile(file),
   }))
-  .filter((item) => !excludedRoutes.has(item.route))
+  .filter((item) => !excludedRoutes.has(item.route) && !item.route.startsWith('/embed/'))
   .map((item) => ({
     ...item,
     lastmod: getLastmod(item.route, item.file),

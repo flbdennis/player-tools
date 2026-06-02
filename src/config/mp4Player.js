@@ -128,14 +128,24 @@ export const mp4PlayerPage = {
   },
   // Embed 区域配置 - EmbedCodeBox 读取当前页面路径和按钮文案
   embed: {
-    // 当前工具页路径 - iframe src 和 direct link 基于它生成
+    // 当前工具页路径 - 作为用户查看完整工具页的来源路径
     pagePath: '/mp4-player/',
-    // Embed 区标题 - 提示用户可将播放器嵌入自己的网站
-    title: 'Embed the player on your website',
-    // iframe 模式按钮文案
-    iframeLabel: 'iFrame Embed',
-    // 直接链接模式按钮文案
-    directLabel: 'Direct Link',
+    // 专用嵌入页路径 - iframe 分享必须使用 noindex/禁广告的轻量页面
+    embedPath: '/embed/mp4/',
+    // Embed 区标题 - 简短说明嵌入能力，详细边界交给问号提示
+    title: 'Embed This Player',
+    // Embed 区可见短提示 - 保留核心授权边界
+    shortNotice: playerShared.embedShortNotice,
+    // Embed 区问号提示 - 说明私有/签名 URL 不会被隐藏或代理
+    detailNotice: playerShared.embedDetailNotice,
+    // 空播放器模式按钮文案
+    emptyLabel: 'Empty Player',
+    // 带当前 URL 模式按钮文案
+    currentUrlLabel: 'With Current URL',
+    // 敏感 URL 提醒 - 当前输入包含 token/signature/expires 等参数时显示
+    sensitiveNotice: playerShared.embedSensitiveNotice,
+    // 当前 URL 缺失提醒 - 用户选择带 URL 模式但输入框无有效 URL 时显示
+    missingUrlNotice: playerShared.embedMissingUrlNotice,
     // 复制按钮默认文案
     copyLabel: 'Copy Code',
     // 复制成功后的按钮文案

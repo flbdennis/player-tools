@@ -1,0 +1,270 @@
+---
+// EmbedPlayer 组件 - 专用 iframe 播放器，只处理轻量播放和授权边界提示
+import Icon from './Icon.astro';
+import { playerShared } from '../config/player.js';
+
+const { player, embed } = Astro.props;
+const playerType = player.id || 'm3u8';
+const playerLabel = player.playerLabel || 'video stream';
+const inputPlaceholder = player.inputPlaceholder || 'Paste a video URL here...';
+const pageTitle = `${playerLabel} embed player`;
+---
+
+<main
+  id="metis-embed-player"
+  class="min-h-screen bg-black text-white"
+  data-player-type={playerType}
+  data-player-label={playerLabel}
+  data-sensitive-notice={embed.sensitiveNotice || playerShared.embedSensitiveNotice}
+>
+  <h1 class="sr-only">{pageTitle}</h1>
+
+  <section class="relative flex min-h-screen items-center justify-center bg-black" aria-label={pageTitle}>
+    <video
+      id="metis-embed-video"
+      class="h-screen max-h-screen w-screen bg-black object-contain"
+      controls
+      playsinline
+      preload="metadata"
+    ></video>
+
+    <div
+      id="metis-embed-empty"
+      class="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_50%_30%,rgba(119,71,255,0.22),transparent_38%),linear-gradient(180deg,#0f1018,#050608)] px-4"
+    >
+      <form id="metis-embed-form" class="w-full max-w-[560px] rounded-2xl border border-white/12 bg-white/8 p-4 shadow-2xl shadow-black/40 backdrop-blur-md" novalidate>
+        <div class="mb-3 flex items-center gap-2 text-white">
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/12 text-violet-200">
+            <Icon name="Play" size={17} color="currentColor" fill="currentColor" strokeWidth={1.8} />
+          </span>
+          <div>
+            <strong class="block text-[15px] font-black leading-tight">Load an authorized stream</strong>
+            <span class="text-[12.5px] font-semibold leading-snug text-white/72">{embed.shortNotice || playerShared.embedShortNotice}</span>
+          </div>
+        </div>
+
+        <label class="sr-only" for="metis-embed-url-input">Video URL</label>
+        <div class="flex flex-col gap-2 sm:flex-row">
+          <input
+            id="metis-embed-url-input"
+            name="url"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            placeholder={inputPlaceholder}
+            class="h-10 min-w-0 flex-1 rounded-lg border border-white/14 bg-white px-3 text-[13px] font-semibold text-gray-950 outline-none transition focus:border-violet-300 focus:ring-4 focus:ring-violet-300/20"
+          />
+          <button
+            type="submit"
+            class="inline-flex h-10 min-w-[96px] items-center justify-center rounded-lg bg-white px-4 text-[13px] font-black text-violet-700 transition hover:bg-violet-50"
+          >
+            Load
+          </button>
+        </div>
+
+        <p id="metis-embed-error" class="mt-2 hidden text-[12.5px] font-semibold leading-snug text-red-200">
+          Enter a valid URL that starts with http:// or https://.
+        </p>
+      </form>
+    </div>
+
+    <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/82 via-black/38 to-transparent px-3 pb-2 pt-8">
+      <div class="mx-auto flex max-w-[900px] flex-col gap-1 text-[12px] font-semibold leading-snug text-white/76 sm:flex-row sm:items-end sm:justify-between">
+        <p>{playerShared.embedShortNotice}</p>
+        <p id="metis-embed-status" class="text-white/58">Waiting for a stream URL.</p>
+      </div>
+      <p id="metis-embed-sensitive-note" class="mx-auto mt-1 hidden max-w-[900px] text-[12px] font-semibold leading-snug text-amber-200"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+  // iframe 播放逻辑：只读取 hash 中的 src 参数，不使用 query，避免视频 URL 进入服务器请求路径。
+  const shell = document.getElementById('metis-embed-player');
+  const video = document.getElementById('metis-embed-video');
+  const emptyState = document.getElementById('metis-embed-empty');
+  const form = document.getElementById('metis-embed-form');
+  const input = document.getElementById('metis-embed-url-input');
+  const error = document.getElementById('metis-embed-error');
+  const status = document.getElementById('metis-embed-status');
+  const sensitiveNote = document.getElementById('metis-embed-sensitive-note');
+  const playerType = shell?.dataset.playerType || 'm3u8';
+  const sensitiveNotice = shell?.dataset.sensitiveNotice || '';
+  const sensitiveParamPattern = /(?:^|[?&#;])(token|signature|sig|expires|expiry|auth|key|jwt|access_token|x-amz-signature|x-amz-security-token|policy)=/i;
+  let hlsInstance = null;
+  let dashPlayer = null;
+  let HlsLibrary = null;
+  let dashjsLibrary = null;
+
+  const hashSource = getHashSource();
+  if (hashSource) {
+    if (input) input.value = hashSource;
+    loadSource(hashSource);
+  }
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const value = input?.value?.trim() || '';
+    if (!isValidHttpUrl(value)) {
+      showError();
+      return;
+    }
+
+    hideError();
+    loadSource(value);
+  });
+
+  video?.addEventListener('error', () => {
+    setStatus('The browser could not play this source.', 'error');
+  });
+
+  async function loadSource(source) {
+    if (!video || !isValidHttpUrl(source)) {
+      showError();
+      return;
+    }
+
+    hideError();
+    resetPlayer();
+    emptyState?.classList.add('hidden');
+    updateSensitiveNotice(source);
+    setStatus('Source loaded. Use the video controls to play.', 'ready');
+
+    try {
+      if (playerType === 'mp4') {
+        setupNativeSource(source);
+        return;
+      }
+
+      if (playerType === 'dash') {
+        await setupDashSource(source);
+        return;
+      }
+
+      await setupHlsSource(source);
+    } catch (loadError) {
+      setStatus(loadError?.message || 'This source could not be loaded in the browser.', 'error');
+    }
+  }
+
+  function setupNativeSource(source) {
+    video.src = source;
+    video.load();
+  }
+
+  async function setupHlsSource(source) {
+    if (video.canPlayType('application/vnd.apple.mpegurl') || video.canPlayType('application/x-mpegURL')) {
+      setupNativeSource(source);
+      return;
+    }
+
+    const Hls = await loadHlsLibrary();
+    if (!Hls.isSupported()) {
+      throw new Error('HLS playback is not supported in this browser.');
+    }
+
+    hlsInstance = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 30,
+    });
+    hlsInstance.on(Hls.Events.ERROR, (_, data) => {
+      if (!data?.fatal) return;
+      setStatus('HLS playback failed in this browser session.', 'error');
+      hlsInstance?.destroy();
+      hlsInstance = null;
+    });
+    hlsInstance.attachMedia(video);
+    hlsInstance.loadSource(source);
+  }
+
+  async function setupDashSource(source) {
+    if (!window.MediaSource && !window.ManagedMediaSource) {
+      throw new Error('DASH playback is not supported in this browser.');
+    }
+
+    const dashjs = await loadDashLibrary();
+    dashPlayer = dashjs.MediaPlayer().create();
+    dashPlayer.updateSettings({
+      streaming: {
+        abr: {
+          autoSwitchBitrate: {
+            audio: true,
+            video: true,
+          },
+        },
+      },
+    });
+    dashPlayer.initialize(video, source, false);
+  }
+
+  function resetPlayer() {
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
+
+    if (dashPlayer) {
+      dashPlayer.reset();
+      dashPlayer = null;
+    }
+
+    video?.pause();
+    video?.removeAttribute('src');
+    video?.load();
+  }
+
+  async function loadHlsLibrary() {
+    if (HlsLibrary) return HlsLibrary;
+    const module = await import('hls.js/light');
+    HlsLibrary = module.default;
+    return HlsLibrary;
+  }
+
+  async function loadDashLibrary() {
+    if (dashjsLibrary) return dashjsLibrary;
+    dashjsLibrary = await import('dashjs/playback');
+    return dashjsLibrary;
+  }
+
+  function getHashSource() {
+    const rawHash = window.location.hash.replace(/^#/, '');
+    if (!rawHash) return '';
+
+    const params = new URLSearchParams(rawHash);
+    const source = params.get('src') || '';
+    return isValidHttpUrl(source) ? source : '';
+  }
+
+  function isValidHttpUrl(value) {
+    try {
+      const parsed = new URL(value);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  function updateSensitiveNotice(source) {
+    if (!sensitiveNote) return;
+    const shouldShow = sensitiveParamPattern.test(source);
+    sensitiveNote.textContent = shouldShow ? sensitiveNotice : '';
+    sensitiveNote.classList.toggle('hidden', !shouldShow);
+  }
+
+  function showError() {
+    error?.classList.remove('hidden');
+    setStatus('Waiting for a valid stream URL.', 'error');
+  }
+
+  function hideError() {
+    error?.classList.add('hidden');
+  }
+
+  function setStatus(message, state = 'ready') {
+    if (!status) return;
+    status.textContent = message;
+    status.classList.toggle('text-amber-200', state === 'error');
+    status.classList.toggle('text-white/58', state !== 'error');
+  }
+</script>

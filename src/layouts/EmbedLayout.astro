@@ -1,0 +1,31 @@
+---
+// EmbedLayout 布局 - 只给第三方 iframe 嵌入页使用，不加载 Header、Footer、广告脚本或监控授权弹窗
+import SEO from '../components/SEO.astro';
+import '../styles/global.css';
+
+const {
+  title,
+  description,
+  robots = 'noindex, nofollow',
+  disableCanonical = true,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <SEO
+      title={title}
+      description={description}
+      robots={robots}
+      disableCanonical={disableCanonical}
+    />
+    {/* iframe 播放页不加载 GA/AdSense，减少第三方嵌入场景的隐私和广告合规风险 */}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+  </head>
+  <body class="min-h-screen bg-black antialiased">
+    <slot />
+  </body>
+</html>
