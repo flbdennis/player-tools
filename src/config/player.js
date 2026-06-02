@@ -5,7 +5,7 @@ export const playerShared = {
   // 授权与版权提示 - 全站统一用于首页 Quick Test 和三个播放器页的 PermissionNotice
   // 文案强调“公开或已授权链接”，同时提醒版权和服务条款，符合 AdSense 对原创/授权内容和用户信任的要求
   policyNotice:
-    'Use only public or authorized video links for testing. Respect copyright, privacy, and the source website’s terms of service.',
+    'Test only public or authorized video links. Respect copyright, privacy, and the source site’s terms.',
 
   // Playback Log 标题下方说明 - 合并“日志用途”和“仅供参考”两段说明，减少重复文案并保持用户可读性
   // 文案避免关键词堆砌，直接说明日志用于浏览器侧播放诊断，且结果可能受浏览器、网络、CORS、CDN、DRM、权限和服务端影响
