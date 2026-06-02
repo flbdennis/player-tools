@@ -52,6 +52,13 @@ function getTagCount(html, pattern) {
   return (html.match(pattern) || []).length;
 }
 
+function routeFromDistHtml(file) {
+  const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
+  if (relativePath === 'index.html') return '/';
+  if (relativePath === '404.html') return '/404/';
+  return `/${relativePath.replace(/index\.html$/, '')}`;
+}
+
 function readPngSize(relativePath) {
   const buffer = fs.readFileSync(path.join(rootDir, relativePath));
   if (buffer.length < 24 || buffer.toString('ascii', 1, 4) !== 'PNG') return null;
@@ -138,6 +145,26 @@ const runtimeFiles = listFiles(distDir, (file) => /\.(html|js)$/.test(file));
 const runtimeText = runtimeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
 const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google'));
 
+if (exists('public/sitemap.xml')) {
+  const sitemapText = read('public/sitemap.xml');
+  if (sitemapText.includes('/blog/')) fail('sitemap.xml must not include /blog/ while Blog is disabled.');
+
+  const sitemapUrls = [...sitemapText.matchAll(/<loc>https:\/\/metistools\.com(\/[^<]*)<\/loc>/g)]
+    .map((match) => match[1])
+    .sort();
+  const indexableDistRoutes = pageHtmlFiles
+    .map(routeFromDistHtml)
+    .filter((route) => route !== '/404/')
+    .sort();
+  const missingRoutes = indexableDistRoutes.filter((route) => !sitemapUrls.includes(route));
+  const staleRoutes = sitemapUrls.filter((route) => !indexableDistRoutes.includes(route));
+
+  if (missingRoutes.length > 0) fail(`sitemap.xml is missing routes: ${missingRoutes.join(', ')}`);
+  if (staleRoutes.length > 0) fail(`sitemap.xml includes missing routes: ${staleRoutes.join(', ')}`);
+} else {
+  fail('public/sitemap.xml is missing.');
+}
+
 if (runtimeText.includes('?url=')) {
   fail('dist runtime still contains ?url=. User video URLs must not be written into page URLs.');
 }
@@ -155,6 +182,7 @@ pageHtmlFiles.forEach((file) => {
   if (getTagCount(html, /<title\b/gi) !== 1) fail(`${relativePath} must contain exactly one title tag.`);
   if (getTagCount(html, /<h1\b/gi) !== 1) fail(`${relativePath} must contain exactly one H1.`);
   if (!/<meta name="description" content="[^"]+"/i.test(html)) fail(`${relativePath} is missing meta description.`);
+  if (/<meta name="keywords"/i.test(html)) fail(`${relativePath} must not output meta keywords.`);
   if (!/<meta property="og:image" content="https:\/\/metistools\.com\/og\/default-og\.png"/i.test(html)) fail(`${relativePath} must use the default OG image.`);
   if (!/<meta property="og:image:width" content="1200"/i.test(html)) fail(`${relativePath} is missing og:image:width.`);
   if (!/<meta property="og:image:height" content="630"/i.test(html)) fail(`${relativePath} is missing og:image:height.`);
@@ -163,6 +191,7 @@ pageHtmlFiles.forEach((file) => {
   if (is404) {
     if (!/<meta name="robots" content="noindex, follow"/i.test(html)) fail('404.html must use noindex, follow.');
     if (/<link rel="canonical"/i.test(html)) fail('404.html must not output canonical.');
+    if (html.includes('pagead2.googlesyndication.com')) fail('404.html must not load AdSense.');
   } else {
     if (!/<link rel="canonical" href="https:\/\/metistools\.com\//i.test(html)) fail(`${relativePath} is missing canonical.`);
     if (!/<meta name="robots" content="index, follow"/i.test(html)) fail(`${relativePath} must be index, follow.`);
@@ -183,6 +212,8 @@ if (consentIndex === -1 || gaIndex === -1 || adsenseIndex === -1) {
 }
 if (!indexHtml.includes("window.gtag('set', 'ads_data_redaction', true)")) fail('ads_data_redaction must be enabled.');
 if (!indexHtml.includes('page_location: sanitizedPageLocation')) fail('GA page_location must use sanitizedPageLocation.');
+if (runtimeText.includes('metistoolsCurrentUrl')) fail('runtime must not expose full video URLs on window.metistoolsCurrentUrl.');
+if (runtimeText.includes('detail:{url') || runtimeText.includes('detail: { url')) fail('runtime must not dispatch full video URLs in CustomEvent detail.');
 
 if (failures.length > 0) {
   console.error('Production checks failed:');

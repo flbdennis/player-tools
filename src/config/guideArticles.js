@@ -13,6 +13,8 @@ export const guideArticles = [
     toolHref: '/m3u8-player/',
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
+    datePublished: '2026-06-02',
+    dateModified: '2026-06-02',
   },
   {
     slug: 'what-is-m3u8',
@@ -27,6 +29,8 @@ export const guideArticles = [
     toolHref: '/m3u8-player/',
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
+    datePublished: '2026-06-02',
+    dateModified: '2026-06-02',
   },
   {
     slug: 'm3u8-works-in-vlc-but-not-browser',
@@ -41,6 +45,8 @@ export const guideArticles = [
     toolHref: '/m3u8-player/',
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
+    datePublished: '2026-06-02',
+    dateModified: '2026-06-02',
   },
   {
     slug: 'fix-m3u8-cors-error',
@@ -55,6 +61,8 @@ export const guideArticles = [
     toolHref: '/m3u8-player/',
     toolLabel: 'M3U8 Player Online',
     priority: 'P0',
+    datePublished: '2026-06-02',
+    dateModified: '2026-06-02',
   },
   {
     slug: 'mp4-url-not-playing',
@@ -69,6 +77,8 @@ export const guideArticles = [
     toolHref: '/mp4-player/',
     toolLabel: 'MP4 Player Online',
     priority: 'P1',
+    datePublished: '2026-06-02',
+    dateModified: '2026-06-02',
   },
   {
     slug: 'mpd-test-online',
@@ -83,6 +93,8 @@ export const guideArticles = [
     toolHref: '/dash-player/',
     toolLabel: 'MPEG-DASH Player',
     priority: 'P1',
+    datePublished: '2026-06-02',
+    dateModified: '2026-06-02',
   },
 ];
 

@@ -18,8 +18,6 @@ export const headerNav = [
   },
   // 指南页入口 - 指向真实指南页面或站点指南首页
   { label: 'Guides', href: '/guides/' },
-  // 博客入口 - 指向真实可访问的播放说明文章索引，避免使用占位页
-  { label: 'Blog', href: '/blog/' },
   // 关于页入口 - AdSense 审核需要清晰站点说明
   { label: 'About', href: '/about/' },
   // 联系页入口 - AdSense 审核需要清晰联系方式

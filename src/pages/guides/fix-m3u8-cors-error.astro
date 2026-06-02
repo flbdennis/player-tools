@@ -76,4 +76,28 @@ const article = getGuideArticle('fix-m3u8-cors-error');
     not yours, do not try to bypass the restriction. Ask the content owner for
     an authorized test URL or integration instructions.
   </p>
+
+  <h2>Example Headers to Review</h2>
+  <p>
+    The exact header values depend on your security model. For a public test
+    stream, stream owners often review whether the relevant responses include
+    browser access headers for the player origin.
+  </p>
+  <pre><code>Access-Control-Allow-Origin: https://metistools.com
+Access-Control-Allow-Methods: GET, HEAD
+Access-Control-Allow-Headers: Content-Type
+Content-Type: application/vnd.apple.mpegurl</code></pre>
+  <p>
+    Apply the policy only to sources you control. Do not use a public proxy or
+    bypass service to access someone else’s restricted stream.
+  </p>
+
+  <h2>CORS Review Checklist</h2>
+  <ul>
+    <li>Check the first M3U8 playlist response.</li>
+    <li>Check every variant playlist referenced by the master playlist.</li>
+    <li>Check media segment responses, not only playlist responses.</li>
+    <li>Check key file responses if the stream uses supported encryption.</li>
+    <li>Review redirects, token expiry and CDN cache behavior.</li>
+  </ul>
 </GuideArticleLayout>

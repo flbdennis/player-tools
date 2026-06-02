@@ -1,28 +1,71 @@
 ---
-// FAQ 页面 - 独立 FAQ 页面，复用首页 FAQ 数据并覆盖全站核心合规问题
+// FAQ 页面 - 独立 FAQ 页面，覆盖工具使用、隐私、版权和排障边界，避免复用首页 FAQ
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../config/site.js';
-import { faq } from '../config/home.js';
+import { faqPageGroups, faqPageItems } from '../config/faqPage.js';
 import Container from '../components/Container.astro';
 import FaqAccordion from '../components/FaqAccordion.astro';
 
 const pageTitle = 'Video Player Tools FAQ';
 const pageDescription = `Frequently asked questions about ${site.name} M3U8, MP4 and MPEG-DASH player tools, Playback Log, browser limits and authorized video link testing.`;
 const canonical = `${site.domain}/faq/`;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqPageItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: `${site.domain}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'FAQ',
+        item: canonical,
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout
   title={pageTitle}
   description={pageDescription}
   canonical={canonical}
+  jsonLd={jsonLd}
 >
   <Container class="py-16 md:py-24">
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-4xl mx-auto">
       <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-10 text-center">
         Video Player Tools FAQ
       </h1>
 
-      <FaqAccordion title={faq.title} items={faq.items} idPrefix="faq-page" class="mx-auto" />
+      <div class="space-y-6">
+        {faqPageGroups.map((group, index) => (
+          <FaqAccordion
+            title={group.title}
+            items={group.items}
+            idPrefix={`faq-page-${index}`}
+            class="mx-auto"
+          />
+        ))}
+      </div>
     </div>
   </Container>
 </BaseLayout>

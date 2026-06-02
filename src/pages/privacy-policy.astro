@@ -14,6 +14,7 @@ const canonical = `${site.domain}/privacy-policy/`;
   title={pageTitle}
   description={pageDescription}
   canonical={canonical}
+  enableAds={false}
 >
   <Container class="py-16 md:py-24">
     <div class="max-w-3xl mx-auto">
@@ -22,7 +23,7 @@ const canonical = `${site.domain}/privacy-policy/`;
       </h1>
 
       <div class="text-gray-600 space-y-6">
-        <p class="text-sm text-gray-400">Last updated: May 31, 2026</p>
+        <p class="text-sm text-gray-400">Last updated: June 2, 2026</p>
 
         <p>
           This Privacy Policy explains how {site.name} handles technical data,
@@ -52,9 +53,11 @@ const canonical = `${site.domain}/privacy-policy/`;
           website’s terms of service.
         </p>
         <p>
-          Playback diagnostics and optional error monitoring are configured to
-          filter video URLs before diagnostic data is sent. Do not paste private,
-          confidential or unauthorized video links into the tools.
+          We do not intentionally store submitted video URLs on our server.
+          Playback diagnostics, copied reports and optional error monitoring are
+          configured to filter source URLs before diagnostic data is shared
+          outside your browser. Do not paste private, confidential or
+          unauthorized video links into the tools.
         </p>
 
         <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
@@ -94,6 +97,11 @@ const canonical = `${site.domain}/privacy-policy/`;
           providers. You may review Google’s advertising and privacy controls in
           your Google account and browser settings.
         </p>
+        <p>
+          We do not sell personal information. Third-party advertising and
+          analytics providers process data according to their own policies and
+          controls.
+        </p>
 
         <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
           5. Optional Error Monitoring
@@ -110,6 +118,22 @@ const canonical = `${site.domain}/privacy-policy/`;
           Video URLs entered into the player tools are filtered before error
           data is sent. Session replay is disabled. You can keep optional error
           monitoring disabled and continue using all tools normally.
+        </p>
+
+        <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
+          6. Data Retention and Deletion Requests
+        </h2>
+        <p>
+          We keep only the limited information needed for analytics,
+          advertising, security, debugging and site operation as handled by the
+          third-party services described above. Retention periods may vary based
+          on each service’s settings and policies.
+        </p>
+        <p>
+          If you contact us about privacy, deletion or data handling questions,
+          we will review your request based on the information reasonably
+          available to us. Because the tools do not require accounts, we may not
+          be able to identify browser-only activity without details you provide.
         </p>
 
         <div class="rounded-2xl border border-orange-100 bg-white/80 p-5 shadow-sm shadow-orange-100/60">
@@ -130,7 +154,7 @@ const canonical = `${site.domain}/privacy-policy/`;
         </div>
 
         <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
-          6. European Advertising Consent
+          7. European Advertising Consent
         </h2>
         <p>
           If advertising consent is required for users in the European Economic
@@ -142,7 +166,7 @@ const canonical = `${site.domain}/privacy-policy/`;
         </p>
 
         <h2 class="text-xl font-semibold text-gray-900 mt-8 mb-4">
-          7. Contact
+          8. Contact
         </h2>
         <p>
           If you have any questions about this privacy policy, please contact

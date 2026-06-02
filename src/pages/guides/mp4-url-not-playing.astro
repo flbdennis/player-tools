@@ -79,4 +79,28 @@ const article = getGuideArticle('mp4-url-not-playing');
     or <a href="/guides/mpd-test-online/">how to test an MPD manifest online</a>.
     Each format has different browser requirements.
   </p>
+
+  <h2>Example MP4 Response Headers</h2>
+  <p>
+    When you own the source, response headers can explain why a browser accepts
+    or rejects an MP4 URL. The exact values depend on your server, but these are
+    common details to review.
+  </p>
+  <pre><code>Content-Type: video/mp4
+Accept-Ranges: bytes
+Content-Length: 24839120
+Access-Control-Allow-Origin: https://metistools.com</code></pre>
+  <p>
+    If the server returns HTML or a JSON error with a video-looking URL, the
+    player still cannot treat it as a direct MP4 file.
+  </p>
+
+  <h2>MP4 Browser Playback Checklist</h2>
+  <ul>
+    <li>Confirm the URL returns a real MP4 file, not a webpage.</li>
+    <li>Check MIME type, codec support and HTTPS consistency.</li>
+    <li>Verify byte Range support for larger files.</li>
+    <li>Check whether the link is expired, signed or private.</li>
+    <li>Use the Playback Log as a browser-side clue, not a complete server diagnosis.</li>
+  </ul>
 </GuideArticleLayout>

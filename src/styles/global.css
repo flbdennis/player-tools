@@ -169,6 +169,33 @@ img[data-fallback-applied='true'] {
   font-weight: 800;
 }
 
+.guide-prose pre {
+  overflow-x: auto;
+  border: 1px solid rgba(231, 168, 112, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(77, 50, 28, 0.04);
+}
+
+.guide-prose pre code {
+  background: transparent;
+  padding: 0;
+  color: #303747;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.65;
+}
+
+.guide-prose ul {
+  padding-left: 1.2rem;
+  list-style: disc;
+}
+
+.guide-prose li + li {
+  margin-top: 0.45rem;
+}
+
 @media (max-width: 767px) {
   .mt-container,
   .mt-hero-container,

@@ -82,4 +82,28 @@ const article = getGuideArticle('mpd-test-online');
     If you are testing a single MP4 file, use the
     <a href="/mp4-player/">MP4 Player Online</a> instead.
   </p>
+
+  <h2>Example MPD Checks</h2>
+  <p>
+    A basic MPD test should confirm that the manifest loads, segment URLs
+    resolve and the browser supports the declared codecs. If the MPD references
+    relative paths, test the final resolved segment URLs as well.
+  </p>
+  <pre><code>[INFO] Loading DASH manifest
+[INFO] Manifest parsed
+[WARNING] Segment request blocked or unavailable
+[ERROR] Browser could not start DASH playback</code></pre>
+  <p>
+    When this happens, inspect the segment request rather than only the MPD
+    request. Many DASH failures happen after the manifest is already parsed.
+  </p>
+
+  <h2>DASH Test Checklist</h2>
+  <ul>
+    <li>Use the direct MPD manifest URL, not a webpage URL.</li>
+    <li>Check initialization segment and media segment access.</li>
+    <li>Review codec declarations and browser support.</li>
+    <li>Confirm whether DRM or license server authorization is required.</li>
+    <li>Compare Playback Log events with CDN or origin logs.</li>
+  </ul>
 </GuideArticleLayout>

@@ -81,4 +81,29 @@ const article = getGuideArticle('how-to-test-m3u8-stream-online');
     explanation of browser-specific failures, read
     <a href="/guides/m3u8-works-in-vlc-but-not-browser/">why an M3U8 stream can work in VLC but not in the browser</a>.
   </p>
+
+  <h2>Example Playback Log Signals</h2>
+  <p>
+    A healthy browser-side test usually shows metadata or playback events after
+    the playlist loads. A blocked test may show network or media errors before
+    the player reaches a ready state.
+  </p>
+  <pre><code>[INFO] Loading HLS stream
+[INFO] Manifest parsed
+[INFO] Media metadata loaded
+[SUCCESS] Playback started</code></pre>
+  <p>
+    If the log stops around manifest or fragment loading, check the browser
+    network panel for the exact request that failed. That request is often more
+    useful than the original URL alone.
+  </p>
+
+  <h2>Quick HLS Test Checklist</h2>
+  <ul>
+    <li>Use the direct M3U8 playlist URL, not a normal webpage URL.</li>
+    <li>Confirm the link is public or authorized for browser playback.</li>
+    <li>Check the master playlist, variant playlist and segment requests.</li>
+    <li>Verify HTTPS, CORS headers, codec support and token expiry.</li>
+    <li>Compare the Playback Log with your server or CDN logs.</li>
+  </ul>
 </GuideArticleLayout>

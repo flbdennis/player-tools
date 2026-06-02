@@ -30,6 +30,8 @@ const jsonLd = [
     },
     mainEntityOfPage: canonical,
     image: `${site.domain}${defaultSeo.ogImage}`,
+    datePublished: article.datePublished,
+    dateModified: article.dateModified,
   },
   {
     '@context': 'https://schema.org',
@@ -82,6 +84,9 @@ const jsonLd = [
         </h1>
         <p class="mt-4 text-lg font-medium leading-relaxed text-gray-600">
           {article.summary}
+        </p>
+        <p class="mt-3 text-sm font-semibold text-gray-500">
+          Last updated: {article.dateModified}
         </p>
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
           <Button href={article.toolHref} variant="primary">{article.toolLabel}</Button>

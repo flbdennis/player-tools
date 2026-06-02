@@ -1158,8 +1158,12 @@ const panelTitle = `${playerLabel} playback panel`;
   }
 
   function updateEmbedData(url) {
-    window.metistoolsCurrentUrl = url;
-    window.dispatchEvent(new CustomEvent('metistools:url-change', { detail: { url } }));
+    window.dispatchEvent(new CustomEvent('metistools:url-change', {
+      detail: {
+        hasUrl: Boolean(url),
+        urlType: detectUrlType(url),
+      },
+    }));
   }
 
   function clearPlaybackLog() {

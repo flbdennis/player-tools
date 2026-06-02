@@ -16,6 +16,7 @@ const {
   noindex = false,
   robots,
   disableCanonical = false,
+  enableAds = true,
 } = Astro.props;
 ---
 
@@ -66,12 +67,16 @@ const {
         page_title: document.title,
       });
     </script>
-    {/* Google AdSense - 审核前只接入官方脚本，不展示假广告位 */}
-    <script
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.googleAdsenseId}`}
-      crossorigin="anonymous"
-    ></script>
+    {enableAds && (
+      <>
+        {/* Google AdSense - 审核前只接入官方脚本，不展示假广告位 */}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${site.googleAdsenseId}`}
+          crossorigin="anonymous"
+        ></script>
+      </>
+    )}
   </head>
   <body class="min-h-screen antialiased">
     <Header />

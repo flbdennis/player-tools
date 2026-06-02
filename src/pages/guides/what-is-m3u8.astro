@@ -78,4 +78,30 @@ const article = getGuideArticle('what-is-m3u8');
     the right test page matters because each format has different loading
     behavior and different failure points.
   </p>
+
+  <h2>What a Simple M3U8 Playlist Can Look Like</h2>
+  <p>
+    M3U8 is plain text. A small media playlist may point to several segment
+    files and tell the player how long each segment is expected to last.
+  </p>
+  <pre><code>#EXTM3U
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:100
+#EXTINF:6.000,
+segment100.ts
+#EXTINF:6.000,
+segment101.ts</code></pre>
+  <p>
+    A master playlist can instead point to multiple variants. If one variant or
+    segment URL is blocked, browser playback may fail even when the first
+    playlist loads correctly.
+  </p>
+
+  <h2>Common Files Behind One M3U8 Test</h2>
+  <ul>
+    <li>Master playlist: lists available bitrate or resolution variants.</li>
+    <li>Variant playlist: lists the media segments for one rendition.</li>
+    <li>Media segments: the actual video and audio chunks.</li>
+    <li>Key files: optional encryption keys for streams that use supported HLS encryption.</li>
+  </ul>
 </GuideArticleLayout>

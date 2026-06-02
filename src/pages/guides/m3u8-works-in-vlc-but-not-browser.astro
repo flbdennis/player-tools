@@ -81,4 +81,26 @@ const article = getGuideArticle('m3u8-works-in-vlc-but-not-browser');
     with a clean test in the M3U8 player and compare the Playback Log with your
     server or CDN logs.
   </p>
+
+  <h2>Browser Checks to Compare With VLC</h2>
+  <ul>
+    <li>Does the M3U8 URL use HTTPS when the page is HTTPS?</li>
+    <li>Do playlist, segment and key responses allow the browser origin?</li>
+    <li>Are the video and audio codecs supported by the browser and device?</li>
+    <li>Does the URL require cookies, referrer rules or a signed user session?</li>
+    <li>Does the stream require DRM or a license server flow?</li>
+  </ul>
+
+  <h2>Example Difference in Failure Signals</h2>
+  <p>
+    VLC may simply play the URL, while the browser may show a network or media
+    error. A typical browser-side clue might look like this:
+  </p>
+  <pre><code>[INFO] Loading HLS stream
+[WARNING] Manifest request completed but segment access failed
+[ERROR] Browser could not continue playback</code></pre>
+  <p>
+    Use this kind of signal to inspect the failing request, then confirm the
+    corresponding response in your CDN or origin logs.
+  </p>
 </GuideArticleLayout>
