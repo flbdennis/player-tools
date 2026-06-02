@@ -98,6 +98,12 @@ if (!exists('public/og/default-og.png')) {
   }
 }
 
+// 核心插图体积检查：避免重新替换图片后拖慢首屏和移动端体验
+if (exists('public/imgs/m3u8_1.webp')) {
+  const imageSize = fs.statSync(path.join(rootDir, 'public/imgs/m3u8_1.webp')).size;
+  if (imageSize > 200 * 1024) fail('public/imgs/m3u8_1.webp should stay under 200KB.');
+}
+
 // _headers 路径检查：避免写入不存在资源或大小写错误路径
 if (!exists('public/_headers')) {
   fail('public/_headers is missing.');
@@ -144,6 +150,36 @@ const htmlFiles = listFiles(distDir, (file) => file.endsWith('.html'));
 const runtimeFiles = listFiles(distDir, (file) => /\.(html|js)$/.test(file));
 const runtimeText = runtimeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
 const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google'));
+const noAdsPages = new Set([
+  '404.html',
+  'about/index.html',
+  'contact/index.html',
+  'privacy-policy/index.html',
+  'terms/index.html',
+  'playback-policy/index.html',
+]);
+
+const guideArticlePages = pageHtmlFiles.filter((file) => {
+  const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
+  return relativePath.startsWith('guides/') && relativePath !== 'guides/index.html';
+});
+if (guideArticlePages.length < 6) fail(`Guide article count is too low: ${guideArticlePages.length}. Keep at least 6 guide pages before AdSense review.`);
+
+if (exists('src/config/faqPage.js')) {
+  const faqSource = read('src/config/faqPage.js');
+  const faqQuestionCount = (faqSource.match(/question:\s*'/g) || []).length;
+  if (faqQuestionCount < 20) fail(`FAQ page item count is too low: ${faqQuestionCount}. Keep at least 20 substantial FAQ items.`);
+} else {
+  fail('src/config/faqPage.js is missing.');
+}
+
+if (exists('src/components/PlayerShell.astro')) {
+  const playerShellSource = read('src/components/PlayerShell.astro');
+  if (!playerShellSource.includes('hasSensitiveUrlParams')) fail('PlayerShell must filter signed or tokenized URLs before sessionStorage writes.');
+  if (/localStorage\.(?:getItem|setItem|removeItem)\(\s*playerUrlStorageKey/.test(playerShellSource)) {
+    fail('Player URL storage must not use localStorage.');
+  }
+}
 
 if (exists('public/sitemap.xml')) {
   const sitemapText = read('public/sitemap.xml');
@@ -171,12 +207,23 @@ if (runtimeText.includes('?url=')) {
 
 pageHtmlFiles.forEach((file) => {
   const html = fs.readFileSync(file, 'utf8');
-  const relativePath = path.relative(distDir, file);
+  const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
   const is404 = relativePath === '404.html';
   const visibleText = stripNonVisibleHtml(html);
+  const hasAdSenseScript = html.includes('pagead2.googlesyndication.com');
 
   if (/[一-龥]/.test(visibleText)) {
     fail(`${relativePath} contains visible Chinese text.`);
+  }
+
+  if (noAdsPages.has(relativePath) && hasAdSenseScript) {
+    fail(`${relativePath} must not load AdSense.`);
+  }
+  if (/\b(?:Leaderboard|Content Middle|Footer Banner|Advertisement placeholder|Ad placeholder|fake ad)\b/i.test(visibleText)) {
+    fail(`${relativePath} contains visible fake ad placeholder text.`);
+  }
+  if (/\b728\s*(?:x|×)\s*90\b/i.test(visibleText)) {
+    fail(`${relativePath} contains visible ad-size placeholder text.`);
   }
 
   if (getTagCount(html, /<title\b/gi) !== 1) fail(`${relativePath} must contain exactly one title tag.`);
@@ -191,7 +238,6 @@ pageHtmlFiles.forEach((file) => {
   if (is404) {
     if (!/<meta name="robots" content="noindex, follow"/i.test(html)) fail('404.html must use noindex, follow.');
     if (/<link rel="canonical"/i.test(html)) fail('404.html must not output canonical.');
-    if (html.includes('pagead2.googlesyndication.com')) fail('404.html must not load AdSense.');
   } else {
     if (!/<link rel="canonical" href="https:\/\/metistools\.com\//i.test(html)) fail(`${relativePath} is missing canonical.`);
     if (!/<meta name="robots" content="index, follow"/i.test(html)) fail(`${relativePath} must be index, follow.`);
@@ -214,6 +260,7 @@ if (!indexHtml.includes("window.gtag('set', 'ads_data_redaction', true)")) fail(
 if (!indexHtml.includes('page_location: sanitizedPageLocation')) fail('GA page_location must use sanitizedPageLocation.');
 if (runtimeText.includes('metistoolsCurrentUrl')) fail('runtime must not expose full video URLs on window.metistoolsCurrentUrl.');
 if (runtimeText.includes('detail:{url') || runtimeText.includes('detail: { url')) fail('runtime must not dispatch full video URLs in CustomEvent detail.');
+if (/text-\[(?:8|8\.5|9|10|10\.5|11|11\.5)px\]/.test(runtimeText)) fail('runtime contains explicit text size below 12px.');
 
 if (failures.length > 0) {
   console.error('Production checks failed:');

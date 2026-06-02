@@ -246,7 +246,7 @@ const panelTitle = `${playerLabel} playback panel`;
 
   const legacyUrl = new URLSearchParams(window.location.search).get('url') || '';
   if (legacyUrl) {
-    // 兼容旧版 ?url= 分享链接：读取一次后立即清理地址栏，避免视频地址进入历史记录、截图或后续统计。
+    // 兼容旧版 ?url= 分享链接：读取一次后立即清理地址栏；如果包含签名参数，只在本次内存状态使用，不写入会话存储。
     setStoredPlayerUrl(legacyUrl);
     clearUrlFromAddressBar();
   }
@@ -1137,9 +1137,44 @@ const panelTitle = `${playerLabel} playback panel`;
     }
   }
 
+  function hasSensitiveUrlParams(value) {
+    const sensitiveParamNames = [
+      'access_token',
+      'auth',
+      'authorization',
+      'credential',
+      'expires',
+      'expire',
+      'jwt',
+      'key',
+      'policy',
+      'session',
+      'sig',
+      'signature',
+      'token',
+      'x-amz-credential',
+      'x-amz-security-token',
+      'x-amz-signature',
+    ];
+
+    const lowerValue = String(value || '').toLowerCase();
+    if (!lowerValue) return false;
+
+    try {
+      const parsedUrl = new URL(value);
+      for (const key of parsedUrl.searchParams.keys()) {
+        if (sensitiveParamNames.includes(key.toLowerCase())) return true;
+      }
+    } catch {
+      // 非标准 URL 已被表单校验拦截；这里保留字符串兜底，避免异常影响输入体验。
+    }
+
+    return sensitiveParamNames.some((name) => lowerValue.includes(`${name.toLowerCase()}=`));
+  }
+
   function setStoredPlayerUrl(value) {
     try {
-      if (value) {
+      if (value && !hasSensitiveUrlParams(value)) {
         window.sessionStorage.setItem(playerUrlStorageKey, value);
       } else {
         window.sessionStorage.removeItem(playerUrlStorageKey);
