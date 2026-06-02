@@ -21,7 +21,7 @@ import Container from './Container.astro';
             loading="lazy"
           />
         </a>
-        <p class="text-[12px] font-medium text-gray-600 leading-snug max-w-[230px]">
+        <p class="text-[13px] font-medium text-gray-600 leading-snug max-w-[250px]">
           Free browser-based video player tools for testing public or authorized M3U8, MP4 and MPEG-DASH links.
         </p>
         {/* 只展示真实可用的联系入口，避免假社交账号影响审核 */}
@@ -36,36 +36,36 @@ import Container from './Container.astro';
 
       {/* Footer 导航分组全部来自配置，保证不会出现无效链接 */}
       <div class="col-span-1 md:col-span-2">
-        <h3 class="text-[12px] font-extrabold text-gray-950 mb-2">{footerNav.tools.title}</h3>
+        <h3 class="text-[13px] font-extrabold text-gray-950 mb-2">{footerNav.tools.title}</h3>
         <ul class="space-y-1">
           {footerNav.tools.links.map((link) => (
-            <li><a href={link.href} class="text-[12px] font-semibold text-gray-600 hover:text-violet-700 transition-colors">{link.label}</a></li>
+            <li><a href={link.href} class="text-[13px] font-semibold text-gray-600 hover:text-violet-700 transition-colors">{link.label}</a></li>
           ))}
         </ul>
       </div>
 
       <div class="col-span-1 md:col-span-2">
-        <h3 class="text-[12px] font-extrabold text-gray-950 mb-2">{footerNav.guides.title}</h3>
+        <h3 class="text-[13px] font-extrabold text-gray-950 mb-2">{footerNav.guides.title}</h3>
         <ul class="space-y-1">
           {footerNav.guides.links.map((link) => (
-            <li><a href={link.href} class="text-[12px] font-semibold text-gray-600 hover:text-violet-700 transition-colors">{link.label}</a></li>
+            <li><a href={link.href} class="text-[13px] font-semibold text-gray-600 hover:text-violet-700 transition-colors">{link.label}</a></li>
           ))}
         </ul>
       </div>
 
       <div class="col-span-1 md:col-span-2">
-        <h3 class="text-[12px] font-extrabold text-gray-950 mb-2">{footerNav.about.title}</h3>
+        <h3 class="text-[13px] font-extrabold text-gray-950 mb-2">{footerNav.about.title}</h3>
         <ul class="space-y-1">
           {footerNav.about.links.map((link) => (
-            <li><a href={link.href} class="text-[12px] font-semibold text-gray-600 hover:text-violet-700 transition-colors">{link.label}</a></li>
+            <li><a href={link.href} class="text-[13px] font-semibold text-gray-600 hover:text-violet-700 transition-colors">{link.label}</a></li>
           ))}
         </ul>
       </div>
 
       <div class="col-span-1 md:col-span-3">
-        <h3 class="text-[12px] font-extrabold text-gray-950 mb-2">Contact</h3>
-        <p class="text-[12px] font-semibold text-gray-600 leading-relaxed mb-1">Questions or suggestions?</p>
-        <a href={`mailto:${site.email}`} class="text-[12px] font-bold text-gray-700 hover:text-violet-700 transition-colors break-all">
+        <h3 class="text-[13px] font-extrabold text-gray-950 mb-2">Contact</h3>
+        <p class="text-[13px] font-semibold text-gray-600 leading-snug mb-1">Questions or suggestions?</p>
+        <a href={`mailto:${site.email}`} class="text-[13px] font-bold text-gray-700 hover:text-violet-700 transition-colors break-all">
           {site.email}
         </a>
       </div>
@@ -73,7 +73,7 @@ import Container from './Container.astro';
 
     {/* 版权信息不能裁切，保持自然高度以确保审核和可信度 */}
     <div class="pt-4 text-center">
-      <p class="text-[11px] font-medium text-gray-500">© 2024 {site.name}. All rights reserved.</p>
+      <p class="text-[12px] font-medium text-gray-500">© 2024 {site.name}. All rights reserved.</p>
     </div>
   </Container>
 </footer>

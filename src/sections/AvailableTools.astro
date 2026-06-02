@@ -16,20 +16,20 @@ import Container from '../components/Container.astro';
       {tools.map((tool) => {
         const color = availableTools.colors[tool.id];
         return (
-          <Card class="group flex min-h-[160px] flex-col items-center text-center px-4 py-4 md:min-h-[228px] md:px-5 md:py-5" hover={true}>
+          <Card class="group flex min-h-[170px] flex-col items-center text-center px-4 py-4 md:min-h-[218px] md:px-5 md:py-5" hover={true}>
             {/* 工具图标以 Lucide Play 统一绘制，渐变色按工具类型配置 */}
             <div
-              class="mt-icon-tile mb-3 h-[42px] w-[42px] rounded-xl transition-transform duration-300 group-hover:scale-110 md:mb-4 md:h-[55px] md:w-[55px]"
+              class="mt-icon-tile mb-2.5 h-[40px] w-[40px] rounded-xl transition-transform duration-300 group-hover:scale-110 md:mb-3 md:h-[50px] md:w-[50px]"
               style={`background: linear-gradient(135deg, ${color.from}, ${color.to});`}
             >
               <Icon name={tool.icon} size={21} color="white" fill="white" strokeWidth={1.8} class="md:hidden" /><Icon name={tool.icon} size={26} color="white" fill="white" strokeWidth={1.8} class="hidden md:block" />
             </div>
 
-            <h3 class="mb-1.5 text-[15px] md:mb-2 md:text-[18px] font-black leading-tight tracking-[-0.03em] text-gray-950">{tool.name}</h3>
-            <p class="mb-2 flex-grow text-[10px] font-semibold leading-[1.45] text-gray-700 md:mb-3 md:text-[12px] md:leading-[1.55]">
+            <h3 class="mb-1.5 text-[15px] md:mb-1.5 md:text-[18px] font-black leading-tight tracking-[-0.03em] text-gray-950">{tool.name}</h3>
+            <p class="mb-2 flex-grow text-[13px] font-semibold leading-snug text-gray-700 md:mb-2.5 md:text-[14px]">
               {tool.description}
             </p>
-            <a href={tool.href} class="inline-flex items-center gap-1.5 text-[11px] font-extrabold transition-colors md:gap-2 md:text-[14px]" style={`color: ${color.text};`}>
+            <a href={tool.href} class="inline-flex items-center gap-1.5 text-[13px] font-extrabold transition-colors md:gap-2 md:text-[14px]" style={`color: ${color.text};`}>
               {availableTools.ctaLabel}
               <Icon name="ArrowRight" size={15} strokeWidth={2.6} />
             </a>

@@ -6,37 +6,37 @@ const pagePath = embed.pagePath || '/m3u8-player/';
 const defaultEmbedCode = `<iframe src="https://metistools.com${pagePath}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
 ---
 
-<section class="mt-card px-5 py-3 md:px-5 md:py-3" aria-labelledby="embed-title" data-page-path={pagePath} id="embed-code-panel">
+<section class="mt-card px-4 py-3 md:px-5 md:py-3" aria-labelledby="embed-title" data-page-path={pagePath} id="embed-code-panel">
   <div class="mb-2 flex items-center justify-between gap-3">
     <h2 id="embed-title" class="text-[16px] font-black tracking-[-0.02em] text-gray-950">{embed.title}</h2>
   </div>
 
-  <div class="flex flex-col gap-3 md:flex-row md:items-center">
-    <div class="flex gap-2">
+  <div class="flex flex-col gap-2.5 md:flex-row md:items-center">
+    <div class="flex gap-1.5">
       <button
         type="button"
         data-embed-mode="iframe"
-        class="embed-mode-btn active inline-flex h-[30px] min-w-[90px] items-center justify-center rounded-md border border-violet-200 bg-violet-50 px-3 text-[11px] font-extrabold text-violet-700 transition-colors"
+        class="embed-mode-btn active inline-flex h-[30px] min-w-[90px] items-center justify-center rounded-md border border-violet-200 bg-violet-50 px-3 text-[13px] font-extrabold text-violet-700 transition-colors"
       >
         {embed.iframeLabel}
       </button>
       <button
         type="button"
         data-embed-mode="direct"
-        class="embed-mode-btn inline-flex h-[30px] min-w-[86px] items-center justify-center rounded-md border border-orange-100 bg-white px-3 text-[11px] font-extrabold text-gray-800 transition-colors hover:text-violet-700"
+        class="embed-mode-btn inline-flex h-[30px] min-w-[86px] items-center justify-center rounded-md border border-orange-100 bg-white px-3 text-[13px] font-extrabold text-gray-800 transition-colors hover:text-violet-700"
       >
         {embed.directLabel}
       </button>
     </div>
 
-    <code id="embed-code" class="min-h-[30px] flex-1 overflow-hidden rounded-md border border-orange-100 bg-white/90 px-4 py-2 text-[10.5px] font-semibold leading-relaxed text-gray-600 shadow-inner shadow-orange-50/70 md:truncate">
+    <code id="embed-code" class="min-h-[30px] flex-1 overflow-hidden rounded-md border border-orange-100 bg-white/90 px-3 py-1.5 text-[12px] font-semibold leading-snug text-gray-600 shadow-inner shadow-orange-50/70 md:truncate">
       {defaultEmbedCode}
     </code>
 
     <button
       type="button"
       id="copy-embed-code"
-      class="inline-flex h-[34px] min-w-[92px] items-center justify-center gap-1.5 rounded-lg bg-[linear-gradient(90deg,#5a37ff_0%,#7a2cff_55%,#9f22ff_100%)] px-4 text-[11px] font-extrabold text-white shadow-lg shadow-violet-200/70 transition-all hover:shadow-xl"
+      class="inline-flex h-[32px] min-w-[92px] items-center justify-center gap-1.5 rounded-lg bg-[linear-gradient(90deg,#5a37ff_0%,#7a2cff_55%,#9f22ff_100%)] px-4 text-[13px] font-extrabold text-white shadow-lg shadow-violet-200/70 transition-all hover:shadow-xl"
     >
       <Icon name="Clipboard" size={14} color="white" strokeWidth={2.3} />
       <span>{embed.copyLabel}</span>

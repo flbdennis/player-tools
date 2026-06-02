@@ -12,7 +12,7 @@ import Container from '../components/Container.astro';
       {/* 左侧文案区：宽度、行高和按钮尺寸按设计图首屏比例设置 */}
       <div class="order-2 md:order-1 max-w-[464px]">
         <div class="inline-flex items-center rounded-full bg-violet-100/75 px-3 py-1.5 mb-3 shadow-sm shadow-violet-100 md:px-4 md:py-2 md:mb-4">
-          <span class="text-[10px] md:text-[14px] font-extrabold text-violet-700 leading-none">{hero.badge}</span>
+          <span class="text-[12px] md:text-[14px] font-extrabold text-violet-700 leading-none">{hero.badge}</span>
         </div>
 
         {/* H1 - 首页唯一主标题，英文文案从配置读取，重点词使用设计图紫色渐变 */}
@@ -21,19 +21,19 @@ import Container from '../components/Container.astro';
           <span>{hero.titleSecondLine}</span>
         </h1>
 
-        <p class="text-[11px] min-[390px]:text-[12px] md:text-[15px] font-semibold text-gray-800 leading-[1.55] mb-4 md:mb-6 max-w-[435px]">
+        <p class="text-[13px] md:text-[15px] font-semibold text-gray-800 leading-snug md:leading-[1.55] mb-4 md:mb-6 max-w-[435px]">
           {hero.description}
         </p>
 
         {/* CTA 按钮均使用 Button 组件，避免页面直接写按钮元素 */}
         <div class="flex flex-nowrap items-center gap-2 mb-4 md:flex-wrap md:gap-4 md:mb-6">
-          <Button href={hero.primaryCta.href} variant="primary" size="lg" class="h-[36px] min-w-0 flex-1 px-3 text-[11px] md:min-w-[145px] md:flex-none md:h-[45px] md:px-7 md:text-base">
+          <Button href={hero.primaryCta.href} variant="primary" size="lg" class="h-[36px] min-w-0 flex-1 px-3 py-0 text-[13px] md:min-w-[145px] md:flex-none md:h-[45px] md:px-7 md:text-base">
             {hero.primaryCta.label}
             <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-violet-700 md:h-6 md:w-6">
               <Icon name="ArrowRight" size={15} strokeWidth={2.8} />
             </span>
           </Button>
-          <Button href={hero.secondaryCta.href} variant="secondary" size="lg" class="h-[36px] min-w-0 flex-1 px-3 text-[11px] md:min-w-[184px] md:flex-none md:h-[45px] md:px-7 md:text-base">
+          <Button href={hero.secondaryCta.href} variant="secondary" size="lg" class="h-[36px] min-w-0 flex-1 px-3 py-0 text-[13px] md:min-w-[184px] md:flex-none md:h-[45px] md:px-7 md:text-base">
             {hero.secondaryCta.label}
             <Icon name="CirclePlay" size={18} strokeWidth={2.4} />
           </Button>
@@ -42,7 +42,7 @@ import Container from '../components/Container.astro';
         {/* 特性标签：图标、颜色和文案都来自配置，贴近设计图四个胶囊标签 */}
         <div class="grid grid-cols-4 gap-1.5 md:flex md:flex-wrap md:gap-2">
           {hero.chips.map((chip) => (
-            <span class="inline-flex min-w-0 items-center justify-center gap-1 h-[23px] px-1 rounded-lg bg-white/90 border border-orange-100 shadow-sm shadow-orange-100/50 text-[8px] min-[390px]:text-[8.5px] font-extrabold text-gray-800 md:gap-1.5 md:h-[28px] md:px-2.5 md:rounded-xl md:text-[11px]">
+            <span class="inline-flex min-w-0 items-center justify-center gap-0.5 h-[26px] px-1 rounded-lg bg-white/90 border border-orange-100 shadow-sm shadow-orange-100/50 text-[12px] font-extrabold text-gray-800 md:gap-1.5 md:h-[28px] md:px-2.5 md:rounded-xl">
               <Icon name={chip.icon} size={11} color={chip.color} strokeWidth={2.4} class="md:hidden" /><Icon name={chip.icon} size={15} color={chip.color} strokeWidth={2.4} class="hidden md:block" />
               {chip.label}
             </span>

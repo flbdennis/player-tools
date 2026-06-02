@@ -33,13 +33,13 @@ const panelTitle = `${playerLabel} playback panel`;
   data-player-type={playerId}
   data-cors-fix-suggestion={corsFixSuggestion}
   data-access-boundary-notice={accessBoundaryNotice}
-  class="relative z-10 mt-card px-4 py-4 md:px-5 md:py-4"
+  class="relative z-10 mt-card px-4 py-3 md:px-5 md:py-3"
   aria-labelledby="player-panel-title"
 >
   <h2 id="player-panel-title" class="sr-only">{panelTitle}</h2>
   <PlayerTabs tabs={tabs} activeId={activeId} />
 
-  <form id="metis-player-form" class="mt-3 flex flex-col gap-3 md:flex-row" novalidate>
+  <form id="metis-player-form" class="mt-2.5 flex flex-col gap-2.5 md:flex-row" novalidate>
     <div class="relative flex-1">
       <span class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-violet-700">
         <Icon name="Link" size={16} color="currentColor" strokeWidth={2.4} />
@@ -50,24 +50,24 @@ const panelTitle = `${playerLabel} playback panel`;
         type="url"
         value={defaultUrl}
         placeholder={player.inputPlaceholder}
-        class="[&_input]:pl-10 [&_input]:h-[36px] [&_input]:text-[12px]"
+        class="[&_input]:pl-10 [&_input]:h-[34px] [&_input]:text-[13px]"
       />
     </div>
-    <Button type="submit" variant="primary" size="md" class="h-[36px] min-w-[108px] rounded-lg px-8 text-[12px]">
+    <Button type="submit" variant="primary" size="md" class="h-[34px] min-w-[108px] rounded-lg px-7 py-0 text-[13px]">
       {player.buttonLabel}
     </Button>
   </form>
 
-  <p id="metis-player-error" class="mt-2 hidden items-center gap-1 text-[12px] font-semibold text-red-500">
+  <p id="metis-player-error" class="mt-1.5 hidden items-center gap-1 text-[13px] font-semibold text-red-500">
     <Icon name="AlertCircle" size={14} color="currentColor" strokeWidth={2.3} />
     <span>Please enter a valid URL starting with http:// or https://.</span>
   </p>
 
   {/* 授权与版权提示复用首页同款组件，保证全站审核提示一致 */}
-  <PermissionNotice text={policyNotice} class="mt-3 text-gray-700" iconColor="#7747ff" />
+  <PermissionNotice text={policyNotice} class="mt-2.5 text-gray-700" iconColor="#7747ff" />
 
-  <div class="mt-4 overflow-hidden rounded-xl border border-orange-100 bg-black shadow-inner shadow-black/20">
-    <div id="metis-player-stage" class="relative aspect-video min-h-0 bg-black md:aspect-[16/6.05]">
+  <div class="mt-3 overflow-hidden rounded-xl border border-orange-100 bg-black shadow-inner shadow-black/20">
+    <div id="metis-player-stage" class="relative aspect-[16/8.4] min-h-0 bg-black md:aspect-[16/5.55]">
       <video
         id="metis-video"
         class="absolute inset-0 hidden h-full w-full bg-black object-contain"
@@ -85,15 +85,15 @@ const panelTitle = `${playerLabel} playback panel`;
           <button
             type="button"
             id="metis-placeholder-main-play"
-            class="mb-2 flex h-12 w-12 md:mb-3 md:h-16 md:w-16 items-center justify-center rounded-full bg-white/90 text-violet-700 shadow-2xl shadow-violet-500/20 transition-all duration-200 hover:scale-105 hover:bg-white active:scale-95"
+            class="mb-1.5 flex h-11 w-11 md:mb-2 md:h-14 md:w-14 items-center justify-center rounded-full bg-white/90 text-violet-700 shadow-2xl shadow-violet-500/20 transition-all duration-200 hover:scale-105 hover:bg-white active:scale-95"
             aria-label={`Play ${playerLabel}`}
           >
-            <Icon name="Play" size={24} color="currentColor" fill="currentColor" strokeWidth={1.8} class="md:hidden" /><Icon name="Play" size={30} color="currentColor" fill="currentColor" strokeWidth={1.8} class="hidden md:block" />
+            <Icon name="Play" size={23} color="currentColor" fill="currentColor" strokeWidth={1.8} class="md:hidden" /><Icon name="Play" size={27} color="currentColor" fill="currentColor" strokeWidth={1.8} class="hidden md:block" />
           </button>
-          <strong class="text-[11px] font-black md:text-sm">{player.emptyTitle}</strong>
-          <span class="mt-0.5 max-w-[230px] text-[9px] font-semibold leading-snug text-white/90 md:mt-1 md:max-w-[320px] md:text-[11px] md:leading-relaxed">{player.emptyDescription}</span>
+          <strong class="text-[13px] font-black md:text-[14px]">{player.emptyTitle}</strong>
+          <span class="mt-0.5 max-w-[240px] text-[12px] font-semibold leading-snug text-white/90 md:max-w-[320px]">{player.emptyDescription}</span>
         </div>
-        <div class="absolute bottom-0 left-0 right-0 flex h-[40px] items-center gap-2 md:h-[54px] md:gap-3 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.7))] px-5 text-white">
+        <div class="absolute bottom-0 left-0 right-0 flex h-[36px] items-center gap-2 md:h-[44px] md:gap-2.5 bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.7))] px-4 text-white">
           <button
             type="button"
             id="metis-placeholder-control-play"
@@ -102,7 +102,7 @@ const panelTitle = `${playerLabel} playback panel`;
           >
             <Icon name="Play" size={19} color="white" fill="white" strokeWidth={1.6} />
           </button>
-          <span class="text-[10px] font-bold md:text-[12px]">0:00 / 0:00</span>
+          <span class="text-[12px] font-bold md:text-[13px]">0:00 / 0:00</span>
           <span class="h-1 flex-1 rounded-full bg-white/70"></span>
           <Icon name="Volume2" size={15} color="white" strokeWidth={2.2} class="md:hidden" />
           <Icon name="Maximize" size={15} color="white" strokeWidth={2.2} class="md:hidden" />
@@ -114,37 +114,37 @@ const panelTitle = `${playerLabel} playback panel`;
   </div>
 
   {/* Playback Log 放在播放器组件内部，记录原生 video、hls.js、dash.js 的关键事件 */}
-  <div class="mt-4 rounded-xl border border-orange-100 bg-white/78 p-5 shadow-sm shadow-orange-100/50" aria-labelledby="playback-log-title">
-    <h3 id="playback-log-title" class="mb-2 text-[18px] font-black tracking-[-0.03em] text-gray-950">{playbackLog.title}</h3>
-    <p class="mb-3 rounded-lg border border-amber-100 bg-amber-50/80 px-4 py-2 text-[11.5px] font-bold leading-relaxed text-amber-950">
+  <div class="mt-3 rounded-xl border border-orange-100 bg-white/78 p-4 shadow-sm shadow-orange-100/50" aria-labelledby="playback-log-title">
+    <h3 id="playback-log-title" class="mb-1.5 text-[18px] font-black tracking-[-0.03em] text-gray-950">{playbackLog.title}</h3>
+    <p class="mb-2 rounded-lg border border-amber-100 bg-amber-50/80 px-3 py-1.5 text-[13px] font-bold leading-snug text-amber-950">
       {playbackLogDescription}
     </p>
-    <div id="playback-status-summary" class="mb-3 rounded-lg border border-violet-100 bg-violet-50/70 px-4 py-3 text-[12px] font-bold leading-relaxed text-gray-700">
+    <div id="playback-status-summary" class="mb-2 rounded-lg border border-violet-100 bg-violet-50/70 px-3 py-2 text-[13px] font-bold leading-snug text-gray-700">
       <span class="text-violet-700">Status: Ready.</span> Paste a public or authorized link, then click Play to start a diagnostic session.
     </div>
-    <div id="playback-log-resize-shell" class="playback-log-resize-shell rounded-lg border border-orange-200 bg-[#f4ecdf] px-4 py-3 shadow-inner shadow-orange-100/80" aria-label="Resizable playback log output">
-      <pre id="playback-log-output" class="min-h-full whitespace-pre-wrap font-mono text-[12px] font-bold leading-[1.6] text-[#27303f]">{(playbackLog.lines && playbackLog.lines.length ? playbackLog.lines.join('\n') : playbackLogNotice)}</pre>
+    <div id="playback-log-resize-shell" class="playback-log-resize-shell rounded-lg border border-orange-200 bg-[#f4ecdf] px-3 py-2 shadow-inner shadow-orange-100/80" aria-label="Resizable playback log output">
+      <pre id="playback-log-output" class="min-h-full whitespace-pre-wrap font-mono text-[12.5px] font-bold leading-[1.48] text-[#27303f]">{(playbackLog.lines && playbackLog.lines.length ? playbackLog.lines.join('\n') : playbackLogNotice)}</pre>
     </div>
-    <p class="mt-2 text-[10.5px] font-semibold leading-relaxed text-gray-500">
+    <p class="mt-1.5 text-[12px] font-semibold leading-snug text-gray-500">
       Drag the lower-left corner to expand the log area and review more diagnostic lines.
     </p>
-    <div class="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
-      <Button type="button" id="playback-log-start" variant="primary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+    <div class="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
+      <Button type="button" id="playback-log-start" variant="primary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
         {playbackLog.actions?.start || 'Start Log'}
       </Button>
-      <Button type="button" id="playback-log-pause" variant="secondary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+      <Button type="button" id="playback-log-pause" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
         {playbackLog.actions?.pause || 'Pause Log'}
       </Button>
-      <Button type="button" id="playback-log-clear" variant="secondary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+      <Button type="button" id="playback-log-clear" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
         {playbackLog.actions?.clear || 'Clear Log'}
       </Button>
-      <Button type="button" id="playback-log-copy" variant="secondary" size="sm" class="h-[34px] rounded-lg text-[12px]">
+      <Button type="button" id="playback-log-copy" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
         {playbackLog.actions?.copy || 'Copy Log'}
       </Button>
     </div>
   </div>
 
-  <p id="metis-player-status" class="mt-3 hidden text-[12px] font-semibold text-gray-600"></p>
+  <p id="metis-player-status" class="mt-2 hidden text-[13px] font-semibold text-gray-600"></p>
 </section>
 
 
@@ -153,8 +153,8 @@ const panelTitle = `${playerLabel} playback panel`;
      direction: rtl 让支持 RTL 的浏览器把原生 resize 手柄放在左下角；内部 pre 再恢复 LTR，保证英文日志正常显示。 */
   .playback-log-resize-shell {
     position: relative;
-    height: 142px;
-    min-height: 132px;
+    height: 112px;
+    min-height: 104px;
     max-height: 460px;
     overflow: auto;
     resize: vertical;
@@ -1125,7 +1125,7 @@ const panelTitle = `${playerLabel} playback panel`;
       error: 'border-red-100 bg-red-50/80 text-red-900',
     }[tone] || 'border-violet-100 bg-violet-50/70 text-gray-700';
 
-    statusSummary.className = `mb-3 rounded-lg border px-4 py-3 text-[12px] font-bold leading-relaxed ${toneClass}`;
+    statusSummary.className = `mb-2 rounded-lg border px-3 py-2 text-[13px] font-bold leading-snug ${toneClass}`;
     statusSummary.innerHTML = `<span class="font-black">Status: ${escapeHtml(status)}.</span> ${escapeHtml(message)}`;
   }
 

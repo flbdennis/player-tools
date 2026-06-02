@@ -5,7 +5,7 @@ import Icon from './Icon.astro';
 const { items = [], class: className = '' } = Astro.props;
 ---
 
-<nav class={`mb-2 flex items-center gap-2 text-[12px] font-black text-slate-800 ${className}`} aria-label="Breadcrumb">
+<nav class={`mb-1.5 flex items-center gap-2 text-[13px] font-black text-slate-800 ${className}`} aria-label="Breadcrumb">
   {items.map((item, index) => (
     <>
       <a
