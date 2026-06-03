@@ -117,40 +117,40 @@ export const whyChoose = {
     {
       // 优势标题 - 强调加载速度和稳定性
       title: 'Browser-side Testing',
-      // 优势说明 - 控制在短句，保证移动端高度稳定
-      description: 'Test links directly online.',
+      // 优势说明 - 写清真实使用场景，避免只像功能标签
+      description: 'Check public or authorized video links in a real browser.',
       // 图标名称 - 由 Icon.astro 统一渲染
       icon: 'Zap',
     },
     {
       // 优势标题 - 强调隐私和安全测试
       title: 'Playback Log',
-      // 优势说明 - 强调简单安全的测试体验
-      description: 'Review useful events.',
+      // 优势说明 - 说明日志价值，并避免承诺第三方源站不会接收 URL
+      description: 'Review loading events, warnings, and errors without a MetisTools server-side parser.',
       // 图标名称 - 由 Icon.astro 统一渲染
       icon: 'Shield',
     },
     {
       // 优势标题 - 强调多设备适配
       title: 'Clear Boundaries',
-      // 优势说明 - 桌面端和移动端都可使用
-      description: 'Clear access limits.',
+      // 优势说明 - 明确合规边界，降低被理解为绕过限制工具的风险
+      description: 'Playback testing only. No CORS, DRM, login, token, or copyright bypass.',
       // 图标名称 - 由 Icon.astro 统一渲染
       icon: 'Monitor',
     },
     {
       // 优势标题 - 面向开发者调试场景
       title: 'Three Formats',
-      // 优势说明 - 强调可帮助调试播放问题
-      description: 'M3U8, MP4 and DASH.',
+      // 优势说明 - 保留 HLS/M3U8、MP4、DASH/MPD 核心 SEO 信号
+      description: 'Test HLS/M3U8 playlists, MP4 URLs, and MPEG-DASH MPD manifests.',
       // 图标名称 - 由 Icon.astro 统一渲染
       icon: 'Code',
     },
     {
       // 优势标题 - 强调免费使用
       title: 'No Install',
-      // 优势说明 - 简单工具适合日常测试
-      description: 'Use modern browsers.',
+      // 优势说明 - 强调浏览器内快速检查，不引导下载软件
+      description: 'Run quick playback checks in a modern browser, no desktop app needed.',
       // 图标名称 - 由 Icon.astro 统一渲染
       icon: 'Headphones',
     },
