@@ -20,36 +20,41 @@ import Container from './Container.astro';
         />
       </a>
 
-      {/* 桌面导航：保持设计图中的紧凑居中布局，所有链接来自配置 */}
-      <nav class="hidden md:flex items-center gap-8" aria-label="Primary navigation">
+      {/* 主导航只渲染一份 DOM：桌面端横向展示，移动端通过按钮切换为浮层，减少抓取噪音和读屏重复 */}
+      <nav
+        id="primary-navigation"
+        class="hidden fixed inset-x-0 top-[58px] z-[60] max-h-[calc(100vh-58px)] overflow-y-auto border-t border-orange-100 bg-white/96 px-4 py-4 shadow-2xl shadow-violet-100/40 backdrop-blur-xl md:static md:z-auto md:flex md:max-h-none md:overflow-visible md:border-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0 items-stretch md:items-center gap-1 md:gap-8"
+        aria-label="Primary navigation"
+        data-primary-nav
+      >
         {headerNav.map((item, index) => (
-          <div class="relative group" data-desktop-dropdown={item.children ? '' : undefined}>
+          <div class="relative group" data-nav-dropdown={item.children ? '' : undefined}>
             {item.children ? (
               <>
                 <button
                   type="button"
-                  id={`desktop-nav-trigger-${index}`}
-                  class="flex items-center gap-1.5 text-[14px] font-bold text-gray-950 hover:text-violet-700 transition-colors"
+                  id={`nav-trigger-${index}`}
+                  class="flex w-full items-center justify-between gap-1.5 rounded-xl px-4 py-3 text-left text-sm font-bold text-gray-900 transition-colors hover:bg-violet-50 hover:text-violet-700 md:w-auto md:justify-start md:rounded-none md:px-0 md:py-0 md:text-[14px] md:text-gray-950 md:hover:bg-transparent"
                   aria-haspopup="true"
                   aria-expanded="false"
-                  aria-controls={`desktop-nav-menu-${index}`}
-                  data-desktop-dropdown-trigger
+                  aria-controls={`nav-menu-${index}`}
+                  data-nav-dropdown-trigger
                 >
                   {item.label}
                   <Icon name="ChevronDown" size={14} strokeWidth={2.4} />
                 </button>
                 {/* 下拉菜单只使用真实工具页链接，避免死链 */}
                 <div
-                  id={`desktop-nav-menu-${index}`}
-                  class="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 bg-white rounded-2xl shadow-xl shadow-violet-100/60 border border-orange-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 py-2"
+                  id={`nav-menu-${index}`}
+                  class="hidden pl-4 space-y-1 md:invisible md:absolute md:left-1/2 md:top-full md:mt-4 md:block md:w-48 md:-translate-x-1/2 md:space-y-0 md:rounded-2xl md:border md:border-orange-100 md:bg-white md:py-2 md:pl-0 md:opacity-0 md:shadow-xl md:shadow-violet-100/60 md:transition-all md:duration-200 md:group-hover:visible md:group-hover:opacity-100 md:group-focus-within:visible md:group-focus-within:opacity-100"
                   role="menu"
-                  aria-labelledby={`desktop-nav-trigger-${index}`}
-                  data-desktop-dropdown-menu
+                  aria-labelledby={`nav-trigger-${index}`}
+                  data-nav-dropdown-menu
                 >
                   {item.children.map((child) => (
                     <a
                       href={child.href}
-                      class="block px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors"
+                      class="block rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-violet-50 hover:text-violet-700 md:rounded-none md:text-gray-700"
                       role="menuitem"
                     >
                       {child.label}
@@ -60,7 +65,7 @@ import Container from './Container.astro';
             ) : (
               <a
                 href={item.href}
-                class="text-[14px] font-bold text-gray-950 hover:text-violet-700 transition-colors"
+                class="block rounded-xl px-4 py-3 text-sm font-bold text-gray-900 transition-colors hover:bg-violet-50 hover:text-violet-700 md:rounded-none md:px-0 md:py-0 md:text-[14px] md:text-gray-950 md:hover:bg-transparent"
               >
                 {item.label}
               </a>
@@ -79,7 +84,7 @@ import Container from './Container.astro';
           class="md:hidden p-2 rounded-xl hover:bg-violet-50 transition-colors"
           aria-label="Toggle menu"
           aria-expanded="false"
-          aria-controls="mobile-menu"
+          aria-controls="primary-navigation"
         >
           <Icon name="Menu" size={24} color="currentColor" strokeWidth={2.4} class="text-gray-950" />
         </button>
@@ -87,51 +92,15 @@ import Container from './Container.astro';
     </div>
   </Container>
 
-  {/* 移动端菜单面板：使用 fixed 浮层覆盖页面，不参与文档流，避免展开后把页面内容向下挤 */}
-  <div
-    id="mobile-menu"
-    class="md:hidden hidden fixed inset-x-0 top-[58px] z-[60] bg-white/96 border-t border-orange-100 shadow-2xl shadow-violet-100/40 backdrop-blur-xl"
-  >
-    <Container variant="header" class="py-4 space-y-1 max-h-[calc(100vh-58px)] overflow-y-auto">
-      {headerNav.map((item, index) => (
-        <div class="mobile-nav-item">
-          {item.children ? (
-            <>
-              <button
-                type="button"
-                class="mobile-dropdown-btn flex items-center justify-between w-full px-4 py-3 text-sm font-bold text-gray-900 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors"
-                aria-expanded="false"
-                aria-controls={`mobile-nav-menu-${index}`}
-              >
-                {item.label}
-                <Icon name="ChevronDown" size={16} strokeWidth={2.4} />
-              </button>
-              <div id={`mobile-nav-menu-${index}`} class="mobile-dropdown hidden pl-4 space-y-1 mt-1">
-                {item.children.map((child) => (
-                  <a href={child.href} class="block px-4 py-2.5 text-sm font-semibold text-gray-600 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors">
-                    {child.label}
-                  </a>
-                ))}
-              </div>
-            </>
-          ) : (
-            <a href={item.href} class="block px-4 py-3 text-sm font-bold text-gray-900 rounded-xl hover:bg-violet-50 hover:text-violet-700 transition-colors">
-              {item.label}
-            </a>
-          )}
-        </div>
-      ))}
-    </Container>
-  </div>
 </header>
 
 <script>
-  // 桌面端工具下拉菜单：在 hover 之外补充 click、键盘和焦点管理，保证键盘用户可访问
-  const desktopDropdowns = document.querySelectorAll('[data-desktop-dropdown]');
+  // 主导航下拉菜单：同一份 DOM 同时服务桌面和移动端，减少重复导航文本和读屏重复
+  const navDropdowns = document.querySelectorAll('[data-nav-dropdown]');
 
-  function setDesktopDropdownState(dropdown, isOpen) {
-    const trigger = dropdown.querySelector('[data-desktop-dropdown-trigger]');
-    const menu = dropdown.querySelector('[data-desktop-dropdown-menu]');
+  function setDropdownState(dropdown, isOpen) {
+    const trigger = dropdown.querySelector('[data-nav-dropdown-trigger]');
+    const menu = dropdown.querySelector('[data-nav-dropdown-menu]');
     if (!trigger || !menu) return;
 
     trigger.setAttribute('aria-expanded', String(isOpen));
@@ -139,45 +108,46 @@ import Container from './Container.astro';
     menu.classList.toggle('visible', isOpen);
     menu.classList.toggle('opacity-0', !isOpen);
     menu.classList.toggle('invisible', !isOpen);
+    menu.classList.toggle('hidden', !isOpen && window.matchMedia('(max-width: 767px)').matches);
   }
 
-  function closeDesktopDropdowns(exceptDropdown = null) {
-    desktopDropdowns.forEach((dropdown) => {
+  function closeDropdowns(exceptDropdown = null) {
+    navDropdowns.forEach((dropdown) => {
       if (dropdown !== exceptDropdown) {
-        setDesktopDropdownState(dropdown, false);
+        setDropdownState(dropdown, false);
       }
     });
   }
 
-  desktopDropdowns.forEach((dropdown) => {
-    const trigger = dropdown.querySelector('[data-desktop-dropdown-trigger]');
-    const menu = dropdown.querySelector('[data-desktop-dropdown-menu]');
+  navDropdowns.forEach((dropdown) => {
+    const trigger = dropdown.querySelector('[data-nav-dropdown-trigger]');
+    const menu = dropdown.querySelector('[data-nav-dropdown-menu]');
     if (!trigger || !menu) return;
 
     trigger.addEventListener('click', (event) => {
       event.stopPropagation();
       const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
-      closeDesktopDropdowns(dropdown);
-      setDesktopDropdownState(dropdown, shouldOpen);
+      closeDropdowns(dropdown);
+      setDropdownState(dropdown, shouldOpen);
     });
 
     trigger.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        closeDesktopDropdowns(dropdown);
-        setDesktopDropdownState(dropdown, true);
+        closeDropdowns(dropdown);
+        setDropdownState(dropdown, true);
         menu.querySelector('a')?.focus();
       }
 
       if (event.key === 'Escape') {
-        setDesktopDropdownState(dropdown, false);
+        setDropdownState(dropdown, false);
         trigger.focus();
       }
     });
 
     menu.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        setDesktopDropdownState(dropdown, false);
+        setDropdownState(dropdown, false);
         trigger.focus();
       }
     });
@@ -185,7 +155,7 @@ import Container from './Container.astro';
     dropdown.addEventListener('focusout', () => {
       window.setTimeout(() => {
         if (!dropdown.contains(document.activeElement)) {
-          setDesktopDropdownState(dropdown, false);
+          setDropdownState(dropdown, false);
         }
       }, 0);
     });
@@ -194,40 +164,35 @@ import Container from './Container.astro';
   document.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof Node)) return;
-    const clickedInsideDropdown = Array.from(desktopDropdowns).some((dropdown) => dropdown.contains(target));
+    const clickedInsideDropdown = Array.from(navDropdowns).some((dropdown) => dropdown.contains(target));
     if (!clickedInsideDropdown) {
-      closeDesktopDropdowns();
+      closeDropdowns();
     }
   });
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      closeDesktopDropdowns();
+      closeDropdowns();
     }
   });
 
   // 移动端菜单展开/收起逻辑，保持无框架依赖和低 JS 体积
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
+  const primaryNavigation = document.getElementById('primary-navigation');
 
   function closeMobileMenu() {
-    if (!mobileMenuBtn || !mobileMenu) return;
+    if (!mobileMenuBtn || !primaryNavigation) return;
     mobileMenuBtn.setAttribute('aria-expanded', 'false');
-    mobileMenu.classList.add('hidden');
-    mobileMenu.querySelectorAll('.mobile-dropdown-btn').forEach((button) => {
-      button.setAttribute('aria-expanded', 'false');
-    });
-    mobileMenu.querySelectorAll('.mobile-dropdown').forEach((dropdown) => {
-      dropdown.classList.add('hidden');
-    });
+    primaryNavigation.classList.add('hidden');
+    closeDropdowns();
   }
 
-  if (mobileMenuBtn && mobileMenu) {
+  if (mobileMenuBtn && primaryNavigation) {
     mobileMenuBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
       mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
-      mobileMenu.classList.toggle('hidden', isExpanded);
+      primaryNavigation.classList.toggle('hidden', isExpanded);
     });
 
     // 移动端导航打开后，点击导航外部区域自动关闭，避免菜单遮挡页面内容
@@ -236,7 +201,7 @@ import Container from './Container.astro';
       const isOpen = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
       if (!isOpen || !(target instanceof Node)) return;
 
-      if (!mobileMenu.contains(target) && !mobileMenuBtn.contains(target)) {
+      if (!primaryNavigation.contains(target) && !mobileMenuBtn.contains(target)) {
         closeMobileMenu();
       }
     });
@@ -247,21 +212,8 @@ import Container from './Container.astro';
       }
     });
 
-    mobileMenu.querySelectorAll('a').forEach((link) => {
+    primaryNavigation.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', closeMobileMenu);
     });
   }
-
-  // 移动端工具下拉菜单，只切换当前列表，避免影响桌面导航
-  document.querySelectorAll('.mobile-dropdown-btn').forEach((btn) => {
-    btn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const dropdown = btn.nextElementSibling;
-      if (dropdown) {
-        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-        btn.setAttribute('aria-expanded', String(!isExpanded));
-        dropdown.classList.toggle('hidden', isExpanded);
-      }
-    });
-  });
 </script>

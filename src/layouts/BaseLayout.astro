@@ -18,6 +18,12 @@ const {
   disableCanonical = false,
   enableAds = true,
 } = Astro.props;
+
+// 公开预览环境统一 noindex、禁 canonical、禁 AdSense，避免 preview 域污染正式站 SEO/Ads 审核信号
+const effectiveRobots = robots || (site.noindex ? 'noindex, nofollow' : undefined);
+const effectiveNoindex = noindex || site.noindex;
+const effectiveDisableCanonical = disableCanonical || site.noindex;
+const effectiveEnableAds = enableAds && !site.noindex;
 ---
 
 <!doctype html>
@@ -29,16 +35,16 @@ const {
       title={title}
       description={description}
       canonical={canonical}
-      ogImage={ogImage}
-      noindex={noindex}
-      robots={robots}
-      disableCanonical={disableCanonical}
-      jsonLd={jsonLd}
-    />
+	      ogImage={ogImage}
+	      noindex={effectiveNoindex}
+	      robots={effectiveRobots}
+	      disableCanonical={effectiveDisableCanonical}
+	      jsonLd={jsonLd}
+	    />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     {/* Google Analytics 预连接 - 只做 DNS/TLS 预热，不改变同意状态 */}
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
-    {enableAds && (
+	    {effectiveEnableAds && (
       <>
         {/* 广告与欧洲隐私消息相关预连接 - 只在允许加载广告脚本的页面输出，避免法律页触达广告域名 */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
@@ -77,7 +83,7 @@ const {
         page_title: document.title,
       });
     </script>
-    {enableAds && (
+	    {effectiveEnableAds && (
       <>
         {/* Google AdSense - 审核前只接入官方脚本，不展示假广告位 */}
         <script

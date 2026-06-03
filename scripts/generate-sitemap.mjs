@@ -8,6 +8,7 @@ import { guideArticles } from '../src/config/guideArticles.js';
 const rootDir = process.cwd();
 const pagesDir = path.join(rootDir, 'src/pages');
 const sitemapPath = path.join(rootDir, 'public/sitemap.xml');
+const robotsPath = path.join(rootDir, 'public/robots.txt');
 const siteDomain = site.domain;
 const guideLastmodByRoute = new Map(
   guideArticles.map((article) => [article.href, article.dateModified])
@@ -134,3 +135,21 @@ const xml = [
 
 fs.writeFileSync(sitemapPath, xml);
 console.log(`Generated sitemap.xml with ${routes.length} URLs.`);
+
+// robots.txt 也随构建环境生成：正式站允许抓取，preview/noindex 构建禁止抓取，避免预览域污染索引信号
+const robotsText = site.noindex
+  ? [
+      'User-agent: *',
+      'Disallow: /',
+      '',
+    ].join('\n')
+  : [
+      'User-agent: *',
+      'Allow: /',
+      '',
+      `Sitemap: ${siteDomain}/sitemap.xml`,
+      '',
+    ].join('\n');
+
+fs.writeFileSync(robotsPath, robotsText);
+console.log(site.noindex ? 'Generated preview robots.txt with Disallow: /.' : 'Generated production robots.txt.');

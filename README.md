@@ -61,6 +61,7 @@ public/                   Static assets, ads.txt, robots.txt and sitemap.xml
 - Keep Privacy Policy, Terms, Contact, About and Playback Policy reachable.
 - Configure Google Privacy & messaging or another Google-certified CMP for EEA, UK and Switzerland users before relying on personalized ads in those regions.
 - Keep the European Privacy Message published in AdSense Privacy & messaging.
+- Keep public preview builds `noindex,nofollow`; set `METISTOOLS_NOINDEX=true` or `PUBLIC_METISTOOLS_NOINDEX=true` when the hosting platform does not expose a preview context automatically.
 - Keep sitemap entries synchronized with real pages and include `lastmod`.
 - Keep guide article images sourced from authorized `public/imgs/` assets unless new images are explicitly approved and added to the project.
 - Keep security headers in `public/_headers` and test them after deployment.
@@ -80,6 +81,7 @@ Before submitting or resubmitting the site for AdSense review:
 - Run `npm run check:prelaunch`.
 - Manually test the homepage, M3U8 Player, MP4 Player, DASH Player, FAQ, Guides, About, Contact, Privacy Policy, Terms and Playback Policy on desktop and mobile.
 - Confirm no fake ad placeholders are visible and no ad position is placed near player controls, URL inputs, Play buttons or Playback Log controls.
+- Before AdSense approval, do not add ad slots inside the tool cards, URL form area, video player, Playback Log or Embed Code panel.
 
 ## Deployment
 

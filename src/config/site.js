@@ -1,4 +1,17 @@
 // 站点全局配置 - 统一管理域名、品牌、联系方式、统计、广告和默认 SEO，避免组件中硬编码站点信息
+const runtimeEnv = typeof process !== 'undefined' ? process.env : {};
+const viteEnv = import.meta.env || {};
+const deploymentContext = String(runtimeEnv.CONTEXT || runtimeEnv.VERCEL_ENV || viteEnv.MODE || '').toLowerCase();
+const cloudflareBranch = String(runtimeEnv.CF_PAGES_BRANCH || '').toLowerCase();
+const explicitNoindex = String(runtimeEnv.METISTOOLS_NOINDEX || runtimeEnv.PUBLIC_METISTOOLS_NOINDEX || viteEnv.PUBLIC_METISTOOLS_NOINDEX || '').toLowerCase();
+const explicitIndexing = String(runtimeEnv.METISTOOLS_INDEXING || runtimeEnv.PUBLIC_METISTOOLS_INDEXING || viteEnv.PUBLIC_METISTOOLS_INDEXING || '').toLowerCase();
+const productionBranches = new Set(['main', 'master', 'production']);
+const isCloudflarePreview = runtimeEnv.CF_PAGES === '1' && cloudflareBranch && !productionBranches.has(cloudflareBranch);
+const isPlatformPreview = ['deploy-preview', 'branch-deploy', 'preview'].includes(deploymentContext);
+const forceNoindex = ['1', 'true', 'yes', 'noindex'].includes(explicitNoindex) || explicitIndexing === 'noindex';
+const forceIndex = ['1', 'true', 'yes', 'index'].includes(explicitIndexing);
+const shouldNoindex = forceNoindex || (!forceIndex && (isCloudflarePreview || isPlatformPreview));
+
 export const site = {
   // 站点品牌名称 - Header、Footer、SEO 和结构化数据会复用
   name: 'MetisTools',
@@ -22,6 +35,10 @@ export const site = {
   logo: '/logo/logo_text.svg',
   // favicon 路径 - 浏览器标签页和搜索结果图标使用
   favicon: '/logo/favicon.ico',
+  // 当前构建是否为公开预览环境 - preview 输出 noindex 并关闭广告脚本，避免被搜索引擎或 AdSense 误当作正式站
+  isPreview: isCloudflarePreview || isPlatformPreview,
+  // 全站索引开关 - 生产默认可索引；预览或显式 noindex 环境禁索引
+  noindex: shouldNoindex,
 };
 
 // 全局 SEO 默认配置 - 当页面没有传入独立 SEO 时作为兜底内容

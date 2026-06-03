@@ -92,7 +92,7 @@ export const m3u8PlayerPage = {
     // 播放对象名称 - 播放器提示和日志中描述当前内容类型
     playerLabel: 'HLS stream',
     // 默认测试链接 - 页面初始输入框内容，使用公开 HLS 示例流
-    defaultUrl: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+    defaultUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     // 输入框占位文案 - 当没有 URL 时显示
     inputPlaceholder: 'Paste your M3U8 link here...',
     // 播放按钮文案 - 输入框右侧和播放器触发逻辑共用

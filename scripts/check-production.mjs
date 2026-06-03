@@ -112,6 +112,13 @@ if (!exists('public/_redirects')) {
   });
 }
 
+if (exists('public/robots.txt')) {
+  const robotsText = read('public/robots.txt');
+  if (!robotsText.includes('Allow: /')) fail('production robots.txt must allow crawling.');
+  if (!robotsText.includes('Sitemap: https://metistools.com/sitemap.xml')) fail('production robots.txt must point to the canonical sitemap URL.');
+  if (/Disallow:\s*\//i.test(robotsText)) fail('production robots.txt must not disallow the whole site.');
+}
+
 // OG 图检查：统一社交图必须存在且尺寸符合 1200x630
 if (!exists('public/og/default-og.png')) {
   fail('public/og/default-og.png is missing.');
@@ -219,6 +226,23 @@ if (exists('src/components/PlayerShell.astro')) {
   if (/localStorage\.(?:getItem|setItem|removeItem)\(\s*playerUrlStorageKey/.test(playerShellSource)) {
     fail('Player URL storage must not use localStorage.');
   }
+  if (/adsbygoogle|data-ad-slot|pagead2\.googlesyndication\.com/i.test(playerShellSource)) {
+    fail('PlayerShell must not contain ad slots or AdSense code near player controls.');
+  }
+}
+
+if (exists('src/components/FaqAccordion.astro')) {
+  const faqAccordionSource = read('src/components/FaqAccordion.astro');
+  if (faqAccordionSource.includes('-mobile-content-') || faqAccordionSource.includes('-desktop-content-')) {
+    fail('FaqAccordion must render each FAQ item once, not separate mobile and desktop copies.');
+  }
+}
+
+if (exists('src/components/Header.astro')) {
+  const headerSource = read('src/components/Header.astro');
+  if (headerSource.includes('mobile-nav-menu') || headerSource.includes('data-desktop-dropdown')) {
+    fail('Header must use a single primary navigation DOM instead of separate mobile and desktop nav copies.');
+  }
 }
 
 if (exists('public/sitemap.xml')) {
@@ -276,6 +300,11 @@ pageHtmlFiles.forEach((file) => {
 
   if (noAdsPages.has(relativePath) && hasAdSenseScript) {
     fail(`${relativePath} must not load AdSense.`);
+  }
+  if (['m3u8-player/index.html', 'mp4-player/index.html', 'dash-player/index.html'].includes(relativePath)) {
+    if (/<ins\b[^>]*adsbygoogle/i.test(html) || /\bdata-ad-slot=/i.test(html) || /adsbygoogle\.push/i.test(html)) {
+      fail(`${relativePath} must not contain tool-page ad slots before AdSense review.`);
+    }
   }
   if (/\b(?:Leaderboard|Content Middle|Footer Banner|Advertisement placeholder|Ad placeholder|fake ad)\b/i.test(visibleText)) {
     fail(`${relativePath} contains visible fake ad placeholder text.`);
