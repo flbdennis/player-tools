@@ -12,7 +12,7 @@ export const tools = [
     description:
       'Test HLS playlists and review common M3U8 loading issues.',
     // 工具页面路由 - 所有入口必须跳转真实页面，避免死链
-    href: '/m3u8-player/',
+    href: '/m3u8-player',
     // 工具图标名称 - 由 Icon.astro 统一渲染，不直接引入图标库
     icon: 'Play',
   },
@@ -28,7 +28,7 @@ export const tools = [
     description:
       'Play public MP4 URLs and check MIME type, codec and server limits.',
     // 工具页面路由 - 所有入口必须跳转真实页面，避免死链
-    href: '/mp4-player/',
+    href: '/mp4-player',
     // 工具图标名称 - 由 Icon.astro 统一渲染，不直接引入图标库
     icon: 'Play',
   },
@@ -44,7 +44,7 @@ export const tools = [
     description:
       'Test MPD manifests and review DASH playback problems.',
     // 工具页面路由 - 所有入口必须跳转真实页面，避免死链
-    href: '/dash-player/',
+    href: '/dash-player',
     // 工具图标名称 - 由 Icon.astro 统一渲染，不直接引入图标库
     icon: 'Play',
   },

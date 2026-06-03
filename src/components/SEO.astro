@@ -20,7 +20,8 @@ const pageTitle = title
   ? `${title} - ${site.name}`
   : defaultSeo.defaultTitle;
 const pageDescription = description || defaultSeo.description;
-const fallbackCanonical = `${site.domain}${Astro.url.pathname}`;
+const normalizedPathname = Astro.url.pathname === '/' ? '/' : Astro.url.pathname.replace(/\/+$/, '');
+const fallbackCanonical = `${site.domain}${normalizedPathname}`;
 const pageCanonical = canonical || fallbackCanonical;
 const shouldRenderCanonical = !disableCanonical && canonical !== null;
 const toAbsoluteUrl = (value) => {

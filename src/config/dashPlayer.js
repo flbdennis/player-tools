@@ -15,7 +15,7 @@ export const dashPlayerPage = {
     // 首页入口 - 面包屑第一项
     { label: 'Home', href: '/' },
     // 当前页面入口 - 面包屑最后一项
-    { label: 'DASH Player', href: '/dash-player/' },
+    { label: 'DASH Player', href: '/dash-player' },
   ],
   // 工具页 Hero 配置 - ToolHero 组件读取标题、描述和插图布局
   hero: {
@@ -77,18 +77,18 @@ export const dashPlayerPage = {
   // 工具 Tab 配置 - PlayerTabs 读取并根据 active id 标记当前页面
   tabs: [
     // M3U8 工具页 Tab
-    { id: 'm3u8', label: 'M3U8 Player', href: '/m3u8-player/' },
+    { id: 'm3u8', label: 'M3U8 Player', href: '/m3u8-player' },
     // MP4 工具页 Tab
-    { id: 'mp4', label: 'MP4 Player', href: '/mp4-player/' },
+    { id: 'mp4', label: 'MP4 Player', href: '/mp4-player' },
     // DASH 当前页 Tab
-    { id: 'dash', label: 'DASH Player', href: '/dash-player/' },
+    { id: 'dash', label: 'DASH Player', href: '/dash-player' },
   ],
   // 播放器主卡片配置 - PlayerShell 读取输入、播放、占位和日志文案
   player: {
     // 工具类型 ID - 播放器逻辑用于区分 MP4/M3U8/DASH 类型
     id: 'dash',
     // 当前工具页路径 - embed 代码和 direct link 生成使用
-    pagePath: '/dash-player/',
+    pagePath: '/dash-player',
     // 播放对象名称 - 播放器提示和日志中描述当前内容类型
     playerLabel: 'DASH stream',
     // 默认测试链接 - 页面初始输入框内容，使用公开 MPD 示例流
@@ -129,9 +129,9 @@ export const dashPlayerPage = {
   // Embed 区域配置 - EmbedCodeBox 读取当前页面路径和按钮文案
   embed: {
     // 当前工具页路径 - 作为用户查看完整工具页的来源路径
-    pagePath: '/dash-player/',
+    pagePath: '/dash-player',
     // 专用嵌入页路径 - iframe 分享必须使用 noindex/禁广告的轻量页面
-    embedPath: '/embed/dash/',
+    embedPath: '/embed/dash',
     // Embed 区标题 - 简短说明嵌入能力，详细边界交给问号提示
     title: 'Embed This Player',
     // Embed 区可见短提示 - 保留核心授权边界

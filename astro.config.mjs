@@ -4,6 +4,12 @@ import tailwindcss from '@tailwindcss/vite';
 
 // Astro 配置 - 项目保持 JavaScript 工作流，不依赖 tsconfig，避免和 CLAUDE.md 中“禁止创建 tsconfig”规则冲突。
 export default defineConfig({
+  // 正式 URL 统一使用无尾斜杠；首页仍保持 "/"，内页使用 "/about" 这类规范路径。
+  trailingSlash: 'never',
+  build: {
+    // 静态产物输出为 about.html / guides.html，避免静态托管把无尾斜杠路径再规范到目录斜杠路径。
+    format: 'file',
+  },
   // 关闭开发工具条，避免页面截图对比时出现额外悬浮 UI。
   devToolbar: {
     enabled: false,

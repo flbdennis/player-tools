@@ -1,5 +1,6 @@
 ---
 import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import GuideArticleImage from '../../components/GuideArticleImage.astro';
 import { getGuideArticle } from '../../config/guideArticles.js';
 
 const article = getGuideArticle('how-to-test-m3u8-stream-online');
@@ -16,7 +17,7 @@ const article = getGuideArticle('how-to-test-m3u8-stream-online');
 
   <p>
     The safest first step is to use a browser-based player such as the
-    <a href="/m3u8-player/">M3U8 Player Online</a>. Paste only a public stream
+    <a href="/m3u8-player">M3U8 Player Online</a>. Paste only a public stream
     or a stream you are authorized to test. Do not paste private customer links,
     paid video URLs, DRM-protected streams or links copied from sites where you
     do not have permission to test the source.
@@ -56,6 +57,8 @@ const article = getGuideArticle('how-to-test-m3u8-stream-online');
     work for visitors.
   </p>
 
+  <GuideArticleImage image={article.image} />
+
   <h2>Check Common HLS Failure Points</h2>
   <p>
     If the stream does not play, check whether the playlist and segment URLs are
@@ -79,7 +82,7 @@ const article = getGuideArticle('how-to-test-m3u8-stream-online');
     system. If the Playback Log points to a network, CORS or media error, use
     that clue with your server logs and CDN configuration. For a broader
     explanation of browser-specific failures, read
-    <a href="/guides/m3u8-works-in-vlc-but-not-browser/">why an M3U8 stream can work in VLC but not in the browser</a>.
+    <a href="/guides/m3u8-works-in-vlc-but-not-browser">why an M3U8 stream can work in VLC but not in the browser</a>.
   </p>
 
   <h2>Example Playback Log Signals</h2>

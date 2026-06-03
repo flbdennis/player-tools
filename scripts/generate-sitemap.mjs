@@ -14,20 +14,20 @@ const guideLastmodByRoute = new Map(
   guideArticles.map((article) => [article.href, article.dateModified])
 );
 
-const excludedRoutes = new Set(['/404/']);
+const excludedRoutes = new Set(['/404']);
 
 const priorityByRoute = new Map([
   ['/', '1.0'],
-  ['/m3u8-player/', '0.9'],
-  ['/mp4-player/', '0.9'],
-  ['/dash-player/', '0.9'],
-  ['/guides/', '0.7'],
-  ['/faq/', '0.7'],
-  ['/about/', '0.5'],
-  ['/contact/', '0.5'],
-  ['/privacy-policy/', '0.4'],
-  ['/terms/', '0.4'],
-  ['/playback-policy/', '0.4'],
+  ['/m3u8-player', '0.9'],
+  ['/mp4-player', '0.9'],
+  ['/dash-player', '0.9'],
+  ['/guides', '0.7'],
+  ['/faq', '0.7'],
+  ['/about', '0.5'],
+  ['/contact', '0.5'],
+  ['/privacy-policy', '0.4'],
+  ['/terms', '0.4'],
+  ['/playback-policy', '0.4'],
 ]);
 
 function listPageFiles(dir) {
@@ -46,19 +46,19 @@ function listPageFiles(dir) {
 function routeFromFile(file) {
   const relativePath = path.relative(pagesDir, file).replaceAll(path.sep, '/');
   if (relativePath === 'index.astro') return '/';
-  const route = relativePath.replace(/(?:\/index)?\.astro$/, '/');
+  const route = relativePath.replace(/(?:\/index)?\.astro$/, '');
   return `/${route}`;
 }
 
 function getPriority(route) {
   if (priorityByRoute.has(route)) return priorityByRoute.get(route);
-  if (route.startsWith('/guides/')) return '0.7';
+  if (route.startsWith('/guides')) return '0.7';
   return '0.6';
 }
 
 function getChangefreq(route) {
-  if (route === '/' || route.endsWith('-player/')) return 'weekly';
-  if (route.startsWith('/guides/')) return 'monthly';
+  if (route === '/' || route.endsWith('-player')) return 'weekly';
+  if (route.startsWith('/guides')) return 'monthly';
   return 'monthly';
 }
 

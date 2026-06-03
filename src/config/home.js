@@ -18,7 +18,7 @@ export const hero = {
   description:
     'Test public or authorized M3U8, MP4 and MPEG-DASH links in your browser. Preview playback, review browser-side events and understand common loading issues.',
   // 主 CTA - 默认引导用户进入 M3U8 测试工具页
-  primaryCta: { label: 'Start Testing', href: '/m3u8-player/' },
+  primaryCta: { label: 'Start Testing', href: '/m3u8-player' },
   // 次 CTA - 跳转到首页工具列表锚点，便于用户查看全部工具
   secondaryCta: { label: 'View All Players', href: '#tools' },
   // 首屏特性标签 - 使用 Icon 组件渲染图标，颜色按 UI 设计配置

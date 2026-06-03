@@ -1,0 +1,24 @@
+---
+// GuideArticleImage 组件 - 文章内图片展示组件，统一控制尺寸、说明文字和图片 SEO 属性
+// 图片只使用文章配置中的授权素材；真实操作截图如需加入，也应先放入 public/imgs 并更新配置。
+const { image } = Astro.props;
+---
+
+{image && (
+  <figure class="mx-auto my-7 max-w-[560px] overflow-hidden rounded-xl border border-orange-100 bg-white/82 shadow-sm shadow-orange-100/50 md:my-8">
+    <img
+      src={image.src}
+      alt={image.alt}
+      width={image.width}
+      height={image.height}
+      loading="lazy"
+      decoding="async"
+      class="mx-auto max-h-[330px] w-full object-contain"
+    />
+    {image.caption && (
+      <figcaption class="border-t border-orange-100 px-4 py-3 text-[13px] font-semibold leading-snug text-gray-600">
+        {image.caption}
+      </figcaption>
+    )}
+  </figure>
+)}

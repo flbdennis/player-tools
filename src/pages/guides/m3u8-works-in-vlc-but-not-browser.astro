@@ -1,5 +1,6 @@
 ---
 import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import GuideArticleImage from '../../components/GuideArticleImage.astro';
 import { getGuideArticle } from '../../config/guideArticles.js';
 
 const article = getGuideArticle('m3u8-works-in-vlc-but-not-browser');
@@ -16,7 +17,7 @@ const article = getGuideArticle('m3u8-works-in-vlc-but-not-browser');
 
   <p>
     To reproduce the browser experience, test the playlist with the
-    <a href="/m3u8-player/">M3U8 Player Online</a>. The result is closer to what
+    <a href="/m3u8-player">M3U8 Player Online</a>. The result is closer to what
     a web visitor or embedded player may experience than a desktop media player
     test.
   </p>
@@ -35,6 +36,8 @@ const article = getGuideArticle('m3u8-works-in-vlc-but-not-browser');
     media segments and key files. One missing header can make playback fail
     after the first request appears successful.
   </p>
+
+  <GuideArticleImage image={article.image} />
 
   <h2>Codecs and MediaSource Support Matter</h2>
   <p>
@@ -76,7 +79,7 @@ const article = getGuideArticle('m3u8-works-in-vlc-but-not-browser');
 
   <p>
     If the problem appears to be cross-origin access, continue with the
-    <a href="/guides/fix-m3u8-cors-error/">M3U8 CORS error guide</a>. If you
+    <a href="/guides/fix-m3u8-cors-error">M3U8 CORS error guide</a>. If you
     only need to confirm whether a public playlist can load in a browser, start
     with a clean test in the M3U8 player and compare the Playback Log with your
     server or CDN logs.

@@ -1,5 +1,6 @@
 ---
 import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import GuideArticleImage from '../../components/GuideArticleImage.astro';
 import { getGuideArticle } from '../../config/guideArticles.js';
 
 const article = getGuideArticle('mp4-url-not-playing');
@@ -14,7 +15,7 @@ const article = getGuideArticle('mp4-url-not-playing');
   </p>
 
   <p>
-    Start with the <a href="/mp4-player/">MP4 Player Online</a> when you want
+    Start with the <a href="/mp4-player">MP4 Player Online</a> when you want
     to test a public or authorized MP4 file URL. This page is for playback
     testing only. It is not a downloader, converter or tool for copying video
     from websites.
@@ -34,6 +35,8 @@ const article = getGuideArticle('mp4-url-not-playing');
     tokens or a user session, it may fail outside the original website or
     authorized player flow.
   </p>
+
+  <GuideArticleImage image={article.image} />
 
   <h2>Check MIME Type and Codec Support</h2>
   <p>
@@ -75,8 +78,8 @@ const article = getGuideArticle('mp4-url-not-playing');
 
   <p>
     If your project also uses streaming playlists, compare the MP4 test with
-    <a href="/guides/how-to-test-m3u8-stream-online/">how to test an M3U8 stream online</a>
-    or <a href="/guides/mpd-test-online/">how to test an MPD manifest online</a>.
+    <a href="/guides/how-to-test-m3u8-stream-online">how to test an M3U8 stream online</a>
+    or <a href="/guides/mpd-test-online">how to test an MPD manifest online</a>.
     Each format has different browser requirements.
   </p>
 

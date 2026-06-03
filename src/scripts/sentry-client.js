@@ -150,7 +150,7 @@ function sanitizeBreadcrumbData(data) {
   if (!data || typeof data !== 'object') return sanitizeValue(data);
 
   const sanitizedData = sanitizeValue(data);
-  // navigation breadcrumb 会记录 from/to，里面可能出现 /m3u8-player/?url=...
+  // navigation breadcrumb 会记录 from/to，里面可能出现 /m3u8-player?url=...
   // 这些字段不需要保留 query，只保留页面路径即可，避免在 Sentry 中出现 ?url=[filtered]
   ['url', 'href', 'requestUrl', 'from', 'to'].forEach((key) => {
     if (typeof sanitizedData?.[key] === 'string') {
@@ -232,7 +232,7 @@ function sanitizeRequestUrl(value) {
   const isRootRelativeUrl = value.startsWith('/');
 
   try {
-    // Sentry 的 navigation breadcrumb 常用相对路径，例如 /m3u8-player/?url=...
+    // Sentry 的 navigation breadcrumb 常用相对路径，例如 /m3u8-player?url=...
     // URL 构造器需要 base 才能解析相对路径，因此这里统一补一个临时域名
     const parsedUrl = new URL(value, 'https://metistools.local');
     const path = parsedUrl.pathname.toLowerCase();

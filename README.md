@@ -45,7 +45,7 @@ src/config/               Shared site, navigation, tool, FAQ and guide data
 src/components/           Reusable UI and player components
 src/layouts/              Base and guide article layouts
 src/pages/                Astro routes
-src/pages/guides/         Guide article pages
+src/pages/guides         Guide article pages
 scripts/generate-sitemap.mjs
 scripts/check-production.mjs
 public/                   Static assets, ads.txt, robots.txt and sitemap.xml
@@ -63,6 +63,7 @@ public/                   Static assets, ads.txt, robots.txt and sitemap.xml
 - Keep the European Privacy Message published in AdSense Privacy & messaging.
 - Keep public preview builds `noindex,nofollow`; set `METISTOOLS_NOINDEX=true` or `PUBLIC_METISTOOLS_NOINDEX=true` when the hosting platform does not expose a preview context automatically.
 - Keep sitemap entries synchronized with real pages and include `lastmod`.
+- Maintain guide `datePublished` and `dateModified` manually. Only update `dateModified` after a substantive article change, not after builds, commits, formatting-only edits or batch metadata syncs.
 - Keep guide article images sourced from authorized `public/imgs/` assets unless new images are explicitly approved and added to the project.
 - Keep security headers in `public/_headers` and test them after deployment.
 

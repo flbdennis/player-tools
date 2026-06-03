@@ -8,7 +8,7 @@ import Icon from './Icon.astro';
 
 <div
   id="metis-monitoring-consent"
-  class="fixed inset-x-3 bottom-3 z-[80] hidden rounded-xl border border-orange-100 bg-white/97 p-3 shadow-2xl shadow-violet-100/50 backdrop-blur-xl md:left-auto md:right-5 md:w-[460px] md:p-4"
+  class="fixed inset-x-3 bottom-3 z-[80] hidden rounded-xl border border-orange-100 bg-white/97 p-3 shadow-2xl shadow-violet-100/50 backdrop-blur-xl sm:left-auto sm:right-4 sm:w-[620px] sm:max-w-[calc(100vw-2rem)] md:right-5 md:p-4"
   role="dialog"
   aria-live="polite"
   aria-labelledby="metis-monitoring-consent-title"
@@ -35,12 +35,12 @@ import Icon from './Icon.astro';
       <p id="metis-monitoring-status" class="mt-2 rounded-md bg-violet-50 px-2.5 py-1.5 text-[12px] font-bold text-violet-800">
         Current optional monitoring status: Not selected.
       </p>
-      <div class="mt-2 grid grid-cols-2 gap-2">
+      <div class="mt-2 grid grid-cols-2 gap-2.5">
         <Button
           id="metis-monitoring-allow"
           type="button"
           size="sm"
-          class="h-8 rounded-lg px-3 py-0 text-[12px] md:h-9 md:text-[13px]"
+          class="h-8 rounded-lg px-2 py-0 text-[12px] whitespace-nowrap md:h-9 md:px-3 md:text-[13px]"
         >
           <span class="hidden sm:inline">Allow Optional Monitoring</span>
           <span class="sm:hidden">Allow</span>
@@ -50,12 +50,12 @@ import Icon from './Icon.astro';
           type="button"
           variant="secondary"
           size="sm"
-          class="h-8 rounded-lg px-3 py-0 text-[12px] md:h-9 md:text-[13px]"
+          class="h-8 rounded-lg px-2 py-0 text-[12px] whitespace-nowrap md:h-9 md:px-3 md:text-[13px]"
         >
           Keep Off
         </Button>
       </div>
-      <a href="/privacy-policy/" class="mt-2 inline-flex text-[12px] font-bold text-violet-700 hover:text-violet-800">
+      <a href="/privacy-policy" class="mt-2 inline-flex text-[12px] font-bold text-violet-700 hover:text-violet-800">
         Read Privacy Policy
       </a>
     </div>

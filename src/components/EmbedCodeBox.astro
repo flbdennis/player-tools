@@ -3,8 +3,8 @@
 import Icon from './Icon.astro';
 import { site } from '../config/site.js';
 const { embed } = Astro.props;
-const embedPath = embed.embedPath || embed.pagePath || '/embed/m3u8/';
-const normalizedEmbedPath = embedPath.endsWith('/') ? embedPath : `${embedPath}/`;
+const embedPath = embed.embedPath || embed.pagePath || '/embed/m3u8';
+const normalizedEmbedPath = embedPath === '/' ? '/' : embedPath.replace(/\/+$/, '');
 const defaultEmbedCode = `<iframe title="${embed.title || 'MetisTools embedded player'}" src="${site.domain}${normalizedEmbedPath}" width="100%" height="360" style="border:0;aspect-ratio:16/9" allow="autoplay; fullscreen; encrypted-media" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
 ---
 
@@ -86,7 +86,7 @@ const defaultEmbedCode = `<iframe title="${embed.title || 'MetisTools embedded p
   const codeNote = document.getElementById('embed-code-note');
   let embedMode = 'empty';
   const embedPanel = document.getElementById('embed-code-panel');
-  const embedPath = embedPanel?.dataset.embedPath || '/embed/m3u8/';
+  const embedPath = embedPanel?.dataset.embedPath || '/embed/m3u8';
   const embedTitle = embedPanel?.dataset.embedTitle || 'MetisTools embedded player';
   const sensitiveNotice = embedPanel?.dataset.sensitiveNotice || '';
   const missingUrlNotice = embedPanel?.dataset.missingUrlNotice || '';
@@ -136,7 +136,7 @@ const defaultEmbedCode = `<iframe title="${embed.title || 'MetisTools embedded p
   function updateEmbedCode() {
     if (!codeEl) return;
     const origin = window.location.origin === 'null' ? 'https://metistools.com' : window.location.origin;
-    const normalizedPath = embedPath.endsWith('/') ? embedPath : `${embedPath}/`;
+    const normalizedPath = embedPath === '/' ? '/' : embedPath.replace(/\/+$/, '');
     const currentUrl = getCurrentPlayerUrl();
     const shouldIncludeUrl = embedMode === 'current' && Boolean(currentUrl);
     const playerUrl = `${origin}${normalizedPath}${shouldIncludeUrl ? `#src=${encodeURIComponent(currentUrl)}` : ''}`;

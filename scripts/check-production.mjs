@@ -1,6 +1,7 @@
 // 生产发布检查脚本 - 使用 Node 原生能力检查 Ads 审核前最关键的工程与 SEO 风险
 import fs from 'node:fs';
 import path from 'node:path';
+import { guideArticles } from '../src/config/guideArticles.js';
 
 const rootDir = process.cwd();
 const distDir = path.join(rootDir, 'dist');
@@ -55,8 +56,11 @@ function getTagCount(html, pattern) {
 function routeFromDistHtml(file) {
   const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
   if (relativePath === 'index.html') return '/';
-  if (relativePath === '404.html') return '/404/';
-  return `/${relativePath.replace(/index\.html$/, '')}`;
+  if (relativePath === '404.html') return '/404';
+  const route = relativePath
+    .replace(/\/index\.html$/, '')
+    .replace(/\.html$/, '');
+  return `/${route}`;
 }
 
 function stripHashAndQuery(value) {
@@ -70,6 +74,10 @@ function readPngSize(relativePath) {
     width: buffer.readUInt32BE(16),
     height: buffer.readUInt32BE(20),
   };
+}
+
+function isValidIsoDate(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00Z`).getTime());
 }
 
 // 基础目录和产物检查：必须先构建 dist，再运行本脚本
@@ -98,10 +106,11 @@ if (exactExists('public', 'Sitemap.xml')) fail('public/Sitemap.xml must not exis
 if (exactExists('public', 'favicon.ico')) fail('public/favicon.ico must not exist. Redirect to /logo/favicon.ico instead.');
 
 // 常见大小写误访路径：Cloudflare Pages 静态路径大小写敏感，用 _redirects 规范化，减少无意义 404
+let redirectsText = '';
 if (!exists('public/_redirects')) {
   fail('public/_redirects is missing. Add redirects for common case-sensitive utility paths.');
 } else {
-  const redirectsText = read('public/_redirects');
+  redirectsText = read('public/_redirects');
   [
     '/Sitemap.xml /sitemap.xml 301',
     '/Robots.txt /robots.txt 301',
@@ -188,29 +197,59 @@ const runtimeFiles = listFiles(distDir, (file) => /\.(html|js)$/.test(file));
 const runtimeText = runtimeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
 const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google'));
 const validDistRoutes = new Set(pageHtmlFiles.map(routeFromDistHtml));
-const noAdsPages = new Set([
-  '404.html',
-  'about/index.html',
-  'contact/index.html',
-  'embed/dash/index.html',
-  'embed/m3u8/index.html',
-  'embed/mp4/index.html',
-  'privacy-policy/index.html',
-  'terms/index.html',
-  'playback-policy/index.html',
+const noAdsRoutes = new Set([
+  '/404',
+  '/about',
+  '/contact',
+  '/embed/dash',
+  '/embed/m3u8',
+  '/embed/mp4',
+  '/privacy-policy',
+  '/terms',
+  '/playback-policy',
 ]);
 const noindexRoutes = new Set([
-  '/404/',
-  '/embed/dash/',
-  '/embed/m3u8/',
-  '/embed/mp4/',
+  '/404',
+  '/embed/dash',
+  '/embed/m3u8',
+  '/embed/mp4',
 ]);
 
+if (redirectsText) {
+  [...validDistRoutes]
+    .filter((route) => route !== '/' && route !== '/404')
+    .sort()
+    .forEach((route) => {
+      const rule = `${route}/ ${route} 301`;
+      if (!redirectsText.includes(rule)) fail(`public/_redirects is missing trailing-slash normalization rule: ${rule}`);
+    });
+}
+
 const guideArticlePages = pageHtmlFiles.filter((file) => {
-  const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
-  return relativePath.startsWith('guides/') && relativePath !== 'guides/index.html';
+  const route = routeFromDistHtml(file);
+  return route.startsWith('/guides/') && route !== '/guides';
 });
 if (guideArticlePages.length < 6) fail(`Guide article count is too low: ${guideArticlePages.length}. Keep at least 6 guide pages before AdSense review.`);
+
+// Guide 日期检查：日期只代表内容发布/实质修改，不应因构建、提交或格式调整批量刷新
+const today = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}).format(new Date());
+const guideModifiedDates = guideArticles.map((article) => article.dateModified);
+const uniqueGuideModifiedDates = new Set(guideModifiedDates);
+guideArticles.forEach((article) => {
+  if (!isValidIsoDate(article.datePublished)) fail(`${article.slug} has an invalid datePublished.`);
+  if (!isValidIsoDate(article.dateModified)) fail(`${article.slug} has an invalid dateModified.`);
+  if (article.datePublished > today) fail(`${article.slug} datePublished must not be in the future.`);
+  if (article.dateModified > today) fail(`${article.slug} dateModified must not be in the future.`);
+  if (article.dateModified < article.datePublished) fail(`${article.slug} dateModified must not be earlier than datePublished.`);
+});
+if (guideArticles.length >= 6 && uniqueGuideModifiedDates.size < 3) {
+  fail('Guide dateModified values look batch-updated. Only update dateModified after substantive article changes.');
+}
 
 if (exists('src/config/faqPage.js')) {
   const faqSource = read('src/config/faqPage.js');
@@ -247,7 +286,7 @@ if (exists('src/components/Header.astro')) {
 
 if (exists('public/sitemap.xml')) {
   const sitemapText = read('public/sitemap.xml');
-  if (sitemapText.includes('/blog/')) fail('sitemap.xml must not include /blog/ while Blog is disabled.');
+  if (/https:\/\/metistools\.com\/blog(?:\/|<)/.test(sitemapText)) fail('sitemap.xml must not include /blog while Blog is disabled.');
 
   const sitemapEntries = [...sitemapText.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((match) => match[1]);
   const sitemapUrls = sitemapEntries
@@ -265,6 +304,8 @@ if (exists('public/sitemap.xml')) {
   if (staleRoutes.length > 0) fail(`sitemap.xml includes missing routes: ${staleRoutes.join(', ')}`);
   sitemapEntries.forEach((entry) => {
     const loc = entry.match(/<loc>([^<]+)<\/loc>/)?.[1] || 'unknown URL';
+    const locPath = loc.replace('https://metistools.com', '');
+    if (locPath !== '/' && locPath.endsWith('/')) fail(`sitemap.xml URL must not use a trailing slash: ${loc}`);
     if (!/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(entry)) fail(`sitemap.xml entry is missing valid lastmod: ${loc}`);
     if (!/<changefreq>[^<]+<\/changefreq>/.test(entry)) fail(`sitemap.xml entry is missing changefreq: ${loc}`);
   });
@@ -295,13 +336,14 @@ pageHtmlFiles.forEach((file) => {
     .map(stripHashAndQuery)
     .filter((href) => href && !href.startsWith('/imgs/') && !href.startsWith('/logo/') && !href.startsWith('/og/'));
   internalLinks.forEach((href) => {
+    if (href !== '/' && href.endsWith('/')) fail(`${relativePath} links to a trailing-slash internal page: ${href}`);
     if (!validDistRoutes.has(href)) fail(`${relativePath} links to a missing internal page: ${href}`);
   });
 
-  if (noAdsPages.has(relativePath) && hasAdSenseScript) {
+  if (noAdsRoutes.has(route) && hasAdSenseScript) {
     fail(`${relativePath} must not load AdSense.`);
   }
-  if (['m3u8-player/index.html', 'mp4-player/index.html', 'dash-player/index.html'].includes(relativePath)) {
+  if (['/m3u8-player', '/mp4-player', '/dash-player'].includes(route)) {
     if (/<ins\b[^>]*adsbygoogle/i.test(html) || /\bdata-ad-slot=/i.test(html) || /adsbygoogle\.push/i.test(html)) {
       fail(`${relativePath} must not contain tool-page ad slots before AdSense review.`);
     }
@@ -329,15 +371,24 @@ pageHtmlFiles.forEach((file) => {
     }
     if (/<link rel="canonical"/i.test(html)) fail(`${relativePath} must not output canonical.`);
   } else {
-    if (!/<link rel="canonical" href="https:\/\/metistools\.com\//i.test(html)) fail(`${relativePath} is missing canonical.`);
+    const canonicalMatch = html.match(/<link rel="canonical" href="(https:\/\/metistools\.com\/?[^"]*)"/i);
+    if (!canonicalMatch) {
+      fail(`${relativePath} is missing canonical.`);
+    } else {
+      const expectedCanonical = `https://metistools.com${route === '/' ? '/' : route}`;
+      if (canonicalMatch[1] !== expectedCanonical) fail(`${relativePath} canonical must be ${expectedCanonical}.`);
+      if (route !== '/' && canonicalMatch[1].endsWith('/')) fail(`${relativePath} canonical must not use a trailing slash.`);
+    }
     if (!/<meta name="robots" content="index, follow"/i.test(html)) fail(`${relativePath} must be index, follow.`);
   }
 });
 
-const aboutHtml = exists('dist/about/index.html') ? read('dist/about/index.html') : '';
+const aboutFile = pageHtmlFiles.find((file) => routeFromDistHtml(file) === '/about');
+const aboutHtml = aboutFile ? fs.readFileSync(aboutFile, 'utf8') : '';
 if (!aboutHtml.includes('https://github.com/flbdennis/player-tools')) fail('About page must link to the GitHub repository for transparency.');
 
-const privacyHtml = exists('dist/privacy-policy/index.html') ? read('dist/privacy-policy/index.html') : '';
+const privacyFile = pageHtmlFiles.find((file) => routeFromDistHtml(file) === '/privacy-policy');
+const privacyHtml = privacyFile ? fs.readFileSync(privacyFile, 'utf8') : '';
 if (!privacyHtml.includes('Do Not Sell') || !privacyHtml.includes('Global Privacy Control') || !privacyHtml.includes('children under 13')) {
   fail('Privacy Policy must include US privacy choices, Global Privacy Control and children policy language.');
 }

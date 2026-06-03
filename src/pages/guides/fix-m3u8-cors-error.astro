@@ -1,5 +1,6 @@
 ---
 import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import GuideArticleImage from '../../components/GuideArticleImage.astro';
 import { getGuideArticle } from '../../config/guideArticles.js';
 
 const article = getGuideArticle('fix-m3u8-cors-error');
@@ -15,7 +16,7 @@ const article = getGuideArticle('fix-m3u8-cors-error');
 
   <p>
     If you own or manage the stream, use the
-    <a href="/m3u8-player/">M3U8 Player Online</a> to reproduce the browser
+    <a href="/m3u8-player">M3U8 Player Online</a> to reproduce the browser
     behavior, then check the responses from your origin server or CDN. The goal
     is to configure authorized browser playback correctly, not to work around
     someone else’s access controls.
@@ -52,6 +53,8 @@ const article = getGuideArticle('fix-m3u8-cors-error');
     identify which response is missing the required access behavior.
   </p>
 
+  <GuideArticleImage image={article.image} />
+
   <h2>Confirm MIME Types and Redirects</h2>
   <p>
     CORS issues sometimes appear together with other response problems. The
@@ -65,7 +68,7 @@ const article = getGuideArticle('fix-m3u8-cors-error');
     reachable, HTTPS is consistent and the browser receives media responses
     rather than HTML or JSON error bodies. If you are also seeing codec or media
     errors, read
-    <a href="/guides/m3u8-works-in-vlc-but-not-browser/">why M3U8 can work in VLC but fail in the browser</a>.
+    <a href="/guides/m3u8-works-in-vlc-but-not-browser">why M3U8 can work in VLC but fail in the browser</a>.
   </p>
 
   <h2>Fix CORS at the Source You Control</h2>

@@ -1,5 +1,6 @@
 ---
 import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import GuideArticleImage from '../../components/GuideArticleImage.astro';
 import { getGuideArticle } from '../../config/guideArticles.js';
 
 const article = getGuideArticle('what-is-m3u8');
@@ -19,7 +20,7 @@ const article = getGuideArticle('what-is-m3u8');
     of video. A browser player reads the map, requests the pieces and switches
     between quality levels when the stream provides variants. You can test a
     public or authorized playlist with the
-    <a href="/m3u8-player/">M3U8 Player Online</a>.
+    <a href="/m3u8-player">M3U8 Player Online</a>.
   </p>
 
   <h2>How M3U8 Works With HLS</h2>
@@ -36,6 +37,8 @@ const article = getGuideArticle('what-is-m3u8');
     M3U8 files are media playlists. A media playlist points directly to the
     segment files that the player downloads during playback.
   </p>
+
+  <GuideArticleImage image={article.image} />
 
   <h2>Why M3U8 Is Different From a Normal Video File</h2>
   <p>
@@ -73,8 +76,8 @@ const article = getGuideArticle('what-is-m3u8');
   <h2>When to Use M3U8, MP4 or MPD</h2>
   <p>
     Use M3U8 for HLS playlists. Use the
-    <a href="/mp4-player/">MP4 Player Online</a> for direct MP4 file URLs. Use
-    the <a href="/dash-player/">MPEG-DASH Player</a> for MPD manifests. Choosing
+    <a href="/mp4-player">MP4 Player Online</a> for direct MP4 file URLs. Use
+    the <a href="/dash-player">MPEG-DASH Player</a> for MPD manifests. Choosing
     the right test page matters because each format has different loading
     behavior and different failure points.
   </p>
