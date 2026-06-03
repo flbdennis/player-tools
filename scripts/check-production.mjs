@@ -91,6 +91,26 @@ if (forbiddenTypeScriptFiles.length > 0) {
 if (!exists('public/ads.txt')) fail('public/ads.txt is missing.');
 if (exactExists('public', 'Ads.txt')) fail('public/Ads.txt must not exist. Use lowercase ads.txt only.');
 if (exactExists('dist', 'Ads.txt')) fail('dist/Ads.txt must not exist. Use lowercase ads.txt only.');
+if (!exists('public/robots.txt')) fail('public/robots.txt is missing.');
+if (!exists('public/sitemap.xml')) fail('public/sitemap.xml is missing.');
+if (exactExists('public', 'Robots.txt')) fail('public/Robots.txt must not exist. Redirect the variant instead.');
+if (exactExists('public', 'Sitemap.xml')) fail('public/Sitemap.xml must not exist. Redirect the variant instead.');
+if (exactExists('public', 'favicon.ico')) fail('public/favicon.ico must not exist. Redirect to /logo/favicon.ico instead.');
+
+// 常见大小写误访路径：Cloudflare Pages 静态路径大小写敏感，用 _redirects 规范化，减少无意义 404
+if (!exists('public/_redirects')) {
+  fail('public/_redirects is missing. Add redirects for common case-sensitive utility paths.');
+} else {
+  const redirectsText = read('public/_redirects');
+  [
+    '/Sitemap.xml /sitemap.xml 301',
+    '/Robots.txt /robots.txt 301',
+    '/Ads.txt /ads.txt 301',
+    '/favicon.ico /logo/favicon.ico 301',
+  ].forEach((rule) => {
+    if (!redirectsText.includes(rule)) fail(`public/_redirects is missing rule: ${rule}`);
+  });
+}
 
 // OG 图检查：统一社交图必须存在且尺寸符合 1200x630
 if (!exists('public/og/default-og.png')) {

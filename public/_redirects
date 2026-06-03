@@ -1,0 +1,11 @@
+# Cloudflare Pages redirects - normalize common case-sensitive utility paths
+/Sitemap.xml /sitemap.xml 301
+/SITEMAP.xml /sitemap.xml 301
+/sitemap.XML /sitemap.xml 301
+/SITEMAP.XML /sitemap.xml 301
+/Robots.txt /robots.txt 301
+/ROBOTS.txt /robots.txt 301
+/Ads.txt /ads.txt 301
+/ADS.txt /ads.txt 301
+/favicon.ico /logo/favicon.ico 301
+/Favicon.ico /logo/favicon.ico 301

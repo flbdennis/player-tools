@@ -609,12 +609,31 @@ const panelTitle = `${playerLabel} playback panel`;
         appendDiagnosticLog('SUCCESS', 'Playback request accepted by the browser.', details);
       })
       .catch((error) => {
+        if (isBrowserPlaybackStartBlocked(error)) {
+          appendDiagnosticLog(
+            'WARNING',
+            'Browser blocked automatic playback start.',
+            `Technical details: ${error?.message || 'playback must be started from the video controls'}`,
+            'The source is loaded. Use the video controls to start playback, or click Play again after the stream is ready.'
+          );
+          setDiagnosticStatus('Ready', 'Source loaded. Use the video controls to start playback.', 'warning');
+          setPlayerStatus(`${playerLabel} source loaded. Use the video controls if the browser blocks automatic playback.`);
+          return;
+        }
+
         reportFatalPlaybackError(
           'The browser rejected the playback request.',
           `Technical details: ${error?.message || 'browser blocked playback or unsupported media'}`,
           'Click Play again, check browser autoplay rules, or verify that the media format is supported.'
         );
       });
+  }
+
+  function isBrowserPlaybackStartBlocked(error) {
+    const errorName = String(error?.name || '');
+    const errorMessage = String(error?.message || '');
+    return errorName === 'NotAllowedError'
+      || /autoplay|user gesture|user activation|interact|not allowed|permission/i.test(errorMessage);
   }
 
   function resetPlaybackEngines() {

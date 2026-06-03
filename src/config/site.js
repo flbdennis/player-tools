@@ -21,7 +21,7 @@ export const site = {
   // 站点文字 Logo 路径 - Header/Footer 统一使用 public/logo 中的既有素材
   logo: '/logo/logo_text.svg',
   // favicon 路径 - 浏览器标签页和搜索结果图标使用
-  favicon: '/logo/logo.ico',
+  favicon: '/logo/favicon.ico',
 };
 
 // 全局 SEO 默认配置 - 当页面没有传入独立 SEO 时作为兜底内容
