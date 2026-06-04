@@ -25,6 +25,29 @@ export const guideArticles = [
     },
   },
   {
+    slug: 'browser-video-format-support',
+    href: '/guides/browser-video-format-support',
+    category: 'Browser Support',
+    title: 'M3U8, MP4 and DASH Browser Support: Chrome, Safari, Firefox and Edge',
+    h1: 'M3U8, MP4 and DASH Browser Support',
+    description:
+      'Compare how M3U8/HLS, MP4 and MPEG-DASH playback behave across Chrome, Safari, Firefox and Edge, and learn which browser to test first.',
+    summary:
+      'A practical browser comparison for HLS/M3U8, MP4 and MPEG-DASH playback tests.',
+    toolHref: '/m3u8-player',
+    toolLabel: 'M3U8 Player Online',
+    priority: 'P1',
+    datePublished: '2026-06-04',
+    dateModified: '2026-06-04',
+    image: {
+      src: '/imgs/guide-screenshots/how-to-test-m3u8-stream-online.webp',
+      width: 1602,
+      height: 1500,
+      alt: 'Screenshot of browser-side video playback testing with MetisTools Playback Log events',
+      caption: 'A browser-side test helps compare what the web player can load, decode and report for the same video source.',
+    },
+  },
+  {
     slug: 'what-is-m3u8',
     href: '/guides/what-is-m3u8',
     category: 'M3U8 / HLS',

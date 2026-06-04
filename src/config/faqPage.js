@@ -81,6 +81,39 @@ export const faqPageGroups = [
     ],
   },
   {
+    title: 'Browser Support',
+    items: [
+      {
+        question: 'Which browser should I use first for M3U8 or HLS testing?',
+        answer:
+          'Safari is useful for checking native HLS behavior, while Chrome or Edge are useful for testing hls.js and MediaSource behavior. If one browser fails, compare the same public or authorized URL in another browser before changing the source.',
+        linkHref: '/guides/browser-video-format-support',
+        linkLabel: 'Read the browser support guide',
+      },
+      {
+        question: 'Why does HLS play in Safari but not Chrome?',
+        answer:
+          'Safari has native HLS support on Apple platforms. Chrome usually needs a JavaScript player path such as hls.js, and the stream must pass browser CORS, codec, segment and access checks.',
+        linkHref: '/guides/browser-video-format-support',
+        linkLabel: 'Compare browser behavior',
+      },
+      {
+        question: 'Why does an MP4 play in one browser but fail in another?',
+        answer:
+          'MP4 is a container, so browser playback still depends on the video codec, audio codec, MIME type, Range request support, HTTPS consistency and source server behavior.',
+        linkHref: '/guides/browser-video-format-support',
+        linkLabel: 'Review MP4 browser differences',
+      },
+      {
+        question: 'Which browser is best for DASH or MPD testing?',
+        answer:
+          'Chrome or Edge are practical first checks for ordinary MPEG-DASH playback because DASH testing usually depends on MediaSource support and a JavaScript player such as dash.js. DRM-protected streams still need the correct authorized license flow.',
+        linkHref: '/guides/browser-video-format-support',
+        linkLabel: 'Read DASH browser notes',
+      },
+    ],
+  },
+  {
     title: 'Playback Log and Troubleshooting',
     items: [
       {

@@ -1,0 +1,183 @@
+---
+import GuideArticleLayout from '../../layouts/GuideArticleLayout.astro';
+import GuideArticleImage from '../../components/GuideArticleImage.astro';
+import { getGuideArticle } from '../../config/guideArticles.js';
+
+const article = getGuideArticle('browser-video-format-support');
+---
+
+<GuideArticleLayout article={article}>
+  <p>
+    A video link can work in one browser and fail in another. That does not
+    always mean the link is broken or the player is wrong. M3U8/HLS, direct
+    MP4 files and MPEG-DASH MPD manifests use different browser features, codec
+    paths and access rules.
+  </p>
+
+  <p>
+    Use this guide when you need to decide which browser to test first, or when
+    a stream plays in Safari but not Chrome, an MP4 file fails in the browser,
+    or a DASH manifest works in one player but not another. For a clean test,
+    use only public or authorized video links.
+  </p>
+
+  <h2>Quick Browser Testing Summary</h2>
+  <ul>
+    <li>
+      <strong>M3U8 / HLS:</strong> test Safari first when you want to confirm
+      native HLS behavior, then test Chrome or Edge for hls.js and MediaSource
+      behavior.
+    </li>
+    <li>
+      <strong>MP4:</strong> test Chrome or Edge first for a common baseline,
+      then compare Safari and Firefox if codec, MIME type or Range request
+      behavior looks suspicious.
+    </li>
+    <li>
+      <strong>DASH / MPD:</strong> test Chrome or Edge first because most
+      browser DASH playback depends on a JavaScript player such as dash.js and
+      MediaSource support.
+    </li>
+    <li>
+      <strong>Firefox:</strong> use it as a useful second check for codec,
+      CORS and MediaSource differences rather than assuming it will match
+      Chrome exactly.
+    </li>
+  </ul>
+
+  <h2>Why M3U8 and HLS Behave Differently</h2>
+  <p>
+    HLS was developed by Apple, and Safari has strong native HLS support on
+    Apple platforms. That is why an M3U8 stream may play directly in Safari
+    while the same M3U8 link needs hls.js or another JavaScript player in
+    Chrome, Edge or Firefox.
+  </p>
+
+  <p>
+    This distinction is important when you see searches such as
+    <code>hls not playing in chrome</code>, <code>chrome hls support</code> or
+    <code>does chrome support m3u8</code>. Chrome can play many HLS streams in
+    a web player, but the page usually needs a player library and the source
+    must allow browser requests for the playlist, variant playlists, segments
+    and key files.
+  </p>
+
+  <p>
+    If you are testing an HLS stream, start with the
+    <a href="/m3u8-player">M3U8 Player Online</a>. If the stream plays in VLC
+    but not in the browser, compare the result with
+    <a href="/guides/m3u8-works-in-vlc-but-not-browser">why M3U8 can work in VLC but not in the browser</a>
+    and the <a href="/guides/fix-m3u8-cors-error">M3U8 CORS error guide</a>.
+  </p>
+
+  <GuideArticleImage image={article.image} />
+
+  <h2>Why MP4 May Play in One Browser but Not Another</h2>
+  <p>
+    MP4 looks simple because it is often one direct video file. In practice,
+    <code>mp4 not playing</code> or <code>mp4 video not playing in browser</code>
+    can come from several different causes. MP4 is a container, not a promise
+    that every browser can decode every video and audio stream inside it.
+  </p>
+
+  <p>
+    A browser-friendly MP4 usually needs a real media response, a suitable
+    MIME type, browser-supported codecs such as common H.264/AAC combinations,
+    HTTPS consistency and useful byte Range request handling. Safari can be
+    stricter about some media delivery details, while Chrome and Edge are often
+    convenient first checks for a desktop baseline.
+  </p>
+
+  <p>
+    Use the <a href="/mp4-player">MP4 Player Online</a> when you want to test a
+    direct MP4 URL. If the file exists but playback fails, read
+    <a href="/guides/mp4-url-not-playing">why an MP4 URL may not play in the browser</a>
+    before changing the player.
+  </p>
+
+  <h2>Why DASH and MPD Are Usually Chrome or Edge First</h2>
+  <p>
+    MPEG-DASH playback in a browser usually depends on an MPD manifest, segment
+    requests, MediaSource support and a JavaScript player such as dash.js.
+    That makes Chrome or Edge a practical first test environment for ordinary
+    browser-side DASH playback.
+  </p>
+
+  <p>
+    DASH failures are often not visible from the MPD URL alone. The manifest
+    may load while initialization segments, media segments, codec declarations
+    or license requirements still prevent playback. If the stream uses DRM, a
+    simple public MPD test cannot replace the authorized license flow.
+  </p>
+
+  <p>
+    Use the <a href="/dash-player">MPEG-DASH Player</a> for public or
+    authorized MPD links, then compare the result with
+    <a href="/guides/mpd-test-online">how to test an MPD manifest online</a>.
+    Terms like <code>mpd player</code>, <code>mpd not playing</code> and
+    <code>dash not playing in browser</code> usually point to manifest,
+    segment, codec, CORS or DRM-related checks rather than one universal
+    browser fix.
+  </p>
+
+  <h2>How to Run a Clean Cross-Browser Test</h2>
+  <ul>
+    <li>Use the direct M3U8 playlist, MP4 file URL or MPD manifest URL.</li>
+    <li>Test only links you own, manage or are authorized to access.</li>
+    <li>Keep the same URL, network and device conditions when comparing browsers.</li>
+    <li>Check whether the browser receives media responses instead of HTML, JSON or login pages.</li>
+    <li>Compare the Playback Log with browser network details and source server logs.</li>
+  </ul>
+
+  <h2>What the Playback Log Can Tell You</h2>
+  <p>
+    The Playback Log records browser-side loading events, warnings and playback
+    errors. It can show whether the player reached metadata, whether playback
+    started, or whether a media library reported a likely manifest, segment,
+    network or codec issue.
+  </p>
+
+  <p>
+    The log cannot prove what happened inside your CDN, storage provider,
+    firewall, license server or private application. It also cannot bypass
+    CORS, DRM, login walls, token rules, copyright restrictions or source
+    website permissions. Treat it as a browser-side clue, not as a full server
+    diagnosis.
+  </p>
+
+  <h2>Browser Support FAQ</h2>
+  <p>
+    <strong>Does Chrome support M3U8?</strong><br />
+    Chrome can play many M3U8/HLS streams through a JavaScript player such as
+    hls.js when MediaSource and the source server configuration allow it. Do
+    not assume a bare M3U8 URL will behave the same as Safari native HLS.
+  </p>
+
+  <p>
+    <strong>Why does HLS play in Safari but not Chrome?</strong><br />
+    Safari has native HLS support. Chrome often relies on hls.js or another web
+    player path, and the stream must pass browser CORS, codec, segment and
+    access checks.
+  </p>
+
+  <p>
+    <strong>Why does an MP4 play in one browser but fail in another?</strong><br />
+    The file may use a codec, MIME type, server response or Range request
+    behavior that one browser accepts and another rejects. Test the same URL in
+    the <a href="/mp4-player">MP4 Player Online</a> and compare browser errors.
+  </p>
+
+  <p>
+    <strong>Is DASH supported directly by every browser?</strong><br />
+    No. Browser DASH playback usually depends on a JavaScript player, an MPD
+    manifest, MediaSource support and compatible media segments. DRM-protected
+    DASH also needs the correct authorized license flow.
+  </p>
+
+  <p>
+    <strong>Can MetisTools fix browser playback errors?</strong><br />
+    No. MetisTools helps you test browser playback and review diagnostic clues.
+    The actual fix usually belongs in the source URL, server headers, codec
+    settings, CDN rules, player integration or authorization flow.
+  </p>
+</GuideArticleLayout>

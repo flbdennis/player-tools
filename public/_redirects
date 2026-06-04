@@ -19,6 +19,7 @@
 /embed/mp4/ /embed/mp4 301
 /faq/ /faq 301
 /guides/ /guides 301
+/guides/browser-video-format-support/ /guides/browser-video-format-support 301
 /guides/fix-m3u8-cors-error/ /guides/fix-m3u8-cors-error 301
 /guides/how-to-test-m3u8-stream-online/ /guides/how-to-test-m3u8-stream-online 301
 /guides/m3u8-works-in-vlc-but-not-browser/ /guides/m3u8-works-in-vlc-but-not-browser 301
