@@ -7,7 +7,6 @@ docs/
 tmp/
 output/
 .playwright-cli/
-AGENTS
 
 # 环境配置文件
 .env

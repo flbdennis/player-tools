@@ -1,0 +1,29 @@
+---
+// 中文 Contact 页面 - 中文用户联系入口
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import { site } from '../../config/site.js';
+
+const pageTitle = '联系 MetisTools';
+const pageDescription = '联系 MetisTools，反馈 M3U8在线播放器、HLS直播流测试、播放日志、隐私或合规相关问题。';
+const canonical = `${site.domain}/zh/contact`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN" enableAds={false}>
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-4 text-3xl font-black text-gray-950 md:text-4xl">联系 MetisTools</h1>
+      <p class="mb-8 text-lg font-medium leading-relaxed text-gray-600">
+        如果你发现 M3U8在线播放器存在问题，或需要反馈隐私、版权、授权测试边界等事项，可以通过邮箱联系。
+      </p>
+      <div class="rounded-xl border border-orange-100 bg-white/82 p-8 shadow-sm shadow-orange-100/60">
+        <h2 class="mb-2 text-lg font-black text-gray-950">邮箱</h2>
+        <a class="break-all text-lg font-bold text-violet-700 hover:text-violet-900" href={`mailto:${site.email}`}>{site.email}</a>
+        <h2 class="mb-2 mt-8 text-lg font-black text-gray-950">反馈时请说明</h2>
+        <p class="text-sm font-medium leading-relaxed text-gray-600">
+          请说明使用的页面、浏览器、设备类型、错误提示和链接类型。不要通过邮件发送未经授权、私密或包含敏感 token 的视频链接。
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

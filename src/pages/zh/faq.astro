@@ -1,0 +1,45 @@
+---
+// 中文 FAQ 页面 - 仅覆盖已汉化 M3U8 工具和合规边界
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import FaqAccordion from '../../components/FaqAccordion.astro';
+import { site } from '../../config/site.js';
+
+const pageTitle = 'M3U8在线播放器常见问题';
+const pageDescription = '查看 M3U8在线播放器、m3u8play、m3u8player、HLS直播流测试、跨域错误、隐私和授权边界相关常见问题。';
+const canonical = `${site.domain}/zh/faq`;
+const items = [
+  {
+    question: 'MetisTools 中文版目前支持哪些工具？',
+    answer: '当前中文版只开放 M3U8在线播放器，用于测试公开或已授权的 M3U8/HLS 视频流。MP4 和 DASH 页面暂未汉化，因此中文页不会展示它们的入口。',
+  },
+  {
+    question: 'm3u8play、m3u8 play、m3u8player 和 m3u8 player 是同一类需求吗？',
+    answer: '这些搜索词通常都指向在线 M3U8/HLS 播放或测试需求。本页把它们统一放在中文 M3U8 工具页中覆盖。',
+  },
+  {
+    question: '为什么 M3U8视频无法播放？',
+    answer: '常见原因包括链接过期、播放列表不是有效 M3U8、分片不可访问、CORS 被阻止、编码不兼容、CDN 限制、DRM 或来源站权限限制。',
+  },
+  {
+    question: '这个工具会上传我的视频链接吗？',
+    answer: '播放器用于浏览器本地播放测试，不会把视频链接上传到服务器端解析。请不要粘贴未经授权或包含敏感 token 的链接。',
+  },
+  {
+    question: '可以用 iframe 嵌入播放器吗？',
+    answer: '可以，但只适合公开或已授权的视频流。iframe 不会隐藏或代理原始视频链接，私有或签名链接需要来源站访问规则保护。',
+  },
+];
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN" enableAds={false}>
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-5 text-3xl font-black text-gray-950 md:text-4xl">M3U8在线播放器常见问题</h1>
+      <p class="mb-8 text-lg font-medium leading-relaxed text-gray-600">
+        这里回答中文 M3U8/HLS 在线测试中最常见的问题，包括跨域、授权、隐私、iframe 嵌入和播放失败原因。
+      </p>
+      <FaqAccordion title="常见问题" items={items} idPrefix="zh-faq" />
+    </div>
+  </Container>
+</BaseLayout>

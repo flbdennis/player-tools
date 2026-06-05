@@ -1,17 +1,27 @@
 ---
 // Footer 组件 - 站点底部，复用导航配置并避免假社交链接
 import { site } from '../config/site.js';
-import { footerNav } from '../config/nav.js';
+import { getNavigationForPath } from '../config/nav.js';
 import Icon from './Icon.astro';
 import Container from './Container.astro';
+
+const navigation = getNavigationForPath(Astro.url.pathname);
+const footerNav = navigation.footerNav;
+const logoHref = navigation.homeHref || '/';
+const footerDescription = navigation.footerDescription;
+const contactTitle = navigation.contactTitle || 'Contact';
+const contactPrompt = navigation.contactPrompt || 'Questions or suggestions?';
+const homeAriaLabel = navigation.homeAriaLabel || `${site.name} home`;
+const emailAriaLabel = navigation.emailAriaLabel || `Email ${site.name}`;
+const copyrightText = navigation.copyrightText || `© 2026 ${site.name}. All rights reserved.`;
 ---
 
 <footer class="bg-white/70 border-t border-orange-100/60">
   <Container class="py-5 md:py-6">
     <div class="grid grid-cols-2 gap-x-5 gap-y-6 md:grid-cols-12 md:gap-6">
-      {/* Logo 和站点说明，文案保持英文且可被搜索引擎抓取 */}
+      {/* Logo 和站点说明按当前语言读取配置；中文页不展示未汉化入口 */}
       <div class="col-span-2 md:col-span-3">
-        <a href="/" class="inline-block mb-2" aria-label={`${site.name} home`}>
+        <a href={logoHref} class="inline-block mb-2" aria-label={homeAriaLabel}>
           <img
             src={site.logo}
             alt={`${site.name} logo`}
@@ -22,13 +32,13 @@ import Container from './Container.astro';
           />
         </a>
         <p class="text-[13px] font-medium text-gray-600 leading-snug max-w-[250px]">
-          Free browser-based video player tools for testing public or authorized M3U8, MP4 and MPEG-DASH links.
+          {footerDescription}
         </p>
         {/* 只展示真实可用的联系入口，避免假社交账号影响审核 */}
         <a
           href={`mailto:${site.email}`}
           class="mt-3 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-900 hover:bg-violet-50 hover:text-violet-700 transition-colors"
-          aria-label="Email MetisTools"
+          aria-label={emailAriaLabel}
         >
           <Icon name="Mail" size={16} strokeWidth={2.2} />
         </a>
@@ -63,8 +73,8 @@ import Container from './Container.astro';
       </div>
 
       <div class="col-span-1 md:col-span-3">
-        <h3 class="text-[13px] font-extrabold text-gray-950 mb-2">Contact</h3>
-        <p class="text-[13px] font-semibold text-gray-600 leading-snug mb-1">Questions or suggestions?</p>
+        <h3 class="text-[13px] font-extrabold text-gray-950 mb-2">{contactTitle}</h3>
+        <p class="text-[13px] font-semibold text-gray-600 leading-snug mb-1">{contactPrompt}</p>
         <a href={`mailto:${site.email}`} class="text-[13px] font-bold text-gray-700 hover:text-violet-700 transition-colors break-all">
           {site.email}
         </a>
@@ -73,7 +83,7 @@ import Container from './Container.astro';
 
     {/* 版权信息不能裁切，保持自然高度以确保审核和可信度 */}
     <div class="pt-4 text-center">
-      <p class="text-[12px] font-medium text-gray-500">© 2026 {site.name}. All rights reserved.</p>
+      <p class="text-[12px] font-medium text-gray-500">{copyrightText}</p>
     </div>
   </Container>
 </footer>

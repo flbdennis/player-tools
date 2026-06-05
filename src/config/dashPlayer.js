@@ -91,6 +91,8 @@ export const dashPlayerPage = {
     pagePath: '/dash-player',
     // 播放对象名称 - 播放器提示和日志中描述当前内容类型
     playerLabel: 'DASH stream',
+    // Hidden H2 used for player region semantics and screen readers, not for keyword stuffing
+    panelTitle: 'DASH stream playback panel',
     // 默认测试链接 - 页面初始输入框内容，使用公开 MPD 示例流
     defaultUrl: 'https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd',
     // 输入框占位文案 - 当没有 URL 时显示
@@ -113,10 +115,6 @@ export const dashPlayerPage = {
       lines: [],
       // 日志操作按钮文案 - PlayerShell 内部按钮读取
       actions: {
-        // 开始记录按钮文案
-        start: 'Start Log',
-        // 暂停记录按钮文案
-        pause: 'Pause Log',
         // 清空日志按钮文案
         clear: 'Clear Log',
         // 复制日志按钮文案

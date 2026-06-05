@@ -31,3 +31,13 @@
 /playback-policy/ /playback-policy 301
 /privacy-policy/ /privacy-policy 301
 /terms/ /terms 301
+/zh/about/ /zh/about 301
+/zh/contact/ /zh/contact 301
+/zh/faq/ /zh/faq 301
+/zh/guides/ /zh/guides 301
+/zh/guides/how-to-test-m3u8-stream-online/ /zh/guides/how-to-test-m3u8-stream-online 301
+/zh/guides/m3u8-cors-error/ /zh/guides/m3u8-cors-error 301
+/zh/m3u8-player/ /zh/m3u8-player 301
+/zh/playback-policy/ /zh/playback-policy 301
+/zh/privacy-policy/ /zh/privacy-policy 301
+/zh/terms/ /zh/terms 301

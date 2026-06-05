@@ -1,0 +1,39 @@
+---
+// 中文服务条款页面 - 简版合规说明
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import { site } from '../../config/site.js';
+
+const pageTitle = '服务条款';
+const pageDescription = '阅读 MetisTools 中文版服务条款，了解 M3U8在线播放器的授权测试、版权、访问限制和禁止用途。';
+const canonical = `${site.domain}/zh/terms`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN" enableAds={false}>
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-6 text-3xl font-black text-gray-950 md:text-4xl">服务条款</h1>
+      <div class="space-y-6 text-base font-medium leading-relaxed text-gray-600">
+        <p>
+          使用 MetisTools 即表示你同意仅测试自己拥有、管理或已获得授权访问的视频链接。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">允许用途</h2>
+        <p>
+          你可以使用 M3U8在线播放器测试公开或已授权的 M3U8/HLS 链接，查看浏览器播放结果和播放日志。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">禁止用途</h2>
+        <p>
+          禁止使用本站下载、转换、解析、抓取、重新分发视频，或绕过 CORS、DRM、登录、token、地域限制、版权限制和来源网站权限。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">结果限制</h2>
+        <p>
+          播放结果和日志仅供参考，可能受到浏览器、网络、CDN、服务器、编码、MIME、Range 请求和访问权限影响。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">联系</h2>
+        <p>
+          条款相关问题请发送邮件至 <a class="font-bold text-violet-700 hover:text-violet-900" href={`mailto:${site.email}`}>{site.email}</a>。
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

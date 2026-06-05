@@ -17,6 +17,9 @@ const {
   robots,
   disableCanonical = false,
   enableAds = true,
+  lang = site.language,
+  ogLocale,
+  alternateLinks = [],
 } = Astro.props;
 
 // 公开预览环境统一 noindex、禁 canonical、禁 AdSense，避免 preview 域污染正式站 SEO/Ads 审核信号
@@ -27,7 +30,7 @@ const effectiveEnableAds = enableAds && !site.noindex;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -40,6 +43,8 @@ const effectiveEnableAds = enableAds && !site.noindex;
 	      robots={effectiveRobots}
 	      disableCanonical={effectiveDisableCanonical}
 	      jsonLd={jsonLd}
+	      ogLocale={ogLocale}
+	      alternateLinks={alternateLinks}
 	    />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     {/* Google Analytics 预连接 - 只做 DNS/TLS 预热，不改变同意状态 */}

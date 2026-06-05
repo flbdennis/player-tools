@@ -19,6 +19,7 @@ const excludedRoutes = new Set(['/404']);
 const priorityByRoute = new Map([
   ['/', '1.0'],
   ['/m3u8-player', '0.9'],
+  ['/zh/m3u8-player', '0.9'],
   ['/mp4-player', '0.9'],
   ['/dash-player', '0.9'],
   ['/guides', '0.7'],

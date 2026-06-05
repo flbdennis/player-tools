@@ -4,6 +4,9 @@
 // 这样写可以避免误导用户，也避免把“广告 Cookie 同意”和“可选错误监控”混为一谈。
 import Button from './Button.astro';
 import Icon from './Icon.astro';
+import { getMonitoringConsentText } from '../config/monitoringConsent.js';
+
+const text = getMonitoringConsentText(Astro.url.pathname);
 ---
 
 <div
@@ -12,6 +15,9 @@ import Icon from './Icon.astro';
   role="dialog"
   aria-live="polite"
   aria-labelledby="metis-monitoring-consent-title"
+  data-status-not-selected={text.statusNotSelected}
+  data-status-on={text.statusOn}
+  data-status-off={text.statusOff}
 >
   <div class="flex items-start gap-2.5 md:gap-3">
     <div class="mt-0.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 sm:flex">
@@ -19,21 +25,21 @@ import Icon from './Icon.astro';
     </div>
     <div class="min-w-0 flex-1">
       <p id="metis-monitoring-consent-title" class="text-[14px] font-black leading-snug text-gray-950">
-        Optional Error Monitoring
+        {text.title}
       </p>
       <p class="mt-1 text-[13px] font-semibold leading-snug text-gray-600">
-        Off by default. If allowed, it helps diagnose JavaScript and player errors. Video URLs are filtered and replay is disabled.
+        {text.description}
       </p>
       <details class="mt-1 text-[12px] font-semibold leading-snug text-gray-500">
         <summary class="cursor-pointer font-bold text-violet-700 outline-none focus-visible:ring-2 focus-visible:ring-violet-300 focus-visible:ring-offset-2">
-          Learn more
+          {text.detailsLabel}
         </summary>
         <p class="mt-1">
-          Essential local storage remembers this choice. Google ads and analytics consent is handled separately through Google-certified consent messages where required.
+          {text.details}
         </p>
       </details>
       <p id="metis-monitoring-status" class="mt-2 rounded-md bg-violet-50 px-2.5 py-1.5 text-[12px] font-bold text-violet-800">
-        Current optional monitoring status: Not selected.
+        {text.statusNotSelected}
       </p>
       <div class="mt-2 grid grid-cols-2 gap-2.5">
         <Button
@@ -42,8 +48,8 @@ import Icon from './Icon.astro';
           size="sm"
           class="h-8 rounded-lg px-2 py-0 text-[12px] whitespace-nowrap md:h-9 md:px-3 md:text-[13px]"
         >
-          <span class="hidden sm:inline">Allow Optional Monitoring</span>
-          <span class="sm:hidden">Allow</span>
+          <span class="hidden sm:inline">{text.allowDesktop}</span>
+          <span class="sm:hidden">{text.allowMobile}</span>
         </Button>
         <Button
           id="metis-monitoring-deny"
@@ -52,11 +58,11 @@ import Icon from './Icon.astro';
           size="sm"
           class="h-8 rounded-lg px-2 py-0 text-[12px] whitespace-nowrap md:h-9 md:px-3 md:text-[13px]"
         >
-          Keep Off
+          {text.deny}
         </Button>
       </div>
-      <a href="/privacy-policy" class="mt-2 inline-flex text-[12px] font-bold text-violet-700 hover:text-violet-800">
-        Read Privacy Policy
+      <a href={text.privacyHref} class="mt-2 inline-flex text-[12px] font-bold text-violet-700 hover:text-violet-800">
+        {text.privacyLink}
       </a>
     </div>
   </div>
@@ -69,6 +75,9 @@ import Icon from './Icon.astro';
   const allowButton = document.getElementById('metis-monitoring-allow');
   const denyButton = document.getElementById('metis-monitoring-deny');
   const statusText = document.getElementById('metis-monitoring-status');
+  const statusNotSelectedText = consentPanel?.dataset.statusNotSelected || 'Current optional monitoring status: Not selected.';
+  const statusOnText = consentPanel?.dataset.statusOn || 'Current optional monitoring status: On.';
+  const statusOffText = consentPanel?.dataset.statusOff || 'Current optional monitoring status: Off.';
   const storageKey = 'metistools_error_monitoring_consent';
   const grantedValue = 'granted';
   const deniedValue = 'denied';
@@ -97,11 +106,11 @@ import Icon from './Icon.astro';
 
     const currentConsent = getStoredConsent();
     if (currentConsent === grantedValue) {
-      statusText.textContent = 'Current optional monitoring status: On.';
+      statusText.textContent = statusOnText;
     } else if (currentConsent === deniedValue) {
-      statusText.textContent = 'Current optional monitoring status: Off.';
+      statusText.textContent = statusOffText;
     } else {
-      statusText.textContent = 'Current optional monitoring status: Not selected.';
+      statusText.textContent = statusNotSelectedText;
     }
   }
 

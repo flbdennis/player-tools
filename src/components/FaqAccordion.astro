@@ -8,6 +8,13 @@ const {
   idPrefix = 'faq',
   class: className = '',
 } = Astro.props;
+
+const safeItems = Array.isArray(items) ? items : [];
+const splitIndex = Math.ceil(safeItems.length / 2);
+const faqColumns = [
+  safeItems.slice(0, splitIndex).map((item, index) => ({ item, index })),
+  safeItems.slice(splitIndex).map((item, index) => ({ item, index: splitIndex + index })),
+];
 ---
 
 <div class={`mt-card px-4 py-4 md:px-5 md:py-4 ${className}`} data-faq-accordion>
@@ -18,33 +25,41 @@ const {
     <h2 class="mt-section-title text-[16px] md:text-[17px] leading-tight">{title}</h2>
   </div>
 
-  {/* FAQ 只渲染一份 DOM：移动端纵向排列，桌面端用 CSS columns 分列，减少重复问答文本和读屏负担 */}
-  <div class="flex flex-col gap-1.5 md:block md:columns-2 md:gap-x-4">
-    {items.map((item, index) => (
-      <div class="faq-item break-inside-avoid overflow-hidden rounded-lg border border-orange-100/90 bg-white/82 shadow-sm shadow-orange-100/40 md:mb-1.5">
-        <button
-          type="button"
-          class="faq-trigger flex min-h-[34px] w-full items-center justify-between gap-3 px-3 py-1.5 text-left"
-          aria-expanded="false"
-          aria-controls={`${idPrefix}-content-${index}`}
-          data-faq-trigger
-        >
-          <span class="min-w-0 flex-1 text-[13px] font-extrabold leading-snug text-gray-900">{item.question}</span>
-          <span class="faq-icon shrink-0 text-violet-700 transition-transform duration-200">
-            <Icon name="ChevronRight" size={15} color="#6f42ff" strokeWidth={2.6} />
-          </span>
-        </button>
-        <div id={`${idPrefix}-content-${index}`} class="faq-content hidden px-4 pb-3 pt-0.5">
-          <p class="text-[14px] font-semibold leading-snug text-gray-600">{item.answer}</p>
-          {item.linkHref && item.linkLabel && (
-            <a
-              class="mt-2 inline-flex text-[13px] font-extrabold text-violet-700 underline decoration-violet-200 underline-offset-2 hover:text-violet-900"
-              href={item.linkHref}
+  {/*
+    FAQ 使用固定两列 DOM，而不是 CSS columns。
+    原因：CSS columns 会在某一项展开后重新平衡列高，导致问题卡片从左列跳到右列。
+    固定两列后，左列永远是前半部分，右列永远是后半部分，展开任何项都不会重排顺序。
+  */}
+  <div class="grid grid-cols-1 gap-1.5 md:grid-cols-2 md:items-start md:gap-x-4 md:gap-y-0">
+    {faqColumns.map((columnItems) => (
+      <div class="flex min-w-0 flex-col gap-1.5">
+        {columnItems.map(({ item, index }) => (
+          <div class="faq-item overflow-hidden rounded-lg border border-orange-100/90 bg-white/82 shadow-sm shadow-orange-100/40">
+            <button
+              type="button"
+              class="faq-trigger flex min-h-[34px] w-full items-center justify-between gap-3 px-3 py-1.5 text-left"
+              aria-expanded="false"
+              aria-controls={`${idPrefix}-content-${index}`}
+              data-faq-trigger
             >
-              {item.linkLabel}
-            </a>
-          )}
-        </div>
+              <span class="min-w-0 flex-1 break-words text-[13px] font-extrabold leading-snug text-gray-900">{item.question}</span>
+              <span class="faq-icon shrink-0 text-violet-700 transition-transform duration-200">
+                <Icon name="ChevronRight" size={15} color="#6f42ff" strokeWidth={2.6} />
+              </span>
+            </button>
+            <div id={`${idPrefix}-content-${index}`} class="faq-content hidden px-4 pb-3 pt-0.5">
+              <p class="break-words text-[14px] font-semibold leading-snug text-gray-600">{item.answer}</p>
+              {item.linkHref && item.linkLabel && (
+                <a
+                  class="mt-2 inline-flex text-[13px] font-extrabold text-violet-700 underline decoration-violet-200 underline-offset-2 hover:text-violet-900"
+                  href={item.linkHref}
+                >
+                  {item.linkLabel}
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     ))}
   </div>
@@ -53,6 +68,9 @@ const {
 <script>
   // FAQ Accordion 交互逻辑：同一组件内只展开一个答案，避免多个 FAQ 互相干扰
   document.querySelectorAll('[data-faq-accordion]').forEach((accordion) => {
+    if (accordion.getAttribute('data-faq-initialized') === 'true') return;
+    accordion.setAttribute('data-faq-initialized', 'true');
+
     const triggers = accordion.querySelectorAll('[data-faq-trigger]');
 
     triggers.forEach((trigger) => {

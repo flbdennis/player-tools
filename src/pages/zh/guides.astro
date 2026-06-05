@@ -1,0 +1,45 @@
+---
+// 中文 Guides 列表页 - 只展示已汉化文章和中文 M3U8 工具入口，避免跳到未汉化页面
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import Button from '../../components/Button.astro';
+import { site } from '../../config/site.js';
+import { zhGuideArticles } from '../../config/zhGuideArticles.js';
+
+const pageTitle = 'M3U8播放测试指南';
+const pageDescription = '阅读中文 M3U8/HLS 播放测试指南，了解 M3U8跨域错误、HLS跨域问题、在线测试流程和浏览器播放边界。';
+const canonical = `${site.domain}/zh/guides`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN">
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-4xl">
+      <header class="text-center">
+        <h1 class="mb-4 text-3xl font-black text-gray-950 md:text-4xl">M3U8播放测试指南</h1>
+        <p class="mx-auto max-w-2xl text-lg font-medium leading-relaxed text-gray-600">
+          这里仅收录已经汉化的 M3U8/HLS 实用指南，帮助你判断公开或已授权视频流在浏览器中的播放表现。
+        </p>
+      </header>
+
+      <section class="mt-10 grid gap-4 md:grid-cols-2" aria-labelledby="zh-guides-title">
+        <h2 id="zh-guides-title" class="sr-only">中文指南列表</h2>
+        {zhGuideArticles.map((article) => (
+          <article class="rounded-xl border border-orange-100 bg-white/82 p-5 shadow-sm shadow-orange-100/60">
+            <p class="mb-2 text-xs font-extrabold text-violet-700">{article.category}</p>
+            <h3 class="mb-2 text-lg font-black text-gray-950">
+              <a class="hover:text-violet-700" href={article.href}>{article.h1}</a>
+            </h3>
+            <p class="text-sm font-medium leading-relaxed text-gray-600">{article.summary}</p>
+            <a class="mt-3 inline-flex text-sm font-extrabold text-violet-700 hover:text-violet-900" href={article.href}>
+              阅读指南
+            </a>
+          </article>
+        ))}
+      </section>
+
+      <div class="mt-10 text-center">
+        <Button href="/zh/m3u8-player" variant="primary">打开M3U8在线播放器</Button>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

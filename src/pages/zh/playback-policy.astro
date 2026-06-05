@@ -1,0 +1,35 @@
+---
+// 中文播放政策页面 - 明确授权测试边界
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import { site } from '../../config/site.js';
+
+const pageTitle = '播放测试政策';
+const pageDescription = '了解 MetisTools 中文版的 M3U8/HLS 播放测试边界：只测试公开或已授权链接，不绕过访问控制或版权限制。';
+const canonical = `${site.domain}/zh/playback-policy`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN" enableAds={false}>
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-6 text-3xl font-black text-gray-950 md:text-4xl">播放测试政策</h1>
+      <div class="space-y-6 text-base font-medium leading-relaxed text-gray-600">
+        <p>
+          MetisTools 中文版只用于测试公开或已授权的视频链接。你应确保自己有权访问、测试或嵌入相关 M3U8/HLS 视频流。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">工具能做什么</h2>
+        <p>
+          工具可以在浏览器中加载 M3U8 播放列表和媒体分片，显示播放结果、播放日志和可能的浏览器侧错误线索。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">工具不能做什么</h2>
+        <p>
+          工具不会绕过 CORS、DRM、登录墙、token、签名 URL、地域限制、版权限制或来源网站权限，也不会下载、转换或重新分发视频。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">私有和签名链接</h2>
+        <p>
+          私有或签名链接应由来源站提供短期授权和访问控制。iframe 嵌入不会隐藏或代理视频 URL，观众仍可能在浏览器网络请求中看到媒体地址。
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

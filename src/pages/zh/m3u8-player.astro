@@ -1,0 +1,88 @@
+---
+// 中文 M3U8 工具页 - 当前中文版本只上线 M3U8 页面，关键词和长尾词集中放在工具页
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import ToolHero from '../../components/ToolHero.astro';
+import PlayerShell from '../../components/PlayerShell.astro';
+import EmbedCodeBox from '../../components/EmbedCodeBox.astro';
+import PlayerGuideSteps from '../../components/PlayerGuideSteps.astro';
+import InfoImageCard from '../../components/InfoImageCard.astro';
+import PlayerFAQ from '../../components/PlayerFAQ.astro';
+import { site } from '../../config/site.js';
+import { zhM3u8PlayerPage } from '../../config/zhM3u8Player.js';
+
+const pageTitle = zhM3u8PlayerPage.seo.title;
+const pageDescription = zhM3u8PlayerPage.seo.description;
+const canonical = `${site.domain}/zh/m3u8-player`;
+const alternateLinks = [
+  { hreflang: 'en', href: `${site.domain}/m3u8-player` },
+  { hreflang: 'zh-CN', href: canonical },
+  { hreflang: 'x-default', href: `${site.domain}/m3u8-player` },
+];
+
+// 中文工具页结构化数据 - 明确这是免费浏览器工具，同时保留公开/授权链接边界
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: '免费 M3U8 在线播放器',
+    url: canonical,
+    applicationCategory: 'MultimediaApplication',
+    operatingSystem: 'Web',
+    description: pageDescription,
+    inLanguage: 'zh-CN',
+    screenshot: `${site.domain}/imgs/m3u8_1.webp`,
+    featureList: [
+      '免费M3U8在线播放器',
+      'HLS直播流测试工具',
+      '浏览器本地播放和播放日志',
+      'M3U8跨域错误和HLS跨域问题参考排查',
+    ],
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: zhM3u8PlayerPage.faq.items.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
+  },
+];
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+  lang="zh-CN"
+  ogLocale="zh_CN"
+  alternateLinks={alternateLinks}
+>
+  <div class="pt-2 md:pt-3">
+    <Container>
+      <ToolHero hero={zhM3u8PlayerPage.hero} titleId="zh-m3u8-page-title" />
+
+      <PlayerShell tabs={zhM3u8PlayerPage.tabs} activeId="m3u8" player={zhM3u8PlayerPage.player} />
+      <EmbedCodeBox embed={zhM3u8PlayerPage.embed} />
+      <PlayerGuideSteps guide={zhM3u8PlayerPage.guide} />
+
+      <div class="space-y-4">
+        {zhM3u8PlayerPage.infoCards.map((card) => (
+          <InfoImageCard card={card} />
+        ))}
+      </div>
+
+      <PlayerFAQ faq={zhM3u8PlayerPage.faq} />
+    </Container>
+  </div>
+</BaseLayout>

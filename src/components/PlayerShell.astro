@@ -10,12 +10,27 @@ import { playerShared } from '../config/player.js';
 const { tabs, activeId = 'm3u8', player } = Astro.props;
 const defaultUrl = player.defaultUrl || '';
 const playbackLog = player.playbackLog || {};
-// Playback Log 默认提示统一从播放器公共配置读取，避免三个工具页重复维护同一句提示
-const playbackLogNotice = playerShared.playbackLogNotice;
+// Playback Log 默认提示允许页面覆盖；中文工具页可显示中文日志说明，英文页继续使用公共兜底
+const playbackLogNotice = playbackLog.notice || playerShared.playbackLogNotice;
+// Source/English mode default notice for localized pages; used when users switch the log output to English before playback starts.
+const playbackLogSourceNotice = playbackLog.sourceNotice || playerShared.playbackLogNotice;
 // Playback Log 说明优先读取页面配置，缺省时使用公共合规说明，保证三类播放器话术一致
 const playbackLogDescription = playbackLog.description || playerShared.playbackLogDescription;
 // Playback Log 可见短提示 - 详细边界放入问号提示，降低日志区高度
 const playbackLogShortDescription = playbackLog.shortDescription || playerShared.playbackLogShortDescription;
+// 播放器固定提示允许页面按语言覆盖，避免中文页出现过多英文操作说明
+const ui = player.ui || {};
+const urlErrorText = ui.urlErrorText || 'Please enter a valid URL starting with http:// or https://.';
+const readyStatusText = ui.readyStatusText || 'Status: Ready.';
+const readyInstructionText = ui.readyInstructionText || 'Paste a public or authorized link, then click Play to start a diagnostic session.';
+const dragLogHint = ui.dragLogHint || 'Drag the lower-left corner to expand the log area and review more diagnostic lines.';
+const logTextConfig = ui.logText || {};
+const hasLocalizedLogText = Boolean(
+  logTextConfig?.messages ||
+  logTextConfig?.patterns ||
+  logTextConfig?.levels ||
+  logTextConfig?.statuses
+);
 // CORS/访问限制相关诊断文案统一读取公共配置，避免三个播放器页提示不一致
 const corsFixSuggestion = playerShared.corsFixSuggestion;
 const accessBoundaryNotice = playerShared.accessBoundaryNotice;
@@ -24,7 +39,8 @@ const policyNotice = player.policyHint || playerShared.policyNotice;
 const playerId = player.id || activeId || 'video';
 const pagePath = player.pagePath || `/${activeId}-player/`;
 const playerLabel = player.playerLabel || `${playerId.toUpperCase()} video`;
-const panelTitle = `${playerLabel} playback panel`;
+// 隐藏 H2 只用于区域语义和屏幕阅读器，不用于塞 SEO 关键词；各语言页面可通过 player.panelTitle 覆盖
+const panelTitle = player.panelTitle || `${playerLabel} playback panel`;
 ---
 
 <section
@@ -35,6 +51,8 @@ const panelTitle = `${playerLabel} playback panel`;
   data-player-type={playerId}
   data-cors-fix-suggestion={corsFixSuggestion}
   data-access-boundary-notice={accessBoundaryNotice}
+  data-log-text={JSON.stringify(logTextConfig)}
+  data-log-source-notice={playbackLogSourceNotice}
   class="relative z-10 mt-card px-4 py-3 md:px-5 md:py-3"
   aria-labelledby="player-panel-title"
 >
@@ -62,7 +80,7 @@ const panelTitle = `${playerLabel} playback panel`;
 
   <p id="metis-player-error" class="mt-1.5 hidden items-center gap-1 text-[13px] font-semibold text-red-500">
     <Icon name="AlertCircle" size={14} color="currentColor" strokeWidth={2.3} />
-    <span>Please enter a valid URL starting with http:// or https://.</span>
+    <span>{urlErrorText}</span>
   </p>
 
   {/* 授权与版权提示复用首页同款组件，保证全站审核提示一致 */}
@@ -141,27 +159,33 @@ const panelTitle = `${playerLabel} playback panel`;
     </div>
     <p class="mb-1.5 text-[12.5px] font-semibold leading-snug text-gray-600">{playbackLogShortDescription}</p>
     <div id="playback-status-summary" class="mb-2 rounded-lg border border-violet-100 bg-violet-50/70 px-3 py-2 text-[13px] font-bold leading-snug text-gray-700">
-      <span class="text-violet-700">Status: Ready.</span> Paste a public or authorized link, then click Play to start a diagnostic session.
+      <span class="text-violet-700">{readyStatusText}</span> {readyInstructionText}
     </div>
     <div id="playback-log-resize-shell" class="playback-log-resize-shell rounded-lg border border-orange-200 bg-[#f4ecdf] px-3 py-2 shadow-inner shadow-orange-100/80" aria-label="Resizable playback log output">
       <pre id="playback-log-output" class="min-h-full whitespace-pre-wrap font-mono text-[12.5px] font-bold leading-[1.48] text-[#27303f]">{(playbackLog.lines && playbackLog.lines.length ? playbackLog.lines.join('\n') : playbackLogNotice)}</pre>
     </div>
     <p class="mt-1.5 text-[12px] font-semibold leading-snug text-gray-500">
-      Drag the lower-left corner to expand the log area and review more diagnostic lines.
+      {dragLogHint}
     </p>
-    <div class="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
-      <Button type="button" id="playback-log-start" variant="primary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
-        {playbackLog.actions?.start || 'Start Log'}
-      </Button>
-      <Button type="button" id="playback-log-pause" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
-        {playbackLog.actions?.pause || 'Pause Log'}
-      </Button>
+    <div class={`mt-2 grid gap-2 ${hasLocalizedLogText ? 'grid-cols-3' : 'grid-cols-2'}`}>
       <Button type="button" id="playback-log-clear" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
         {playbackLog.actions?.clear || 'Clear Log'}
       </Button>
       <Button type="button" id="playback-log-copy" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
         {playbackLog.actions?.copy || 'Copy Log'}
       </Button>
+      {hasLocalizedLogText && (
+        <Button
+          type="button"
+          id="playback-log-language-toggle"
+          variant="secondary"
+          size="sm"
+          class="h-[32px] rounded-lg px-3 py-0 text-[13px]"
+          title={playbackLog.actions?.showEnglishTitle || 'Show original English log. Current log lines will switch immediately.'}
+        >
+          {playbackLog.actions?.showEnglish || 'English Log'}
+        </Button>
+      )}
     </div>
   </div>
 
@@ -185,6 +209,20 @@ const panelTitle = `${playerLabel} playback panel`;
   .playback-log-resize-shell pre {
     direction: ltr;
     text-align: left;
+  }
+
+  .playback-log-entry {
+    display: block;
+  }
+
+  :global(.playback-log-raw-warning) {
+    color: #f59e0b;
+    font-weight: 900;
+  }
+
+  :global(.playback-log-raw-error) {
+    color: #dc2626;
+    font-weight: 900;
   }
 
   .playback-log-resize-shell::after {
@@ -216,10 +254,9 @@ const panelTitle = `${playerLabel} playback panel`;
   const statusSummary = document.getElementById('playback-status-summary');
   const placeholderMainPlay = document.getElementById('metis-placeholder-main-play');
   const placeholderControlPlay = document.getElementById('metis-placeholder-control-play');
-  const logStartBtn = document.getElementById('playback-log-start');
-  const logPauseBtn = document.getElementById('playback-log-pause');
   const logClearBtn = document.getElementById('playback-log-clear');
   const logCopyBtn = document.getElementById('playback-log-copy');
+  const logLanguageToggleBtn = document.getElementById('playback-log-language-toggle');
   const validUrlPattern = /^https?:\/\/.+/i;
   const shell = document.getElementById('player-shell');
   const defaultPlayerUrl = shell?.dataset.defaultUrl || '';
@@ -228,6 +265,10 @@ const panelTitle = `${playerLabel} playback panel`;
   const playerType = (shell?.dataset.playerType || 'mp4').toLowerCase();
   const corsFixSuggestion = shell?.dataset.corsFixSuggestion || 'If you own the source server, enable CORS for playlists, manifests, media files, and media segments. Allow this site origin for GET, HEAD, and OPTIONS requests.';
   const accessBoundaryNotice = shell?.dataset.accessBoundaryNotice || 'This tool does not bypass CORS, DRM, private access controls, copyright restrictions, token rules, or source website permissions.';
+  const logTextConfig = parseLogTextConfig(shell?.dataset.logText || '{}');
+  const hasLocalizedLogText = Boolean(logTextConfig?.messages || logTextConfig?.patterns || logTextConfig?.levels || logTextConfig?.statuses);
+  const localizedLogNotice = logOutput?.textContent || '';
+  const sourceLogNotice = shell?.dataset.logSourceNotice || 'No diagnostic log lines recorded.';
   const playerUrlStorageKey = `metistools_${playerType}_player_url`;
 
   // 播放诊断状态：只在本地浏览器中维护，不主动上传完整视频地址，避免用户复制报告时泄露私有流地址
@@ -256,7 +297,6 @@ const panelTitle = `${playerLabel} playback panel`;
     stallInterval: null,
   };
 
-  let logPaused = false;
   let hlsInstance = null;
   let dashPlayer = null;
   let dashInitialized = false;
@@ -264,6 +304,8 @@ const panelTitle = `${playerLabel} playback panel`;
   let dashjsLibrary = null;
   let suppressNativeEvents = false;
   let activeSession = false;
+  let logLanguageMode = hasLocalizedLogText ? 'localized' : 'source';
+  const diagnosticLogEntries = [];
 
   const legacyUrl = new URLSearchParams(window.location.search).get('url') || '';
   if (legacyUrl) {
@@ -338,16 +380,6 @@ const panelTitle = `${playerLabel} playback panel`;
     });
   });
 
-  logStartBtn?.addEventListener('click', () => {
-    logPaused = false;
-    appendDiagnosticLog('INFO', 'Logging resumed.', 'New playback events will be appended to this diagnostic session.', '', true);
-  });
-
-  logPauseBtn?.addEventListener('click', () => {
-    appendDiagnosticLog('INFO', 'Logging paused.', 'Playback continues, but new diagnostic lines are temporarily hidden.', '', true);
-    logPaused = true;
-  });
-
   logClearBtn?.addEventListener('click', () => {
     clearPlaybackLog();
     setDiagnosticStatus('Ready', 'Log cleared. Paste a public or authorized link, then click Play to start a new diagnostic session.', 'info');
@@ -357,7 +389,7 @@ const panelTitle = `${playerLabel} playback panel`;
     const reportText = buildDiagnosticReport();
     try {
       await navigator.clipboard.writeText(reportText);
-      setLogCopyLabel('Copied');
+      setLogCopyLabel(translateLogText('Copied'));
     } catch {
       const temp = document.createElement('textarea');
       temp.value = reportText;
@@ -365,9 +397,18 @@ const panelTitle = `${playerLabel} playback panel`;
       temp.select();
       document.execCommand('copy');
       temp.remove();
-      setLogCopyLabel('Copied');
+      setLogCopyLabel(translateLogText('Copied'));
     }
   });
+
+  logLanguageToggleBtn?.addEventListener('click', () => {
+    if (!hasLocalizedLogText) return;
+    logLanguageMode = logLanguageMode === 'source' ? 'localized' : 'source';
+    renderDiagnosticLog(false);
+    updateLogLanguageToggleButton();
+  });
+
+  updateLogLanguageToggleButton();
 
   async function loadAndPlay(value, sourceLabel) {
     // 用户开始播放时清空默认诊断提示和上一次播放日志，只保留本次播放过程
@@ -802,8 +843,9 @@ const panelTitle = `${playerLabel} playback panel`;
       setDiagnosticStatus('Buffering', 'Playback is waiting for more media data.', 'warning');
       appendDiagnosticLog(
         'WARNING',
-        eventName === 'waiting' ? 'Playback is waiting for more data.' : 'Playback appears stalled.',
-        'The browser reported a sustained buffering state. This can be caused by network delay, server delay, CORS restrictions, missing media segments, expired signed segment URLs, or bitrate higher than the current connection can sustain.'
+        eventName === 'waiting' ? 'Playback is waiting for more data.' : 'Playback appears stuck.',
+        'The browser is waiting for video data and cannot continue smoothly.',
+        'Check the network, CORS, expired tokens, missing segments, or source server speed.'
       );
     }, 4000);
   }
@@ -816,15 +858,15 @@ const panelTitle = `${playerLabel} playback panel`;
     // 10 秒没有元数据时提示用户，避免一直空等但也不立即判定失败
     diagnostic.timers.push(window.setTimeout(() => {
       if (!diagnostic.metadataLoaded && activeSession) {
-        appendDiagnosticLog('WARNING', 'Media metadata is taking longer than expected.', 'The browser has not received playable metadata yet. Common causes include CORS, private or expired URLs, missing MIME type, slow CDN response, unsupported redirects, or server availability.', 'If you own the source, verify CORS, Content-Type, Range support for MP4, and that the manifest or media file is publicly reachable.');
-        setDiagnosticStatus('Loading slowly', 'Metadata has not loaded yet. Check CORS, network, MIME type, permissions, and server availability.', 'warning');
+        appendDiagnosticLog('WARNING', 'Media is still loading.', 'The browser has not received enough information to start playback.', 'Check CORS, permissions, MIME type, network, and server availability.');
+        setDiagnosticStatus('Loading slowly', 'Media is still loading. Check CORS, network, MIME type, permissions, and server availability.', 'warning');
       }
     }, 10000));
 
     // 20 秒没有达到可播放状态时给出明确错误，但仍保留播放器继续尝试的空间
     diagnostic.timers.push(window.setTimeout(() => {
       if (!diagnostic.canPlay && !diagnostic.playbackStarted && activeSession) {
-        reportFatalPlaybackError('Playback did not become ready in time.', 'The browser did not receive enough compatible media data within 20 seconds. This can happen when CORS blocks browser requests, the source is private or expired, the server returns HTML instead of media, MIME type is wrong, codecs are unsupported, or Range requests fail.', 'Check whether the link is public, CORS allows browser access, codecs are supported, MP4 Range requests work, and the source server is responding with the expected media content.');
+        reportFatalPlaybackError('Playback could not start.', 'The browser did not receive playable media data in time.', 'Check whether the link is public, CORS is allowed, the media format is supported, and the source server returns real media content.');
       }
     }, 20000));
 
@@ -853,8 +895,8 @@ const panelTitle = `${playerLabel} playback panel`;
 
       diagnostic.lastStallWarningAt = Date.now();
       diagnostic.stalledWarningShown = true;
-      appendDiagnosticLog('WARNING', 'Playback appears stalled.', 'The browser has not advanced playback for more than 20 seconds and appears to be waiting for media data.', 'Check for missing segments, CORS-blocked segment requests, token expiry, CDN latency, or an overloaded source server.');
-      setDiagnosticStatus('Stalled', 'Playback started but appears stalled after repeated checks.', 'warning');
+      appendDiagnosticLog('WARNING', 'Playback appears stuck.', 'The video has not moved for more than 20 seconds.', 'Check missing segments, CORS, expired tokens, CDN delay, or source server overload.');
+      setDiagnosticStatus('Stalled', 'Playback appears stuck after repeated checks.', 'warning');
     }, 5000);
   }
 
@@ -901,26 +943,26 @@ const panelTitle = `${playerLabel} playback panel`;
   }
 
   function appendDiagnosticLog(level, message, details = '', suggestion = '', force = false) {
-    if (!logOutput || (logPaused && !force)) return;
+    if (!logOutput) return;
     const now = new Date();
-    const time = now.toTimeString().slice(0, 8);
     const normalizedLevel = normalizeLogLevel(level);
-    const safeMessage = sanitizeLogText(message);
-    const safeDetails = sanitizeLogText(details);
-    const safeSuggestion = sanitizeLogText(suggestion);
-    const parts = [`[${time}] [${normalizedLevel}] ${safeMessage}`];
+    const rawMessage = sanitizeLogText(message);
+    const rawDetails = sanitizeLogText(details);
+    const rawSuggestion = sanitizeLogText(suggestion);
 
-    if (safeDetails) parts.push(`  Details: ${safeDetails}`);
-    if (safeSuggestion) parts.push(`  Suggestion: ${safeSuggestion}`);
+    diagnosticLogEntries.push({
+      time: now.toTimeString().slice(0, 8),
+      level: normalizedLevel,
+      message: rawMessage,
+      details: rawDetails,
+      suggestion: rawSuggestion,
+    });
 
-    if (normalizedLevel === 'WARNING' && safeMessage && !diagnostic.warnings.includes(safeMessage)) {
-      diagnostic.warnings.push(safeMessage);
+    if (normalizedLevel === 'WARNING' && rawMessage && !diagnostic.warnings.includes(rawMessage)) {
+      diagnostic.warnings.push(rawMessage);
     }
 
-    const current = logOutput.textContent?.trim();
-    logOutput.textContent = `${current ? `${current}\n` : ''}${parts.join('\n')}`;
-    if (logScrollBox) logScrollBox.scrollTop = logScrollBox.scrollHeight;
-    logOutput.scrollTop = logOutput.scrollHeight;
+    renderDiagnosticLog(true);
   }
 
   function normalizeHlsError(data, Hls) {
@@ -946,41 +988,41 @@ const panelTitle = `${playerLabel} playback panel`;
     const resourceLabel = getHlsResourceLabel(details);
     const corsSuspected = isCorsLikeFailure(errorText, statusCode, type === Hls?.ErrorTypes?.NETWORK_ERROR);
     let message = data?.fatal ? 'HLS playback failed.' : 'HLS playback warning.';
-    let suggestion = 'Check whether the stream is public, authorized, and accessible from the browser.';
+    let suggestion = 'Check whether the stream is public, authorized, and browser-accessible.';
 
     if (corsSuspected) {
-      message = `HLS ${resourceLabel} request may be blocked by browser CORS or access policy.`;
+      message = `Browser may be blocked from reading the HLS ${resourceLabel}.`;
       suggestion = corsFixSuggestion;
     } else if (statusCode === 401 || statusCode === 403) {
       message = `HLS ${resourceLabel} request was denied by the source server.`;
-      suggestion = 'Check whether the link is public or authorized, whether signed tokens have expired, and whether the source allows browser playback from this site.';
+      suggestion = 'Check permissions, expired tokens, and whether the source allows browser playback from this site.';
     } else if (statusCode === 404 || statusCode === 410) {
       message = `HLS ${resourceLabel} was not found.`;
-      suggestion = 'Check whether the playlist or segment URL is correct, still available, and not generated by an expired temporary link.';
+      suggestion = 'Check whether the URL is correct, still available, and not expired.';
     } else if (statusCode >= 500) {
-      message = `HLS ${resourceLabel} server error detected.`;
-      suggestion = 'The origin server or CDN returned a server error. Retry later or check the source server logs if you own the stream.';
+      message = `HLS ${resourceLabel} server returned an error.`;
+      suggestion = 'Retry later, or check the source server/CDN logs if you own the stream.';
     } else if (details.includes('manifest') && details.includes('load')) {
-      message = 'HLS manifest could not be loaded.';
-      suggestion = 'Verify that the M3U8 URL is public, not expired, and returns a valid playlist with CORS enabled.';
+      message = 'HLS playlist could not be loaded.';
+      suggestion = 'Check that the M3U8 URL is public, not expired, and allows CORS.';
     } else if (details.includes('manifest') && details.includes('parsing')) {
-      message = 'HLS manifest could not be parsed.';
-      suggestion = 'Check whether the playlist format is valid M3U8 and not an HTML error page, login page, redirect page, or CDN error page.';
+      message = 'HLS playlist is not valid.';
+      suggestion = 'Check that the URL returns a real M3U8 file, not an HTML error, login, redirect, or CDN page.';
     } else if (details.includes('frag') || details.includes('level')) {
-      message = 'HLS media segment could not be loaded.';
-      suggestion = 'Check segment URLs, CDN availability, CORS headers, token expiry, geo restrictions, and whether relative segment paths resolve correctly.';
+      message = 'HLS video segment could not be loaded.';
+      suggestion = 'Check segment URLs, CDN availability, CORS, token expiry, geo restrictions, and relative paths.';
     } else if (details.includes('buffer')) {
-      message = 'HLS buffering issue detected.';
-      suggestion = 'Try another network or stream variant. The server may be slow, missing segments, using too high a bitrate, or delaying live segments.';
+      message = 'HLS playback is buffering too long.';
+      suggestion = 'Try another network or lower quality. The server may be slow or missing live segments.';
     } else if (details.includes('key') || details.includes('eme') || type === Hls?.ErrorTypes?.KEY_SYSTEM_ERROR) {
-      message = 'HLS DRM or key-system issue detected.';
-      suggestion = 'This browser player cannot play protected streams without the required DRM license flow.';
+      message = 'This HLS stream may require DRM or a key license.';
+      suggestion = 'Protected streams need a supported DRM/license flow and cannot be tested as plain public streams.';
     } else if (type === Hls?.ErrorTypes?.MEDIA_ERROR) {
-      message = 'HLS media decode issue detected.';
-      suggestion = 'Check codecs, container compatibility, browser support, and whether the stream uses unsupported audio/video tracks.';
+      message = 'The browser could not decode this HLS media.';
+      suggestion = 'Check codecs, browser support, and unsupported audio/video tracks.';
     } else if (type === Hls?.ErrorTypes?.NETWORK_ERROR) {
-      message = 'HLS network issue detected.';
-      suggestion = 'Check server availability, CORS headers, redirects, signed URL expiry, mixed content, and ad-blocking or corporate network filters.';
+      message = 'HLS network request failed.';
+      suggestion = 'Check server availability, CORS, redirects, signed URL expiry, mixed content, or network filters.';
     }
 
     return {
@@ -999,35 +1041,35 @@ const panelTitle = `${playerLabel} playback panel`;
     const statusCode = extractHttpStatusCode(rawText);
     const corsSuspected = isCorsLikeFailure(messageText, statusCode, true);
     let message = 'DASH playback error detected.';
-    let suggestion = 'Check whether the MPD manifest and media segments are public and compatible with this browser.';
+    let suggestion = 'Check whether the MPD and media segments are public and browser-compatible.';
 
     if (corsSuspected) {
-      message = 'DASH request may be blocked by browser CORS or access policy.';
+      message = 'Browser may be blocked from reading the DASH stream.';
       suggestion = corsFixSuggestion;
     } else if (statusCode === 401 || statusCode === 403) {
-      message = 'DASH request was denied by the source server.';
-      suggestion = 'Check permissions, signed URL expiry, geo restrictions, DRM/license requirements, and whether the source allows browser playback from this site.';
+      message = 'Source server denied the DASH request.';
+      suggestion = 'Check permissions, expired signed URLs, geo restrictions, DRM, and browser playback rules.';
     } else if (statusCode === 404 || statusCode === 410) {
-      message = 'DASH manifest or media segment was not found.';
-      suggestion = 'Check whether the MPD or segment URL is correct, still available, and not generated by an expired temporary link.';
+      message = 'DASH manifest or video segment was not found.';
+      suggestion = 'Check whether the MPD or segment URL is correct, available, and not expired.';
     } else if (statusCode >= 500) {
-      message = 'DASH source server or CDN error detected.';
-      suggestion = 'The origin server or CDN returned a server error. Retry later or check the source server logs if you own the stream.';
+      message = 'DASH source server or CDN returned an error.';
+      suggestion = 'Retry later, or check the source server/CDN logs if you own the stream.';
     } else if (messageText.includes('manifest') || messageText.includes('mpd')) {
-      message = 'DASH manifest could not be loaded or parsed.';
-      suggestion = 'Verify that the MPD URL is public, valid XML, not an HTML error page, and served with browser-accessible CORS headers.';
+      message = 'DASH manifest could not be loaded or read.';
+      suggestion = 'Check that the MPD URL is public, valid XML, not an HTML error page, and allows CORS.';
     } else if (messageText.includes('segment') || messageText.includes('fragment') || messageText.includes('chunk')) {
-      message = 'DASH media segment could not be loaded.';
-      suggestion = 'Check segment URLs, CDN availability, CORS headers, token expiry, geo restrictions, and relative segment paths.';
+      message = 'DASH video segment could not be loaded.';
+      suggestion = 'Check segment URLs, CDN availability, CORS, token expiry, geo restrictions, and relative paths.';
     } else if (messageText.includes('codec') || messageText.includes('decode') || messageText.includes('media')) {
-      message = 'DASH media compatibility issue detected.';
-      suggestion = 'Check video/audio codecs, MIME types, and browser MediaSource support.';
+      message = 'The browser may not support this DASH media.';
+      suggestion = 'Check codecs, MIME type, and browser MediaSource support.';
     } else if (messageText.includes('drm') || messageText.includes('eme') || messageText.includes('license') || messageText.includes('key')) {
-      message = 'DASH DRM or license issue detected.';
+      message = 'This DASH stream may require DRM or a license.';
       suggestion = 'Protected streams require a supported DRM license flow and cannot be tested as a plain public stream.';
     } else if (messageText.includes('network') || messageText.includes('timeout')) {
-      message = 'DASH network issue detected.';
-      suggestion = 'Check server availability, CORS headers, redirects, signed URL expiry, and network or CDN latency.';
+      message = 'DASH network request failed.';
+      suggestion = 'Check server availability, CORS, redirects, signed URL expiry, and CDN/network delay.';
     }
 
     return {
@@ -1122,20 +1164,20 @@ const panelTitle = `${playerLabel} playback panel`;
   function getVideoErrorMessage() {
     const errorCode = video?.error?.code;
     const errorMap = {
-      1: 'MEDIA_ERR_ABORTED: playback was aborted by the user or browser.',
-      2: 'MEDIA_ERR_NETWORK: a network error interrupted media loading.',
-      3: 'MEDIA_ERR_DECODE: the browser could not decode the media. Codec or file corruption is likely.',
-      4: 'MEDIA_ERR_SRC_NOT_SUPPORTED: the source or MIME type is not supported by this browser.',
+      1: 'MEDIA_ERR_ABORTED: playback was stopped by the user or browser.',
+      2: 'MEDIA_ERR_NETWORK: network loading failed.',
+      3: 'MEDIA_ERR_DECODE: the browser could not decode this media.',
+      4: 'MEDIA_ERR_SRC_NOT_SUPPORTED: this browser cannot play this source or format.',
     };
     return errorMap[errorCode] || 'Unknown native video error.';
   }
 
   function getNativeErrorSuggestion() {
     const errorCode = video?.error?.code;
-    if (errorCode === 2) return 'Check server availability, CORS headers, signed URL expiry, redirects, mixed content, and network connectivity.';
-    if (errorCode === 3) return 'Check whether the file uses browser-supported video and audio codecs and is not corrupted or partially uploaded.';
-    if (errorCode === 4) return 'Try a public MP4 file or verify that this browser supports the media format, MIME type, codec, and Range request behavior.';
-    return 'Check whether the URL is public, authorized, served with correct CORS and MIME headers, and compatible with this browser.';
+    if (errorCode === 2) return 'Check server availability, CORS, signed URL expiry, redirects, mixed content, and network connectivity.';
+    if (errorCode === 3) return 'Check that the file uses browser-supported audio/video codecs and is not damaged.';
+    if (errorCode === 4) return 'Try a public MP4 file, or check format, MIME type, codec, and Range requests.';
+    return 'Check that the URL is public or authorized, has correct CORS/MIME headers, and is browser-compatible.';
   }
 
   function showPlayerError() {
@@ -1150,7 +1192,7 @@ const panelTitle = `${playerLabel} playback panel`;
 
   function setPlayerStatus(message) {
     if (!playerStatus) return;
-    playerStatus.textContent = message;
+    playerStatus.textContent = translateLogText(message);
     playerStatus.classList.remove('hidden');
   }
 
@@ -1166,7 +1208,10 @@ const panelTitle = `${playerLabel} playback panel`;
     }[tone] || 'border-violet-100 bg-violet-50/70 text-gray-700';
 
     statusSummary.className = `mb-2 rounded-lg border px-3 py-2 text-[13px] font-bold leading-snug ${toneClass}`;
-    statusSummary.innerHTML = `<span class="font-black">Status: ${escapeHtml(status)}.</span> ${escapeHtml(message)}`;
+    const statusPrefix = getLogLabel('statusPrefix', 'Status');
+    const statusSeparator = getLogLabel('statusSeparator', ': ');
+    const statusEnd = getLogLabel('statusEnd', '.');
+    statusSummary.innerHTML = `<span class="font-black">${escapeHtml(statusPrefix)}${escapeHtml(statusSeparator)}${escapeHtml(translateStatus(status))}${escapeHtml(statusEnd)}</span> ${escapeHtml(translateLogText(message))}`;
   }
 
   function getStoredPlayerUrl() {
@@ -1242,29 +1287,146 @@ const panelTitle = `${playerLabel} playback panel`;
   }
 
   function clearPlaybackLog() {
-    if (logOutput) logOutput.textContent = '';
+    diagnosticLogEntries.length = 0;
+    renderDiagnosticLog(false);
   }
 
   function buildDiagnosticReport() {
-    const logText = logOutput?.textContent?.trim() || 'No diagnostic log lines recorded.';
-    const warnings = diagnostic.warnings.length ? diagnostic.warnings.join('; ') : 'None';
+    const logText = diagnosticLogEntries.length
+      ? diagnosticLogEntries.map(renderDiagnosticLogEntryText).join('\n')
+      : getCurrentLogLabel('noLogLines', 'No diagnostic log lines recorded.');
+    const warnings = diagnostic.warnings.length
+      ? diagnostic.warnings.map(renderLogText).join('; ')
+      : getCurrentLogLabel('none', 'None');
     const browser = `${navigator.userAgent}`;
 
     return [
-      'MetisTools Playback Diagnostic Report',
-      `Tool: ${playerLabel}`,
-      `URL Type: ${diagnostic.urlType.toUpperCase()}`,
-      `Engine: ${diagnostic.engine}`,
-      `Status: ${diagnostic.status}`,
-      `Main Error: ${diagnostic.mainError || 'None'}`,
-      `Warnings: ${warnings}`,
-      `Started At: ${diagnostic.startedAt ? diagnostic.startedAt.toISOString() : 'Not started'}`,
-      'Source URL: [filtered-url]',
-      `Browser: ${browser}`,
+      getCurrentLogLabel('reportTitle', 'MetisTools Playback Diagnostic Report'),
+      `${getCurrentLogLabel('tool', 'Tool')}: ${playerLabel}`,
+      `${getCurrentLogLabel('urlType', 'URL Type')}: ${diagnostic.urlType.toUpperCase()}`,
+      `${getCurrentLogLabel('engine', 'Engine')}: ${diagnostic.engine}`,
+      `${getCurrentLogLabel('status', 'Status')}: ${renderStatus(diagnostic.status)}`,
+      `${getCurrentLogLabel('mainError', 'Main Error')}: ${diagnostic.mainError ? renderLogText(diagnostic.mainError) : getCurrentLogLabel('none', 'None')}`,
+      `${getCurrentLogLabel('warnings', 'Warnings')}: ${warnings}`,
+      `${getCurrentLogLabel('startedAt', 'Started At')}: ${diagnostic.startedAt ? diagnostic.startedAt.toISOString() : getCurrentLogLabel('notStarted', 'Not started')}`,
+      `${getCurrentLogLabel('sourceUrl', 'Source URL')}: [filtered-url]`,
+      `${getCurrentLogLabel('browser', 'Browser')}: ${browser}`,
       '',
-      'Log:',
+      `${getCurrentLogLabel('log', 'Log')}:`,
       logText,
     ].join('\n');
+  }
+
+  function renderDiagnosticLog(scrollToEnd = true) {
+    if (!logOutput) return;
+
+    if (!diagnosticLogEntries.length) {
+      logOutput.innerHTML = escapeHtml(getCurrentLogNotice());
+      return;
+    }
+
+    logOutput.innerHTML = diagnosticLogEntries.map(renderDiagnosticLogEntryHtml).join('\n');
+
+    if (scrollToEnd) {
+      if (logScrollBox) logScrollBox.scrollTop = logScrollBox.scrollHeight;
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+  }
+
+  function renderDiagnosticLogEntryText(entry) {
+    const parts = [`[${entry.time}] [${renderLevel(entry.level)}] ${renderLogText(entry.message)}`];
+
+    if (entry.details) parts.push(`  ${getCurrentLogLabel('details', 'Details')}: ${renderLogText(entry.details)}`);
+    if (entry.suggestion) parts.push(`  ${getCurrentLogLabel('suggestion', 'Suggestion')}: ${renderLogText(entry.suggestion)}`);
+
+    const rawLog = buildAttentionRawLog(entry);
+    if (rawLog) parts.push(`  ${getCurrentLogLabel('rawLog', 'Original log')}: ${rawLog}`);
+
+    return parts.join('\n');
+  }
+
+  function renderDiagnosticLogEntryHtml(entry) {
+    const lines = [`[${entry.time}] [${renderLevel(entry.level)}] ${renderLogText(entry.message)}`];
+
+    if (entry.details) lines.push(`  ${getCurrentLogLabel('details', 'Details')}: ${renderLogText(entry.details)}`);
+    if (entry.suggestion) lines.push(`  ${getCurrentLogLabel('suggestion', 'Suggestion')}: ${renderLogText(entry.suggestion)}`);
+
+    const rawLog = buildAttentionRawLog(entry);
+    if (rawLog) {
+      const rawClassName = getAttentionRawLogClass(entry.level);
+      const rawStyle = getAttentionRawLogStyle(entry.level);
+      const rawStyleAttr = rawStyle ? ` style="${rawStyle}"` : '';
+      lines.push(`  ${escapeHtml(getCurrentLogLabel('rawLog', 'Original log'))}: <span class="${rawClassName}"${rawStyleAttr}>${escapeHtml(rawLog)}</span>`);
+    }
+
+    const html = lines.map((line) => line.includes('<span') ? line : escapeHtml(line)).join('\n');
+    return `<span class="playback-log-entry">${html}</span>`;
+  }
+
+  function getAttentionRawLogClass(level) {
+    const normalizedLevel = normalizeLogLevel(level);
+    if (normalizedLevel === 'WARNING') return 'playback-log-raw-warning';
+    if (normalizedLevel === 'ERROR') return 'playback-log-raw-error';
+    return '';
+  }
+
+  function getAttentionRawLogStyle(level) {
+    const normalizedLevel = normalizeLogLevel(level);
+    if (normalizedLevel === 'WARNING') return 'color: #f59e0b; font-weight: 900;';
+    if (normalizedLevel === 'ERROR') return 'color: #dc2626; font-weight: 900;';
+    return '';
+  }
+
+  function buildAttentionRawLog(entry) {
+    const normalizedLevel = normalizeLogLevel(entry.level);
+    if (normalizedLevel !== 'WARNING' && normalizedLevel !== 'ERROR') return '';
+
+    const rawParts = [entry.message];
+    if (entry.details) rawParts.push(`Details: ${entry.details}`);
+    if (entry.suggestion) rawParts.push(`Suggestion: ${entry.suggestion}`);
+    return `[${rawParts.filter(Boolean).join(' | ')}]`;
+  }
+
+  function isSourceLogMode() {
+    return logLanguageMode === 'source';
+  }
+
+  function renderLogText(value) {
+    const safeText = sanitizeLogText(value);
+    return isSourceLogMode() ? safeText : translateLogText(safeText);
+  }
+
+  function renderLevel(level) {
+    const normalizedLevel = normalizeLogLevel(level);
+    return isSourceLogMode() ? normalizedLevel : translateLevel(normalizedLevel);
+  }
+
+  function renderStatus(status) {
+    return isSourceLogMode() ? status : translateStatus(status);
+  }
+
+  function getCurrentLogLabel(key, fallback) {
+    return isSourceLogMode() ? fallback : getLogLabel(key, fallback);
+  }
+
+  function getCurrentLogNotice() {
+    if (isSourceLogMode()) return sourceLogNotice || getCurrentLogLabel('noLogLines', 'No diagnostic log lines recorded.');
+    return localizedLogNotice || getLogLabel('noLogLines', '尚未记录播放诊断日志。');
+  }
+
+  function updateLogLanguageToggleButton() {
+    if (!logLanguageToggleBtn) return;
+
+    if (isSourceLogMode()) {
+      logLanguageToggleBtn.textContent = getLogLabel('showLocalizedLog', 'Localized Log');
+      logLanguageToggleBtn.setAttribute('title', getLogLabel('showLocalizedLogTitle', 'Switch back to the localized log. Current log lines will update immediately.'));
+      logLanguageToggleBtn.setAttribute('aria-label', getLogLabel('showLocalizedLogTitle', 'Switch back to the localized log. Current log lines will update immediately.'));
+      return;
+    }
+
+    logLanguageToggleBtn.textContent = getLogLabel('showSourceLog', 'English Log');
+    logLanguageToggleBtn.setAttribute('title', getLogLabel('showSourceLogTitle', 'Switch to original English log text for searching errors. Current log lines will update immediately.'));
+    logLanguageToggleBtn.setAttribute('aria-label', getLogLabel('showSourceLogTitle', 'Switch to original English log text for searching errors. Current log lines will update immediately.'));
   }
 
   function sanitizeLogText(value) {
@@ -1277,6 +1439,47 @@ const panelTitle = `${playerLabel} playback panel`;
   function normalizeLogLevel(level) {
     const normalized = String(level || 'INFO').toUpperCase();
     return ['INFO', 'SUCCESS', 'WARNING', 'ERROR', 'DEBUG'].includes(normalized) ? normalized : 'INFO';
+  }
+
+  function parseLogTextConfig(value) {
+    try {
+      const parsed = JSON.parse(value || '{}');
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function getLogLabel(key, fallback) {
+    return logTextConfig?.labels?.[key] || fallback;
+  }
+
+  function translateLevel(level) {
+    return logTextConfig?.levels?.[level] || level;
+  }
+
+  function translateStatus(status) {
+    return logTextConfig?.statuses?.[status] || status;
+  }
+
+  function translateLogText(value) {
+    if (!value) return '';
+    const text = String(value);
+    if (logTextConfig?.messages?.[text]) return logTextConfig.messages[text];
+
+    const patterns = Array.isArray(logTextConfig?.patterns) ? logTextConfig.patterns : [];
+    for (const pattern of patterns) {
+      if (!pattern?.match || typeof pattern.replace !== 'string') continue;
+
+      try {
+        const regex = new RegExp(pattern.match);
+        if (regex.test(text)) return text.replace(regex, pattern.replace);
+      } catch {
+        // 无效翻译模式不影响播放器主功能，继续使用原始日志文本
+      }
+    }
+
+    return text;
   }
 
   function escapeHtml(value) {
@@ -1293,7 +1496,7 @@ const panelTitle = `${playerLabel} playback panel`;
     const original = logCopyBtn.textContent;
     logCopyBtn.textContent = label;
     window.setTimeout(() => {
-      logCopyBtn.textContent = original || 'Copy Log';
+      logCopyBtn.textContent = original || getLogLabel('copyLog', 'Copy Log');
     }, 1600);
   }
 </script>

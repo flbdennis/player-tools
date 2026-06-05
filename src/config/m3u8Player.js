@@ -91,6 +91,8 @@ export const m3u8PlayerPage = {
     pagePath: '/m3u8-player',
     // 播放对象名称 - 播放器提示和日志中描述当前内容类型
     playerLabel: 'HLS stream',
+    // Hidden H2 used for player region semantics and screen readers, not for keyword stuffing
+    panelTitle: 'HLS stream playback panel',
     // 默认测试链接 - 页面初始输入框内容，使用公开 HLS 示例流
     defaultUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',
     // 输入框占位文案 - 当没有 URL 时显示
@@ -113,10 +115,6 @@ export const m3u8PlayerPage = {
       lines: [],
       // 日志操作按钮文案 - PlayerShell 内部按钮读取
       actions: {
-        // 开始记录按钮文案
-        start: 'Start Log',
-        // 暂停记录按钮文案
-        pause: 'Pause Log',
         // 清空日志按钮文案
         clear: 'Clear Log',
         // 复制日志按钮文案

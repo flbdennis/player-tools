@@ -1,0 +1,39 @@
+---
+// 中文隐私政策页面 - 简版说明，保持与当前中文工具范围一致
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import { site } from '../../config/site.js';
+
+const pageTitle = '隐私政策';
+const pageDescription = '了解 MetisTools 中文版如何处理 M3U8在线播放器中的视频链接、浏览器播放测试、统计、广告和可选错误监控。';
+const canonical = `${site.domain}/zh/privacy-policy`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN" enableAds={false}>
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-6 text-3xl font-black text-gray-950 md:text-4xl">隐私政策</h1>
+      <div class="space-y-6 text-base font-medium leading-relaxed text-gray-600">
+        <p>
+          MetisTools 中文版用于浏览器侧 M3U8/HLS 播放测试。视频链接会在你的浏览器中用于播放和生成嵌入代码，不会被主动上传到服务器端解析。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">视频链接</h2>
+        <p>
+          请不要粘贴未经授权、私密、包含敏感 token 或不应公开的视频链接。复制播放日志时，页面会过滤视频 URL，降低敏感链接泄露风险。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">统计和广告</h2>
+        <p>
+          网站可能使用 Google Analytics 和 Google AdSense 等官方服务进行基础统计和广告展示。欧洲隐私消息和同意管理由 Google AdSense 后台配置。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">可选错误监控</h2>
+        <p>
+          可选错误监控默认关闭。只有在用户允许后才用于诊断 JavaScript 和播放器错误，且不用于上传完整视频链接。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">联系我们</h2>
+        <p>
+          隐私问题可发送邮件至 <a class="font-bold text-violet-700 hover:text-violet-900" href={`mailto:${site.email}`}>{site.email}</a>。
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

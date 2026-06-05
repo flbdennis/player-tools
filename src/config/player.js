@@ -7,8 +7,7 @@ export const playerShared = {
   policyNotice:
     'Test only public or authorized video links. Respect copyright, privacy, and the source site’s terms.',
 
-  // Playback Log 标题下方说明 - 合并“日志用途”和“仅供参考”两段说明，减少重复文案并保持用户可读性
-  // 文案避免关键词堆砌，压缩为低高度提示，同时保留授权、诊断限制和不绕过权限的合规边界
+  // Playback Log 问号提示 - 只说明日志用途、隐私和合规边界；日志等级说明放在输出框默认文字中，避免重复
   playbackLogDescription:
     'Logs browser-side playback events for public or authorized links. Results depend on browser, network, CORS, CDN, server, MIME/codec, Range and access settings; MetisTools does not bypass CORS, DRM, copyright or source permissions.',
 
@@ -34,7 +33,7 @@ export const playerShared = {
 
   // Playback Log 默认提示 - 日志尚未开始时显示在输出框内，解释日志等级并提醒复制报告会隐藏视频 URL
   playbackLogNotice:
-    'Playback Diagnostic Log\nINFO = normal progress, SUCCESS = playback milestone, WARNING = possible issue, ERROR = playback failure.\nVideo URLs are hidden from copied reports for privacy.',
+    'INFO = normal progress, SUCCESS = playback milestone, WARNING = possible issue, ERROR = playback failure. Warnings and errors include the original English log for search.',
 
   // CORS 修复建议 - 只在日志诊断到浏览器跨域/访问策略风险时输出，不提供代理或绕过功能
   corsFixSuggestion:

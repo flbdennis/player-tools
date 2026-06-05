@@ -1,0 +1,35 @@
+---
+// 中文 About 页面 - 说明中文站定位和当前已汉化范围
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
+import { site } from '../../config/site.js';
+
+const pageTitle = '关于 MetisTools 中文版';
+const pageDescription = '了解 MetisTools 中文版的 M3U8在线播放器定位、授权测试边界、隐私处理和联系方式。';
+const canonical = `${site.domain}/zh/about`;
+---
+
+<BaseLayout title={pageTitle} description={pageDescription} canonical={canonical} lang="zh-CN" ogLocale="zh_CN" enableAds={false}>
+  <Container class="py-14 md:py-20">
+    <div class="mx-auto max-w-3xl">
+      <h1 class="mb-6 text-3xl font-black text-gray-950 md:text-4xl">关于 MetisTools 中文版</h1>
+      <div class="space-y-6 text-base font-medium leading-relaxed text-gray-600">
+        <p>
+          MetisTools 中文版当前专注于 M3U8/HLS 浏览器播放测试，帮助用户测试公开或已授权的 M3U8视频流地址、M3U8直播源 和 HLS直播流。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">我们提供什么</h2>
+        <p>
+          中文 M3U8在线播放器可以在浏览器中加载 M3U8/HLS 链接，显示播放结果和播放日志，帮助判断跨域、分片、编码、CDN、服务器响应或访问权限问题。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">我们不提供什么</h2>
+        <p>
+          MetisTools 不提供视频下载、格式转换、视频解析、抓取、重新分发或绕过 CORS、DRM、登录、token、版权和来源网站权限的功能。
+        </p>
+        <h2 class="text-xl font-black text-gray-950">联系</h2>
+        <p>
+          如有问题、建议或合规反馈，请通过 <a class="font-bold text-violet-700 hover:text-violet-900" href={`mailto:${site.email}`}>{site.email}</a> 联系我们。
+        </p>
+      </div>
+    </div>
+  </Container>
+</BaseLayout>

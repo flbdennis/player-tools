@@ -1,16 +1,24 @@
 ---
 // Header 组件 - 站点顶部导航，严格复用站点配置与 Icon 组件
 import { site } from '../config/site.js';
-import { headerNav } from '../config/nav.js';
+import { getLanguageMenu, getNavigationForPath } from '../config/nav.js';
 import Icon from './Icon.astro';
 import Container from './Container.astro';
+
+const navigation = getNavigationForPath(Astro.url.pathname);
+const headerNav = navigation.headerNav;
+const languageMenu = getLanguageMenu(Astro.url.pathname);
+const logoHref = navigation.homeHref || '/';
+const homeAriaLabel = navigation.homeAriaLabel || `${site.name} home`;
+const primaryNavLabel = navigation.primaryNavLabel || 'Primary navigation';
+const mobileMenuAriaLabel = navigation.mobileMenuAriaLabel || 'Toggle menu';
 ---
 
 <header class="sticky top-0 z-50 bg-white/88 backdrop-blur-xl border-b border-orange-100/60">
   <Container variant="header">
     <div class="flex items-center justify-between h-[58px]">
       {/* Logo 使用 public/logo 中的既有素材，不重绘、不改色 */}
-      <a href="/" class="flex items-center shrink-0" aria-label={`${site.name} home`}>
+      <a href={logoHref} class="flex items-center shrink-0" aria-label={homeAriaLabel}>
         <img
           src={site.logo}
           alt={`${site.name} logo`}
@@ -24,7 +32,7 @@ import Container from './Container.astro';
       <nav
         id="primary-navigation"
         class="hidden fixed inset-x-0 top-[58px] z-[60] max-h-[calc(100vh-58px)] overflow-y-auto border-t border-orange-100 bg-white/96 px-4 py-4 shadow-2xl shadow-violet-100/40 backdrop-blur-xl md:static md:z-auto md:flex md:max-h-none md:overflow-visible md:border-0 md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-0 items-stretch md:items-center gap-1 md:gap-8"
-        aria-label="Primary navigation"
+        aria-label={primaryNavLabel}
         data-primary-nav
       >
         {headerNav.map((item, index) => (
@@ -34,7 +42,7 @@ import Container from './Container.astro';
                 <button
                   type="button"
                   id={`nav-trigger-${index}`}
-                  class="flex w-full items-center justify-between gap-1.5 rounded-xl px-4 py-3 text-left text-sm font-bold text-gray-900 transition-colors hover:bg-violet-50 hover:text-violet-700 md:w-auto md:justify-start md:rounded-none md:px-0 md:py-0 md:text-[14px] md:text-gray-950 md:hover:bg-transparent"
+                  class="flex w-full items-center justify-between gap-1.5 rounded-xl px-4 py-3 text-left text-sm font-bold text-gray-900 transition-colors hover:bg-violet-50 hover:text-violet-700 md:w-auto md:justify-start md:rounded-none md:px-0 md:py-0 md:text-[14px] md:text-gray-950 md:bg-transparent md:hover:bg-transparent md:focus:bg-transparent md:active:bg-transparent"
                   aria-haspopup="true"
                   aria-expanded="false"
                   aria-controls={`nav-menu-${index}`}
@@ -65,7 +73,7 @@ import Container from './Container.astro';
             ) : (
               <a
                 href={item.href}
-                class="block rounded-xl px-4 py-3 text-sm font-bold text-gray-900 transition-colors hover:bg-violet-50 hover:text-violet-700 md:rounded-none md:px-0 md:py-0 md:text-[14px] md:text-gray-950 md:hover:bg-transparent"
+                class="block rounded-xl px-4 py-3 text-sm font-bold text-gray-900 transition-colors hover:bg-violet-50 hover:text-violet-700 md:rounded-none md:px-0 md:py-0 md:text-[14px] md:text-gray-950 md:bg-transparent md:hover:bg-transparent md:focus:bg-transparent md:active:bg-transparent"
               >
                 {item.label}
               </a>
@@ -75,14 +83,50 @@ import Container from './Container.astro';
       </nav>
 
       <div class="flex items-center gap-3">
-        {/* 多语言切换暂不开放，移除不可用入口，避免用户误以为当前站点已有语言切换功能 */}
+        {/* 语言选择使用下拉菜单；菜单项只包含已有对应翻译的页面，避免跳到未汉化页面 */}
+        {languageMenu.options.length > 0 && (
+          <div class="relative group" data-nav-dropdown>
+            <button
+              type="button"
+              id="language-switch-trigger"
+              class="inline-flex h-[32px] items-center justify-center gap-1.5 rounded-lg border border-orange-100 bg-white/80 px-2.5 text-[13px] font-extrabold text-gray-800 transition-colors hover:border-violet-200 hover:text-violet-700"
+              aria-label={languageMenu.ariaLabel}
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="language-switch-menu"
+              data-nav-dropdown-trigger
+            >
+              <Icon name="Languages" size={14} color="currentColor" strokeWidth={2.3} />
+              <span>{languageMenu.label}</span>
+              <Icon name="ChevronDown" size={13} color="currentColor" strokeWidth={2.5} />
+            </button>
+            <div
+              id="language-switch-menu"
+              class="hidden absolute right-0 top-full z-[70] mt-2 min-w-[116px] rounded-xl border border-orange-100 bg-white py-1.5 opacity-0 shadow-xl shadow-violet-100/60 transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 md:invisible md:block"
+              role="menu"
+              aria-labelledby="language-switch-trigger"
+              data-nav-dropdown-menu
+            >
+              {languageMenu.options.map((link) => (
+              <a
+                href={link.href}
+                hreflang={link.lang}
+                role="menuitem"
+                class="block px-3 py-2 text-[13px] font-extrabold text-gray-700 transition-colors hover:bg-violet-50 hover:text-violet-700"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+          </div>
+        )}
 
         {/* 移动端菜单按钮使用统一 Icon 组件，保证图标来源和可访问名称一致 */}
         <button
           type="button"
           id="mobile-menu-btn"
           class="md:hidden p-2 rounded-xl hover:bg-violet-50 transition-colors"
-          aria-label="Toggle menu"
+          aria-label={mobileMenuAriaLabel}
           aria-expanded="false"
           aria-controls="primary-navigation"
         >
@@ -93,6 +137,19 @@ import Container from './Container.astro';
   </Container>
 
 </header>
+
+<style is:global>
+  @media (min-width: 768px) {
+    #primary-navigation {
+      background: transparent !important;
+    }
+
+    #primary-navigation > [data-nav-dropdown] > [data-nav-dropdown-trigger],
+    #primary-navigation > div > a {
+      background-color: transparent !important;
+    }
+  }
+</style>
 
 <script>
   // 主导航下拉菜单：同一份 DOM 同时服务桌面和移动端，减少重复导航文本和读屏重复

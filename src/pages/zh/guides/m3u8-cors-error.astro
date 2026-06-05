@@ -1,0 +1,72 @@
+---
+// 中文 Guide：M3U8 CORS 排障 - 仅链接中文页面和中文工具页
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Container from '../../../components/Container.astro';
+import Button from '../../../components/Button.astro';
+import { site } from '../../../config/site.js';
+import { zhGuideArticles } from '../../../config/zhGuideArticles.js';
+
+const article = zhGuideArticles.find((item) => item.slug === 'm3u8-cors-error');
+const canonical = `${site.domain}${article.href}`;
+---
+
+<BaseLayout title={article.title} description={article.description} canonical={canonical} lang="zh-CN" ogLocale="zh_CN">
+  <Container class="py-12 md:py-16">
+    <article class="mx-auto max-w-3xl">
+      <nav class="mb-6 text-sm font-semibold text-gray-500" aria-label="面包屑">
+        <a class="hover:text-violet-700" href="/zh/m3u8-player">M3U8在线播放器</a>
+        <span class="mx-2 text-gray-300">/</span>
+        <a class="hover:text-violet-700" href="/zh/guides">指南</a>
+      </nav>
+
+      <header class="mb-8">
+        <p class="mb-3 text-sm font-extrabold text-violet-700">{article.category}</p>
+        <h1 class="text-3xl font-black leading-tight text-gray-950 md:text-4xl">{article.h1}</h1>
+        <p class="mt-4 text-lg font-medium leading-relaxed text-gray-600">{article.summary}</p>
+        <p class="mt-3 text-sm font-semibold text-gray-500">最后更新：{article.dateModified}</p>
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Button href="/zh/m3u8-player" variant="primary">测试M3U8链接</Button>
+          <Button href="/zh/guides" variant="secondary">全部指南</Button>
+        </div>
+      </header>
+
+      <div class="guide-prose">
+        <h2>M3U8跨域错误是什么意思</h2>
+        <p>
+          M3U8跨域错误通常表示浏览器尝试请求播放列表、媒体分片、字幕或密钥文件时，来源服务器没有允许当前网页访问这些资源。它不是播放器按钮失效，也不是简单换一个前端播放器就一定能解决的问题。
+        </p>
+
+        <h2>先确认是哪一个请求失败</h2>
+        <p>
+          HLS 播放通常会依次请求 master playlist、media playlist 和多个 segment。一个 M3U8 链接能打开，并不代表所有分片都能被浏览器访问。排查时要看第一个失败的请求是播放列表、分片、字幕还是 key 文件。
+        </p>
+
+        <h2>常见原因</h2>
+        <ul>
+          <li>播放列表没有返回 `Access-Control-Allow-Origin`。</li>
+          <li>播放列表允许跨域，但分片文件没有允许跨域。</li>
+          <li>CDN 开启了防盗链、来源限制或地域限制。</li>
+          <li>签名链接、token 或临时 URL 已经过期。</li>
+          <li>视频源服务器限制跨域访问，不允许外部网页播放。</li>
+        </ul>
+
+        <h2>正确处理方式</h2>
+        <p>
+          如果你拥有或管理视频源，应该在来源服务器或 CDN 上配置正确的 CORS 响应头。不要把私有视频简单改成公开访问，也不要使用代理或绕过方式处理未经授权的内容。
+        </p>
+
+        <h2>用 MetisTools 如何辅助判断</h2>
+        <p>
+          你可以把公开或已授权的 M3U8/HLS 链接粘贴到中文 M3U8在线播放器中，观察播放日志是否停在 playlist、segment、CORS、编码或访问权限相关步骤。日志只能作为浏览器侧参考，不能替代服务器日志。
+        </p>
+      </div>
+
+      <aside class="mt-10 rounded-xl border border-orange-100 bg-white/82 p-5 shadow-sm shadow-orange-100/50">
+        <h2 class="text-lg font-black text-gray-950">合规提醒</h2>
+        <p class="mt-2 text-sm font-medium leading-relaxed text-gray-600">
+          MetisTools 只用于测试公开或已授权的视频链接，不下载、不转换、不重新分发，也不绕过 CORS、DRM、登录、token、版权或来源网站权限。
+        </p>
+      </aside>
+    </article>
+  </Container>
+</BaseLayout>

@@ -197,6 +197,8 @@ const runtimeFiles = listFiles(distDir, (file) => /\.(html|js)$/.test(file));
 const runtimeText = runtimeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
 const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google'));
 const validDistRoutes = new Set(pageHtmlFiles.map(routeFromDistHtml));
+// 英文页面允许出现的非英文语言切换标签；除此之外仍视为可见中文泄漏
+const allowedNonEnglishLanguageSwitchLabels = ['中文'];
 const noAdsRoutes = new Set([
   '/404',
   '/about',
@@ -207,6 +209,12 @@ const noAdsRoutes = new Set([
   '/privacy-policy',
   '/terms',
   '/playback-policy',
+  '/zh/about',
+  '/zh/contact',
+  '/zh/faq',
+  '/zh/privacy-policy',
+  '/zh/terms',
+  '/zh/playback-policy',
 ]);
 const noindexRoutes = new Set([
   '/404',
@@ -322,12 +330,18 @@ pageHtmlFiles.forEach((file) => {
   const relativePath = path.relative(distDir, file).replaceAll(path.sep, '/');
   const is404 = relativePath === '404.html';
   const route = routeFromDistHtml(file);
+  const isChinesePage = route.startsWith('/zh/');
   const isNoindexPage = noindexRoutes.has(route);
   const visibleText = stripNonVisibleHtml(html);
   const hasAdSenseScript = /<script\b[^>]+pagead2\.googlesyndication\.com/i.test(html);
 
-  if (/[一-龥]/.test(visibleText)) {
-    fail(`${relativePath} contains visible Chinese text.`);
+  // 英文页面仍禁止可见中文；中文目录页面允许中文内容，避免多语言上线后误报
+  const visibleTextForLanguageCheck = allowedNonEnglishLanguageSwitchLabels.reduce(
+    (text, label) => text.replaceAll(label, ''),
+    visibleText,
+  );
+  if (!isChinesePage && /[一-龥]/.test(visibleTextForLanguageCheck)) {
+    fail(`${relativePath} contains visible Chinese text outside /zh/.`);
   }
 
   const internalLinks = [...html.matchAll(/<a\b[^>]*\bhref="([^"]+)"/gi)]
