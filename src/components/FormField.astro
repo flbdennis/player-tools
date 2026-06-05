@@ -1,0 +1,49 @@
+---
+// 表单字段外壳组件 - 统一 label、提示、错误状态和间距，给后续转换/下载/合并工具保留一致扩展点
+import Icon from './Icon.astro';
+
+const {
+  id,
+  label,
+  hint,
+  error,
+  required = false,
+  hideLabel = false,
+  class: className = '',
+  labelClass = '',
+  hintClass = '',
+  errorClass = '',
+} = Astro.props;
+
+const hintId = hint && id ? `${id}-hint` : undefined;
+const errorId = error && id ? `${id}-error` : undefined;
+---
+
+<div class={`w-full space-y-2 ${className}`} data-form-field data-invalid={error ? 'true' : 'false'}>
+  {label && (
+    <label
+      for={id}
+      class={`block text-[13px] font-extrabold leading-snug text-gray-900 ${hideLabel ? 'sr-only' : ''} ${labelClass}`}
+    >
+      {label}
+      {required && <span class="ml-1 text-red-500" aria-hidden="true">*</span>}
+    </label>
+  )}
+
+  <slot />
+
+  {hint && !error && (
+    <p id={hintId} class={`text-[12.5px] font-semibold leading-snug text-gray-500 ${hintClass}`}>
+      {hint}
+    </p>
+  )}
+
+  {error && (
+    <p id={errorId} class={`flex items-start gap-1.5 text-[12.5px] font-bold leading-snug text-red-500 ${errorClass}`}>
+      <span class="mt-[1px] inline-flex shrink-0 text-red-500">
+        <Icon name="AlertCircle" size={14} color="currentColor" strokeWidth={2.3} />
+      </span>
+      <span>{error}</span>
+    </p>
+  )}
+</div>

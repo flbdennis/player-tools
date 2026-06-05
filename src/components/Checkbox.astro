@@ -1,0 +1,67 @@
+---
+// 复选框组件 - 用于授权确认、批量选项和工具开关，避免页面直接写原生 checkbox
+import Icon from './Icon.astro';
+
+const {
+  id,
+  name,
+  label,
+  description,
+  hint,
+  error,
+  value = '1',
+  checked = false,
+  required = false,
+  disabled = false,
+  class: className = '',
+  inputClass = '',
+} = Astro.props;
+
+const hintId = hint && id ? `${id}-hint` : '';
+const errorId = error && id ? `${id}-error` : '';
+const descriptionId = description && id ? `${id}-description` : '';
+const describedByValue = [error ? errorId : hintId, descriptionId].filter(Boolean).join(' ') || undefined;
+---
+
+<div class={`w-full ${className}`} data-form-field data-invalid={error ? 'true' : 'false'}>
+  <label
+    for={id}
+    class={`flex gap-3 rounded-lg border bg-white/80 p-3 shadow-sm shadow-orange-50/70 transition-colors ${error ? 'border-red-200' : 'border-orange-100 hover:border-violet-200'} ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+  >
+    <input
+      id={id}
+      name={name}
+      type="checkbox"
+      value={value}
+      checked={checked}
+      required={required}
+      disabled={disabled}
+      aria-invalid={error ? 'true' : undefined}
+      aria-describedby={describedByValue}
+      class={`mt-0.5 h-4 w-4 shrink-0 rounded border-orange-200 text-violet-700 accent-violet-700 focus:ring-2 focus:ring-violet-200 ${inputClass}`}
+    />
+    <span class="min-w-0">
+      <span class="block text-[13px] font-extrabold leading-snug text-gray-900">
+        {label}
+        {required && <span class="ml-1 text-red-500" aria-hidden="true">*</span>}
+      </span>
+      {description && (
+        <span id={descriptionId} class="mt-1 block text-[12.5px] font-semibold leading-snug text-gray-500">
+          {description}
+        </span>
+      )}
+    </span>
+  </label>
+
+  {hint && !error && (
+    <p id={hintId} class="mt-2 text-[12.5px] font-semibold leading-snug text-gray-500">{hint}</p>
+  )}
+  {error && (
+    <p id={errorId} class="mt-2 flex items-start gap-1.5 text-[12.5px] font-bold leading-snug text-red-500">
+      <span class="mt-[1px] inline-flex shrink-0 text-red-500">
+        <Icon name="AlertCircle" size={14} color="currentColor" strokeWidth={2.3} />
+      </span>
+      <span>{error}</span>
+    </p>
+  )}
+</div>
