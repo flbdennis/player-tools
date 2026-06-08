@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { site } from '../src/config/site.js';
 import { guideArticles } from '../src/config/guideArticles.js';
+import { disabledDraftStreamRoutes } from '../src/config/streamTools.js';
 
 const rootDir = process.cwd();
 const pagesDir = path.join(rootDir, 'src/pages');
@@ -15,10 +16,12 @@ const guideLastmodByRoute = new Map(
 );
 
 const excludedRoutes = new Set(['/404']);
+const disabledDraftRouteSet = new Set(disabledDraftStreamRoutes);
 
 const priorityByRoute = new Map([
   ['/', '1.0'],
   ['/m3u8-player', '0.9'],
+  ['/m3u8-analyzer', '0.9'],
   ['/zh/m3u8-player', '0.9'],
   ['/mp4-player', '0.9'],
   ['/dash-player', '0.9'],
@@ -106,7 +109,7 @@ const routes = listPageFiles(pagesDir)
     file,
     route: routeFromFile(file),
   }))
-  .filter((item) => !excludedRoutes.has(item.route) && !item.route.startsWith('/embed/'))
+  .filter((item) => !excludedRoutes.has(item.route) && !item.route.startsWith('/embed/') && !disabledDraftRouteSet.has(item.route))
   .map((item) => ({
     ...item,
     lastmod: getLastmod(item.route, item.file),

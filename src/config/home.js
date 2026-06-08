@@ -40,10 +40,10 @@ export const hero = {
 
 // 首页工具列表配置 - Available Player Tools 区块使用
 export const availableTools = {
-  // 区块标题 - 展示当前可用播放器工具
-  title: 'Free Video Player Tools',
-  // 区块副标题 - 解释三类播放器分别覆盖不同测试场景
-  subtitle: 'Choose the right browser-based player for HLS playlists, MP4 video URLs or MPEG-DASH MPD manifests.',
+  // 区块标题 - 展示当前可用播放器和低风险分析工具
+  title: 'Free Video Player and Analyzer Tools',
+  // 区块副标题 - 解释播放器和 Analyzer 分别覆盖播放测试与 manifest 诊断场景
+  subtitle: 'Choose the right browser-based tool for HLS playlists, MP4 video URLs, MPEG-DASH MPD manifests or stream manifest analysis.',
   // 工具卡片 CTA 文案 - 所有工具卡片统一使用
   ctaLabel: 'Use Now',
   // 工具主题色 - 根据 tools.js 中的 id 匹配不同图标渐变和链接色
@@ -54,6 +54,8 @@ export const availableTools = {
     mp4: { from: '#ff6d9a', to: '#ff3f78', text: '#ff3f78' },
     // DASH 工具橙色主题
     dash: { from: '#ffc444', to: '#ff970f', text: '#ff9900' },
+    // Analyzer 工具蓝绿色主题，和播放器卡片保持同一视觉体系但区分诊断属性
+    analyzer: { from: '#16b8a6', to: '#159dff', text: '#0f8fbc' },
   },
 };
 

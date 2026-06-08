@@ -82,6 +82,8 @@ export const m3u8PlayerPage = {
     { id: 'mp4', label: 'MP4 Player', href: '/mp4-player' },
     // DASH 工具页 Tab
     { id: 'dash', label: 'DASH Player', href: '/dash-player' },
+    // Analyzer 工具页 Tab - 低风险诊断工具与播放器平级
+    { id: 'analyzer', label: 'Analyzer', href: '/m3u8-analyzer' },
   ],
   // 播放器主卡片配置 - PlayerShell 读取输入、播放、占位和日志文案
   player: {

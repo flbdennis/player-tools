@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { guideArticles } from '../src/config/guideArticles.js';
+import { disabledDraftStreamRoutes } from '../src/config/streamTools.js';
 
 const rootDir = process.cwd();
 const distDir = path.join(rootDir, 'dist');
@@ -195,7 +196,8 @@ pageFiles.forEach((file) => {
 const htmlFiles = listFiles(distDir, (file) => file.endsWith('.html'));
 const runtimeFiles = listFiles(distDir, (file) => /\.(html|js)$/.test(file));
 const runtimeText = runtimeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
-const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google'));
+const disabledDraftRouteSet = new Set(disabledDraftStreamRoutes);
+const pageHtmlFiles = htmlFiles.filter((file) => !path.basename(file).startsWith('google') && !disabledDraftRouteSet.has(routeFromDistHtml(file)));
 const validDistRoutes = new Set(pageHtmlFiles.map(routeFromDistHtml));
 // 英文页面允许出现的非英文语言切换标签；除此之外仍视为可见中文泄漏
 const allowedNonEnglishLanguageSwitchLabels = ['中文'];

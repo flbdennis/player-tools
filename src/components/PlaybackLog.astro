@@ -1,0 +1,131 @@
+---
+// PlaybackLog 组件 - 从 PlayerShell 抽出的日志区，播放器和 Analyzer 共用同一结构、样式和按钮尺寸
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import Tooltip from './Tooltip.astro';
+
+const {
+  title = 'Playback Log',
+  description = '',
+  shortDescription = '',
+  notice = '',
+  statusText = '',
+  instructionText = '',
+  dragHint = 'Drag the lower-left corner to expand the log area and review more diagnostic lines.',
+  titleId = 'playback-log-title',
+  tooltipId = 'playback-log-detail-tooltip',
+  statusId = 'playback-status-summary',
+  resizeId = 'playback-log-resize-shell',
+  outputId = 'playback-log-output',
+  clearId = 'playback-log-clear',
+  copyId = 'playback-log-copy',
+  languageToggleId = 'playback-log-language-toggle',
+  clearLabel = 'Clear Log',
+  copyLabel = 'Copy Log',
+  languageToggleLabel = 'English Log',
+  languageToggleTitle = 'Show original English log. Current log lines will switch immediately.',
+  showLanguageToggle = false,
+  class: className = '',
+} = Astro.props;
+
+const statusContent = [statusText, instructionText].filter(Boolean).join(' ');
+---
+
+<div class={`mt-3 rounded-xl border border-orange-100 bg-white/78 p-3 shadow-sm shadow-orange-100/50 md:p-4 ${className}`} aria-labelledby={titleId}>
+  <div class="mb-1.5">
+    <h3 id={titleId} class="relative inline-flex items-center gap-1.5 pr-1 text-[17px] font-black tracking-[-0.03em] text-gray-950 md:text-[18px]">
+      {title}
+      {description && (
+        <Tooltip id={tooltipId} text={description} position="bottom" class="shrink-0">
+          <button
+            type="button"
+            class="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-transparent text-amber-700/85 transition-colors hover:text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-200"
+            aria-label={`${title} note`}
+            aria-describedby={tooltipId}
+          >
+            <Icon name="HelpCircle" size={14} color="currentColor" strokeWidth={2.3} />
+          </button>
+        </Tooltip>
+      )}
+    </h3>
+  </div>
+  {shortDescription && (
+    <p class="mb-1.5 text-[12.5px] font-semibold leading-snug text-gray-600">{shortDescription}</p>
+  )}
+  {statusContent && (
+    <div id={statusId} class="mb-2 rounded-lg border border-violet-100 bg-violet-50/70 px-3 py-2 text-[13px] font-bold leading-snug text-gray-700">
+      {statusText && <span class="text-violet-700">{statusText}</span>} {instructionText}
+    </div>
+  )}
+  <div id={resizeId} class="playback-log-resize-shell rounded-lg border border-orange-200 bg-[#f4ecdf] px-3 py-2 shadow-inner shadow-orange-100/80" aria-label={`Resizable ${title} output`}>
+    <pre id={outputId} class="min-h-full whitespace-pre-wrap font-mono text-[12.5px] font-bold leading-[1.48] text-[#27303f]">{notice}</pre>
+  </div>
+  {dragHint && (
+    <p class="mt-1.5 text-[12px] font-semibold leading-snug text-gray-500">{dragHint}</p>
+  )}
+  <div class={`mt-2 grid gap-2 ${showLanguageToggle ? 'grid-cols-3' : 'grid-cols-2'}`}>
+    <Button type="button" id={clearId} variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
+      {clearLabel}
+    </Button>
+    <Button type="button" id={copyId} variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
+      {copyLabel}
+    </Button>
+    {showLanguageToggle && (
+      <Button
+        type="button"
+        id={languageToggleId}
+        variant="secondary"
+        size="sm"
+        class="h-[32px] rounded-lg px-3 py-0 text-[13px]"
+        title={languageToggleTitle}
+      >
+        {languageToggleLabel}
+      </Button>
+    )}
+  </div>
+</div>
+
+<style>
+  /* 日志输出框保持播放器原有左下角可拖拽手柄，Analyzer 复用同一视觉和交互反馈。 */
+  .playback-log-resize-shell {
+    position: relative;
+    height: 112px;
+    min-height: 104px;
+    max-height: 460px;
+    overflow: auto;
+    resize: vertical;
+    direction: rtl;
+  }
+
+  .playback-log-resize-shell pre {
+    direction: ltr;
+    text-align: left;
+  }
+
+  :global(.playback-log-entry) {
+    display: block;
+  }
+
+  :global(.playback-log-raw-warning) {
+    color: #f59e0b;
+    font-weight: 900;
+  }
+
+  :global(.playback-log-raw-error) {
+    color: #dc2626;
+    font-weight: 900;
+  }
+
+  .playback-log-resize-shell::after {
+    content: '';
+    position: sticky;
+    left: 0;
+    bottom: 0;
+    display: block;
+    width: 14px;
+    height: 14px;
+    margin-top: -14px;
+    background: linear-gradient(135deg, transparent 0 45%, rgba(119, 71, 255, 0.42) 46% 54%, transparent 55% 100%);
+    pointer-events: none;
+  }
+</style>

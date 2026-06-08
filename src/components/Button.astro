@@ -7,6 +7,10 @@ const {
   class: className = '',
   type = 'button',
   id,
+  disabled = false,
+  title,
+  ariaLabel,
+  ariaDescribedby,
 } = Astro.props;
 
 // 变体样式映射 - 与 UI/home.png 的紫色主按钮和白色次按钮保持一致
@@ -30,15 +34,17 @@ const sizeStyles = {
 const baseStyles =
   'inline-flex items-center justify-center gap-2 font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-2 focus:ring-offset-white';
 
-const styles = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`;
+// 禁用态用于 Analyzer 分片检测等异步按钮，避免用户在无可检测对象时误触发
+const disabledStyles = disabled ? 'cursor-not-allowed opacity-55 shadow-none hover:shadow-none' : '';
+const styles = `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${disabledStyles} ${className}`;
 ---
 
 {href ? (
-  <a href={href} class={styles} id={id}>
+  <a href={href} class={styles} id={id} title={title} aria-label={ariaLabel} aria-describedby={ariaDescribedby}>
     <slot />
   </a>
 ) : (
-  <button type={type} class={styles} id={id}>
+  <button type={type} class={styles} id={id} disabled={disabled} title={title} aria-label={ariaLabel} aria-describedby={ariaDescribedby}>
     <slot />
   </button>
 )}

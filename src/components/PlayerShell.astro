@@ -5,6 +5,7 @@ import TextInput from './TextInput.astro';
 import Button from './Button.astro';
 import Icon from './Icon.astro';
 import PermissionNotice from './PermissionNotice.astro';
+import PlaybackLog from './PlaybackLog.astro';
 import { playerShared } from '../config/player.js';
 
 const { tabs, activeId = 'm3u8', player } = Astro.props;
@@ -133,111 +134,24 @@ const panelTitle = player.panelTitle || `${playerLabel} playback panel`;
     </div>
   </div>
 
-  {/* Playback Log 放在播放器组件内部，记录原生 video、hls.js、dash.js 的关键事件 */}
-  <div class="mt-3 rounded-xl border border-orange-100 bg-white/78 p-4 shadow-sm shadow-orange-100/50" aria-labelledby="playback-log-title">
-    <div class="mb-1.5">
-      <h3 id="playback-log-title" class="relative inline-block pr-3 text-[18px] font-black tracking-[-0.03em] text-gray-950">
-        {playbackLog.title}
-        <span class="group absolute -right-1 -top-1 inline-flex">
-        <button
-          type="button"
-          class="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-transparent text-amber-700/85 transition-colors hover:text-amber-900"
-          aria-label="Playback Log note"
-          aria-describedby="playback-log-detail-tooltip"
-        >
-          <Icon name="HelpCircle" size={14} color="currentColor" strokeWidth={2.3} />
-        </button>
-        <span
-          id="playback-log-detail-tooltip"
-          role="tooltip"
-          class="pointer-events-none absolute left-0 top-7 z-20 w-[270px] rounded-lg border border-amber-100 bg-white px-3 py-2 text-[12px] font-semibold leading-snug text-gray-700 opacity-0 shadow-xl shadow-orange-100/70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 md:w-[360px]"
-        >
-          {playbackLogDescription}
-        </span>
-      </span>
-      </h3>
-    </div>
-    <p class="mb-1.5 text-[12.5px] font-semibold leading-snug text-gray-600">{playbackLogShortDescription}</p>
-    <div id="playback-status-summary" class="mb-2 rounded-lg border border-violet-100 bg-violet-50/70 px-3 py-2 text-[13px] font-bold leading-snug text-gray-700">
-      <span class="text-violet-700">{readyStatusText}</span> {readyInstructionText}
-    </div>
-    <div id="playback-log-resize-shell" class="playback-log-resize-shell rounded-lg border border-orange-200 bg-[#f4ecdf] px-3 py-2 shadow-inner shadow-orange-100/80" aria-label="Resizable playback log output">
-      <pre id="playback-log-output" class="min-h-full whitespace-pre-wrap font-mono text-[12.5px] font-bold leading-[1.48] text-[#27303f]">{(playbackLog.lines && playbackLog.lines.length ? playbackLog.lines.join('\n') : playbackLogNotice)}</pre>
-    </div>
-    <p class="mt-1.5 text-[12px] font-semibold leading-snug text-gray-500">
-      {dragLogHint}
-    </p>
-    <div class={`mt-2 grid gap-2 ${hasLocalizedLogText ? 'grid-cols-3' : 'grid-cols-2'}`}>
-      <Button type="button" id="playback-log-clear" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
-        {playbackLog.actions?.clear || 'Clear Log'}
-      </Button>
-      <Button type="button" id="playback-log-copy" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[13px]">
-        {playbackLog.actions?.copy || 'Copy Log'}
-      </Button>
-      {hasLocalizedLogText && (
-        <Button
-          type="button"
-          id="playback-log-language-toggle"
-          variant="secondary"
-          size="sm"
-          class="h-[32px] rounded-lg px-3 py-0 text-[13px]"
-          title={playbackLog.actions?.showEnglishTitle || 'Show original English log. Current log lines will switch immediately.'}
-        >
-          {playbackLog.actions?.showEnglish || 'English Log'}
-        </Button>
-      )}
-    </div>
-  </div>
+  {/* Playback Log 复用独立组件；id 保持不变，确保现有播放器脚本继续工作 */}
+  <PlaybackLog
+    title={playbackLog.title}
+    description={playbackLogDescription}
+    shortDescription={playbackLogShortDescription}
+    notice={(playbackLog.lines && playbackLog.lines.length ? playbackLog.lines.join('\n') : playbackLogNotice)}
+    statusText={readyStatusText}
+    instructionText={readyInstructionText}
+    dragHint={dragLogHint}
+    clearLabel={playbackLog.actions?.clear || 'Clear Log'}
+    copyLabel={playbackLog.actions?.copy || 'Copy Log'}
+    showLanguageToggle={hasLocalizedLogText}
+    languageToggleLabel={playbackLog.actions?.showEnglish || 'English Log'}
+    languageToggleTitle={playbackLog.actions?.showEnglishTitle || 'Show original English log. Current log lines will switch immediately.'}
+  />
 
   <p id="metis-player-status" class="mt-2 hidden text-[13px] font-semibold text-gray-600"></p>
 </section>
-
-
-<style>
-  /* Playback Log 输出框：使用基础 CSS 实现可拉伸区域，不依赖复杂 Tailwind 插件。
-     direction: rtl 让支持 RTL 的浏览器把原生 resize 手柄放在左下角；内部 pre 再恢复 LTR，保证英文日志正常显示。 */
-  .playback-log-resize-shell {
-    position: relative;
-    height: 112px;
-    min-height: 104px;
-    max-height: 460px;
-    overflow: auto;
-    resize: vertical;
-    direction: rtl;
-  }
-
-  .playback-log-resize-shell pre {
-    direction: ltr;
-    text-align: left;
-  }
-
-  .playback-log-entry {
-    display: block;
-  }
-
-  :global(.playback-log-raw-warning) {
-    color: #f59e0b;
-    font-weight: 900;
-  }
-
-  :global(.playback-log-raw-error) {
-    color: #dc2626;
-    font-weight: 900;
-  }
-
-  .playback-log-resize-shell::after {
-    content: '';
-    position: sticky;
-    left: 0;
-    bottom: 0;
-    display: block;
-    width: 14px;
-    height: 14px;
-    margin-top: -14px;
-    background: linear-gradient(135deg, transparent 0 45%, rgba(119, 71, 255, 0.42) 46% 54%, transparent 55% 100%);
-    pointer-events: none;
-  }
-</style>
 
 <script>
   // hls.js 和 dash.js 按需动态加载：MP4 页面不加载流媒体库，降低首屏 JS 体积

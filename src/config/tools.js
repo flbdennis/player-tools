@@ -1,5 +1,8 @@
+import { featureFlags } from './features.js';
+import { analyzerTool } from './streamTools.js';
+
 // 工具页面配置 - 首页工具卡片、导航下拉和工具页 Tab 统一读取这些工具数据
-export const tools = [
+const playerTools = [
   // M3U8/HLS 播放器入口配置
   {
     // 工具唯一 ID - 用于匹配颜色、激活态和工具类型判断
@@ -49,3 +52,8 @@ export const tools = [
     icon: 'Play',
   },
 ];
+
+// 公开工具列表 - Analyzer 作为低风险诊断工具与现有 Player 平级；高风险草稿工具不从这里输出
+export const tools = featureFlags.enableAnalyzerTools
+  ? [...playerTools, analyzerTool]
+  : playerTools;

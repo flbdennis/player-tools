@@ -1,0 +1,196 @@
+---
+// AnalyzerShell 组件 - 封装 M3U8/HLS、DASH/MPD 与 MP4 三种分析模式，统一输入、结果、分片检测和日志区域
+import PlayerTabs from './PlayerTabs.astro';
+import TextInput from './TextInput.astro';
+import Textarea from './Textarea.astro';
+import Button from './Button.astro';
+import Icon from './Icon.astro';
+import PermissionNotice from './PermissionNotice.astro';
+import PlaybackLog from './PlaybackLog.astro';
+
+const { tabs, activeId = 'analyzer', analyzer } = Astro.props;
+const resultText = analyzer.results || {};
+const segmentText = analyzer.segmentCheck || {};
+const logText = analyzer.log || {};
+const analyzerModeTabs = (analyzer.modes || []).map((mode) => ({
+  id: mode.value,
+  label: mode.label,
+  description: mode.description,
+}));
+const uiText = {
+  results: resultText,
+  segmentCheck: segmentText,
+  log: logText,
+  input: analyzer.input || {},
+};
+---
+
+<section
+  class="relative z-10 mt-card px-4 py-4 md:px-5"
+  data-stream-analyzer
+  data-m3u8-sample={analyzer.samples?.m3u8 || ''}
+  data-mpd-sample={analyzer.samples?.mpd || ''}
+  data-mp4-sample={analyzer.samples?.mp4 || ''}
+  data-ui-text={JSON.stringify(uiText)}
+  aria-labelledby="stream-analyzer-panel-title"
+>
+  <h2 id="stream-analyzer-panel-title" class="sr-only">M3U8, MPD and MP4 analyzer panel</h2>
+  <PlayerTabs tabs={tabs} activeId={activeId} />
+
+  <div class="mt-2.5 space-y-3">
+    <form id="stream-analyzer-form" class="rounded-xl border border-orange-100 bg-white/78 p-3 shadow-sm shadow-orange-100/50 md:p-4" novalidate>
+      <div>
+        <p class="mb-1.5 text-[13px] font-extrabold leading-snug text-gray-900">Analyzer Mode</p>
+        <PlayerTabs
+          tabs={analyzerModeTabs}
+          activeId="m3u8"
+          mode="buttons"
+          ariaLabel="Analyzer mode"
+          buttonPrefix="stream-analyzer-mode"
+        />
+      </div>
+
+      <div class="mt-2.5 space-y-2.5">
+        <p id="stream-analyzer-url-hint" class="text-[12.5px] font-semibold leading-snug text-gray-500">
+          {analyzer.input.urlHint}
+        </p>
+
+        <TextInput
+          id="stream-analyzer-url"
+          name="streamUrl"
+          type="url"
+          label=""
+          ariaLabel={analyzer.input.urlLabel}
+          describedBy="stream-analyzer-url-hint"
+          placeholder={analyzer.input.urlPlaceholder}
+          leftIcon="Link"
+          autocomplete="off"
+          inputmode="url"
+        />
+
+        {/* 授权边界提示与 Player 页面一致，紧贴 URL 输入区下方，避免 Analyzer 被理解为下载、解密或绕过工具 */}
+        <PermissionNotice text={analyzer.policyHint} class="text-gray-700" iconColor="#7747ff" />
+
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <Button type="submit" variant="primary" size="md" class="h-[34px] rounded-lg px-3 py-0 text-[13px]">
+            <Icon name="SearchCheck" size={15} color="currentColor" strokeWidth={2.4} />
+            <span id="stream-analyzer-submit-label">{analyzer.input.buttonLabel}</span>
+          </Button>
+          <Button type="button" id="stream-analyzer-load-sample" variant="secondary" size="md" class="h-[34px] rounded-lg px-3 py-0 text-[13px]">
+            <Icon name="Clipboard" size={15} color="currentColor" strokeWidth={2.4} />
+            {analyzer.input.sampleLabel}
+          </Button>
+          <Button type="button" id="stream-analyzer-clear" variant="secondary" size="md" class="h-[34px] rounded-lg px-3 py-0 text-[13px]">
+            <Icon name="Trash2" size={15} color="currentColor" strokeWidth={2.4} />
+            {analyzer.input.clearLabel}
+          </Button>
+        </div>
+      </div>
+
+      <details id="stream-analyzer-advanced-input" class="mt-2.5 rounded-lg border border-orange-100 bg-[#fffaf4]/70 p-3">
+        <summary class="cursor-pointer text-[13px] font-black text-gray-950 marker:text-violet-700">
+          {analyzer.input.advancedSummary}
+        </summary>
+        <div class="mt-3">
+          <Textarea
+            id="stream-analyzer-text"
+            name="manifestText"
+            label={analyzer.input.textLabel}
+            hint={analyzer.input.textHint}
+            placeholder={analyzer.input.textPlaceholder}
+            rows={6}
+            textareaClass="font-mono text-[12.5px]"
+          />
+        </div>
+      </details>
+    </form>
+
+    <aside class="rounded-xl border border-orange-100 bg-white/78 p-3 shadow-sm shadow-orange-100/50 md:p-4" aria-labelledby="stream-analyzer-result-title">
+      <h3 id="stream-analyzer-result-title" class="mb-2.5 text-[18px] font-black tracking-[-0.03em] text-gray-950">
+        {resultText.title}
+      </h3>
+
+      <div id="stream-analyzer-result" class="space-y-2.5">
+        <section id="stream-analyzer-conclusion" class="rounded-xl border border-orange-100 bg-[#fffaf4]/85 p-3" aria-live="polite">
+          <p class="text-[14px] font-black text-gray-950">{resultText.emptyTitle}</p>
+          <p class="mt-1 text-[13px] font-semibold leading-snug text-gray-600">{resultText.emptyDescription}</p>
+        </section>
+
+        <section class="rounded-xl border border-orange-100 bg-white/82 p-3">
+          <h4 class="mb-2 text-[14px] font-black text-gray-950">Summary</h4>
+          <div id="stream-analyzer-summary" class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"></div>
+        </section>
+
+        <section class="rounded-xl border border-orange-100 bg-white/82 p-3">
+          <h4 class="mb-2 text-[14px] font-black text-gray-950">Main Result</h4>
+          <div id="stream-analyzer-main" class="space-y-2 text-[13px] font-semibold leading-snug text-gray-700">
+            <p>No analysis result yet.</p>
+          </div>
+        </section>
+
+        <section class="rounded-xl border border-orange-100 bg-white/82 p-3" aria-labelledby="stream-analyzer-segment-title">
+          <div>
+            <h4 id="stream-analyzer-segment-title" class="text-[14px] font-black text-gray-950">{segmentText.title}</h4>
+            <p id="stream-analyzer-segment-note" class="mt-1 text-[12.5px] font-semibold leading-snug text-gray-500">{segmentText.smartNote}</p>
+          </div>
+          <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <Button type="button" id="stream-analyzer-smart-check" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[12.5px]" disabled={true}>
+              <Icon name="Gauge" size={14} color="currentColor" strokeWidth={2.4} />
+              {segmentText.smartLabel}
+            </Button>
+            <Button type="button" id="stream-analyzer-check-all" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[12.5px]" disabled={true}>
+              <Icon name="ListChecks" size={14} color="currentColor" strokeWidth={2.4} />
+              {segmentText.allLabel}
+            </Button>
+            <Button type="button" id="stream-analyzer-copy-failed" variant="secondary" size="sm" class="h-[32px] rounded-lg px-3 py-0 text-[12.5px]" disabled={true}>
+              <Icon name="Clipboard" size={14} color="currentColor" strokeWidth={2.4} />
+              {segmentText.copyFailedLabel}
+            </Button>
+          </div>
+          <div id="stream-analyzer-segment-summary" class="mt-2.5 grid gap-2 sm:grid-cols-4">
+            <p class="text-[13px] font-semibold leading-snug text-gray-600">{segmentText.unavailable}</p>
+          </div>
+          <div id="stream-analyzer-segment-failures" class="mt-2.5 hidden"></div>
+        </section>
+
+        <section id="stream-analyzer-warnings-section" class="hidden rounded-xl border border-orange-100 bg-white/82 p-3">
+          <h4 class="mb-2 text-[14px] font-black text-gray-950">Warnings and Errors</h4>
+          <div id="stream-analyzer-warnings" class="space-y-2 text-[13px] font-semibold leading-snug text-gray-700"></div>
+        </section>
+
+        <details id="stream-analyzer-advanced-result" class="rounded-xl border border-orange-100 bg-white/82 p-3">
+          <summary class="cursor-pointer text-[14px] font-black text-gray-950 marker:text-violet-700">Advanced Information</summary>
+          <div id="stream-analyzer-advanced" class="mt-2.5 text-[13px] font-semibold leading-snug text-gray-700">
+            <p>No advanced information yet.</p>
+          </div>
+        </details>
+      </div>
+    </aside>
+
+    <PlaybackLog
+      title={logText.title}
+      description={logText.description}
+      shortDescription={logText.shortDescription}
+      notice={logText.empty}
+      statusText={logText.readyStatus}
+      instructionText={logText.readyInstruction}
+      dragHint={logText.dragHint}
+      titleId="stream-analyzer-log-title"
+      tooltipId="stream-analyzer-log-tooltip"
+      statusId="stream-analyzer-log-summary"
+      resizeId="stream-analyzer-log-resize-shell"
+      outputId="stream-analyzer-log-output"
+      clearId="stream-analyzer-clear-log"
+      copyId="stream-analyzer-copy-log"
+      clearLabel={logText.clearLabel}
+      copyLabel={logText.copyLabel}
+    />
+  </div>
+</section>
+
+<script>
+  // Analyzer 客户端初始化：只在浏览器内读取用户输入，不把 manifest URL 写入地址栏、存储或统计事件
+  import { initStreamAnalyzer } from '../scripts/stream-analyzer.js';
+
+  initStreamAnalyzer();
+</script>

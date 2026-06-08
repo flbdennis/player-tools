@@ -1,0 +1,29 @@
+---
+// Tooltip 组件 - 统一 hover/focus 浮动说明，用于日志问号、工具切换和后续需要轻提示的控件
+const {
+  id,
+  text = '',
+  position = 'bottom',
+  class: className = '',
+  tooltipClass = '',
+} = Astro.props;
+
+const positionStyles = {
+  bottom: 'left-0 top-full mt-2',
+  top: 'bottom-full left-0 mb-2',
+  right: 'left-full top-1/2 ml-2 -translate-y-1/2',
+};
+---
+
+<span class={`group relative inline-flex min-w-0 ${className}`}>
+  <slot />
+  {text && (
+    <span
+      id={id}
+      role="tooltip"
+      class={`pointer-events-none absolute z-30 hidden w-[240px] rounded-lg border border-amber-100 bg-white px-3 py-2 text-left text-[12px] font-semibold leading-snug text-gray-700 shadow-xl shadow-orange-100/70 group-hover:block group-focus-within:block md:w-[320px] ${positionStyles[position] || positionStyles.bottom} ${tooltipClass}`}
+    >
+      {text}
+    </span>
+  )}
+</span>

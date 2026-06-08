@@ -1,4 +1,20 @@
+import { featureFlags } from './features.js';
+import { analyzerTool, draftStreamTools } from './streamTools.js';
+
 // Header / Footer 导航配置 - 全站导航入口集中管理，避免不同组件出现不一致链接
+const publicToolLinks = [
+  // M3U8 工具页链接
+  { label: 'M3U8 Player', href: '/m3u8-player' },
+  // MP4 工具页链接
+  { label: 'MP4 Player', href: '/mp4-player' },
+  // DASH 工具页链接
+  { label: 'DASH Player', href: '/dash-player' },
+  // Analyzer 为低风险工具，和播放器工具平级展示
+  ...(featureFlags.enableAnalyzerTools ? [{ label: analyzerTool.name, href: analyzerTool.href }] : []),
+  // 高风险草稿路由默认不展示；只有后续明确打开功能开关才进入导航
+  ...(featureFlags.showStreamToolDraftsInNav ? draftStreamTools.map((tool) => ({ label: tool.name, href: tool.href })) : []),
+];
+
 export const headerNav = [
   // 工具下拉入口 - 当前没有工具分类页，子项直接指向真实工具页面
   {
@@ -7,14 +23,7 @@ export const headerNav = [
     // 桌面下拉父级 href - 当前只作为兜底锚点，不作为主要访问路径
     href: '#tools',
     // 工具下拉子项 - 必须全部是真实可访问页面
-    children: [
-      // M3U8 工具页链接
-      { label: 'M3U8 Player', href: '/m3u8-player' },
-      // MP4 工具页链接
-      { label: 'MP4 Player', href: '/mp4-player' },
-      // DASH 工具页链接
-      { label: 'DASH Player', href: '/dash-player' },
-    ],
+    children: publicToolLinks,
   },
   // 指南页入口 - 指向真实指南页面或站点指南首页
   { label: 'Guides', href: '/guides' },
@@ -31,14 +40,7 @@ export const footerNav = {
     // Footer 栏目标题
     title: 'Tools',
     // Footer 工具链接列表 - 只放真实工具页面，避免死链
-    links: [
-      // M3U8 工具页链接
-      { label: 'M3U8 Player', href: '/m3u8-player' },
-      // MP4 工具页链接
-      { label: 'MP4 Player', href: '/mp4-player' },
-      // DASH 工具页链接
-      { label: 'DASH Player', href: '/dash-player' },
-    ],
+    links: publicToolLinks,
   },
   // 指南栏目 - 汇总用户帮助和播放政策内容
   guides: {
